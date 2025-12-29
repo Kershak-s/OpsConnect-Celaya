@@ -1,0 +1,389 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para ver todas las respuestas */
+    body {
+        background-color: #f8f9fa;
+        background-image: linear-gradient(135deg, #f5f7fa 0%, #e4eaec 100%);
+    }
+    
+    .breadcrumb-section {
+        padding: 1rem 0;
+        background-color: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(5px);
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .breadcrumb {
+        margin-bottom: 0;
+        padding: 0.5rem 1rem;
+    }
+    
+    .responses-container {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .page-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #343a40;
+        display: flex;
+        align-items: center;
+    }
+    
+    .page-title i {
+        margin-right: 0.8rem;
+        font-size: 1.6rem;
+        color: #0d6efd;
+    }
+    
+    .form-meta {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+    
+    .form-meta i {
+        margin-right: 0.5rem;
+    }
+    
+    .nav-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .nav-button {
+        border-radius: 50px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 500;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        background-color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+    }
+    
+    .nav-button:hover {
+        transform: translateX(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+    
+    .nav-button i {
+        margin-right: 0.5rem;
+    }
+    
+    .form-section {
+        margin-bottom: 2.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .form-section:last-child {
+        border-bottom: none;
+    }
+    
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .form-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #343a40;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-title i {
+        margin-right: 0.5rem;
+        color: #0d6efd;
+    }
+    
+    .form-link {
+        display: inline-flex;
+        align-items: center;
+        color: #0d6efd;
+        font-weight: 500;
+    }
+    
+    .form-link i {
+        margin-right: 0.3rem;
+    }
+    
+    .form-link:hover {
+        text-decoration: underline;
+    }
+    
+    .response-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 5px solid #0d6efd;
+        transition: all 0.3s ease;
+    }
+    
+    .response-card:hover {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    
+    .response-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .response-title {
+        font-weight: 600;
+        color: #343a40;
+    }
+    
+    .response-item {
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #f8f9fa;
+    }
+    
+    .response-question {
+        font-weight: 500;
+        color: #6c757d;
+        margin-bottom: 0.3rem;
+    }
+    
+    .response-value {
+        color: #343a40;
+    }
+    
+    .no-responses {
+        text-align: center;
+        padding: 2rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    
+    .no-responses i {
+        font-size: 2rem;
+        color: #dee2e6;
+        margin-bottom: 0.5rem;
+    }
+    
+    .no-responses p {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+    
+    .toggle-responses {
+        cursor: pointer;
+        margin-bottom: 1rem;
+        padding: 0.5rem 1rem;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.3s ease;
+    }
+    
+    .toggle-responses:hover {
+        background-color: #e9ecef;
+    }
+    
+    .responses-list {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.5s ease;
+    }
+    
+    .responses-list.show {
+        max-height: 1000px;
+    }
+    
+    /* Animaciones */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .responses-container {
+        animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes slideInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .form-section {
+        animation: slideInUp 0.5s ease;
+    }
+    
+    .form-section:nth-child(1) { animation-delay: 0.1s; }
+    .form-section:nth-child(2) { animation-delay: 0.15s; }
+    .form-section:nth-child(3) { animation-delay: 0.2s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="nav-buttons">
+    <a href="{{ url_for('index') }}" class="nav-button">
+        <i class="fas fa-home"></i>Inicio
+    </a>
+    <a href="{{ url_for('line_sections', category=category) }}" class="nav-button">
+        <i class="fas fa-layer-group"></i>Secciones
+    </a>
+    <a href="{{ url_for('section_exercises', category=category, section='calidad') }}" class="nav-button">
+        <i class="fas fa-award"></i>Calidad
+    </a>
+    <a href="{{ url_for('custom_forms', category=category) }}" class="nav-button">
+        <i class="fas fa-clipboard-list"></i>Formularios Personalizados
+    </a>
+</div>
+
+<div class="breadcrumb-section">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('line_sections', category=category) }}">{{ category }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('section_exercises', category=category, section='calidad') }}">Calidad</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('custom_forms', category=category) }}">Formularios Personalizados</a></li>
+            <li class="breadcrumb-item active">Todas las Respuestas</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="container">
+    <div class="responses-container">
+        <h1 class="page-title">
+            <i class="fas fa-clipboard-check"></i>Todas las Respuestas - {{ category }}
+        </h1>
+        
+        <div class="form-meta">
+            <span><i class="fas fa-clipboard-list"></i>{{ forms|length }} formularios disponibles</span>
+            {% set total_responses = 0 %}
+            {% for form in forms %}
+                {% set total_responses = total_responses + responses_by_form[form.id]|length %}
+            {% endfor %}
+            <span><i class="fas fa-comments"></i>{{ total_responses }} respuestas en total</span>
+        </div>
+        
+        {% for form in forms %}
+            <div class="form-section">
+                <div class="form-header">
+                    <h2 class="form-title">
+                        <i class="fas fa-file-alt"></i>{{ form.title }}
+                    </h2>
+                    <a href="{{ url_for('view_custom_responses', form_id=form.id) }}" class="form-link">
+                        <i class="fas fa-external-link-alt"></i>Ver detalles
+                    </a>
+                </div>
+                
+                <div class="form-meta">
+                    <span><i class="fas fa-clipboard-list"></i>{{ responses_by_form[form.id]|length }} respuestas</span>
+                    <span><i class="fas fa-calendar-alt"></i>Creado: {{ form.created_at.strftime('%d/%m/%Y') }}</span>
+                    <span><i class="fas fa-user"></i>Creado por: 
+                        {% if form.creator %}
+                            {{ form.creator.username }}
+                        {% else %}
+                            Usuario desconocido
+                        {% endif %}
+                    </span>
+                </div>
+                
+                {% if responses_by_form[form.id] %}
+                    <div class="toggle-responses" onclick="toggleResponses('form-{{ form.id }}')">
+                        <span>Ver respuestas ({{ responses_by_form[form.id]|length }})</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    
+                    <div id="form-{{ form.id }}" class="responses-list">
+                        {% for response in responses_by_form[form.id] %}
+                            <div class="response-card">
+                                <div class="response-header">
+                                    <div class="response-title">
+                                        <i class="fas fa-user me-2"></i>{{ response.user.username if response.user else 'Usuario desconocido' }}
+                                    </div>
+                                    <div class="response-date">{{ response.submitted_at.strftime('%d/%m/%Y %H:%M') }}</div>
+                                </div>
+                                
+                                {% for question in questions_by_form[form.id] %}
+                                    <div class="response-item">
+                                        <div class="response-question">{{ question.question_text }}</div>
+                                        {% set found = false %}
+                                        {% for answer in response.answers %}
+                                            {% if answer.question_id == question.id %}
+                                                {% set found = true %}
+                                                <div class="response-value">
+                                                    {% if answer.answer_text %}
+                                                        {% if question.question_type == 'checkbox' and ',' in answer.answer_text %}
+                                                            {% for option in answer.answer_text.split(',') %}
+                                                                <div class="badge bg-light text-dark me-2">{{ option }}</div>
+                                                            {% endfor %}
+                                                        {% else %}
+                                                            {{ answer.answer_text }}
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <em class="text-muted">Sin respuesta</em>
+                                                    {% endif %}
+                                                </div>
+                                            {% endif %}
+                                        {% endfor %}
+                                        
+                                        {% if not found %}
+                                            <div class="response-value">
+                                                <em class="text-muted">Sin respuesta</em>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-responses">
+                        <i class="fas fa-clipboard"></i>
+                        <p>No hay respuestas para este formulario.</p>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+    function toggleResponses(id) {
+        const element = document.getElementById(id);
+        element.classList.toggle('show');
+        
+        // Cambiar icono
+        const icon = element.previousElementSibling.querySelector('i');
+        if (element.classList.contains('show')) {
+            icon.classList.remove('fa-chevron-down');
+            icon.classList.add('fa-chevron-up');
+        } else {
+            icon.classList.remove('fa-chevron-up');
+            icon.classList.add('fa-chevron-down');
+        }
+    }
+</script>
+{% endblock %}

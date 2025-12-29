@@ -1,0 +1,33 @@
+<!-- 
+PATCH PARA AGREGAR CAMPOS PT PRODUCTO TERMINADO 
+Agregar este código después de la sección de tambores en el modal de creación
+-->
+
+<!-- NUEVOS CAMPOS PT PRODUCTO TERMINADO -->
+<div class="form-section-title mt-4">Producto Terminado General</div>
+<div class="row mb-3">
+    <div class="col-md-4">
+        <label for="aceite_pt_producto_terminado" class="form-label">Aceite PT PRODUCTO TERMINADO</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="aceite_pt_producto_terminado"
+                name="aceite_pt_producto_terminado" placeholder="Ingrese valor">
+            <span class="input-group-text">{{ aceite_pt_min }} - {{ aceite_pt_max }}</span>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <label for="humedad_pt_producto_terminado" class="form-label">Humedad PT PRODUCTO TERMINADO</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="humedad_pt_producto_terminado"
+                name="humedad_pt_producto_terminado" placeholder="Ingrese valor">
+            <span class="input-group-text">{{ humedad_pt_min }} - {{ humedad_pt_max }}</span>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <label for="sal_pt_producto_terminado" class="form-label">Sal PT PRODUCTO TERMINADO</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="sal_pt_producto_terminado"
+                name="sal_pt_producto_terminado" placeholder="Ingrese valor">
+            <span class="input-group-text">{{ sal_pt_min }} - {{ sal_pt_max }}</span>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,42 @@
+<!-- 
+PATCH PARA AGREGAR CAMPOS PT PRODUCTO TERMINADO AL MODAL DE EDICIÓN
+Agregar este código después de la sección de tambores en el modal de edición
+-->
+
+<!-- NUEVOS CAMPOS PT PRODUCTO TERMINADO EN MODAL DE EDICIÓN -->
+<div class="form-section-title mt-4">Producto Terminado General</div>
+<div class="row mb-3">
+    <div class="col-md-4">
+        <label for="edit_aceite_pt_producto_terminado" class="form-label">Aceite PT PRODUCTO TERMINADO</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="edit_aceite_pt_producto_terminado"
+                name="aceite_pt_producto_terminado">
+            <span class="input-group-text">{{ aceite_pt_min }} - {{ aceite_pt_max }}</span>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <label for="edit_humedad_pt_producto_terminado" class="form-label">Humedad PT PRODUCTO TERMINADO</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="edit_humedad_pt_producto_terminado"
+                name="humedad_pt_producto_terminado">
+            <span class="input-group-text">{{ humedad_pt_min }} - {{ humedad_pt_max }}</span>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <label for="edit_sal_pt_producto_terminado" class="form-label">Sal PT PRODUCTO TERMINADO</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="edit_sal_pt_producto_terminado"
+                name="sal_pt_producto_terminado">
+            <span class="input-group-text">{{ sal_pt_min }} - {{ sal_pt_max }}</span>
+        </div>
+    </div>
+</div>
+
+<!--
+TAMBIÉN AGREGAR EN LA SECCIÓN DE JAVASCRIPT DEL MODAL DE EDICIÓN:
+Al llenar los datos del modal de edición, agregar estas líneas:
+
+document.getElementById('edit_aceite_pt_producto_terminado').value = button.getAttribute('data-aceite_pt_producto_terminado') || '';
+document.getElementById('edit_humedad_pt_producto_terminado').value = button.getAttribute('data-humedad_pt_producto_terminado') || '';
+document.getElementById('edit_sal_pt_producto_terminado').value = button.getAttribute('data-sal_pt_producto_terminado') || '';
+-->

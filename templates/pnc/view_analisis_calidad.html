@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pnc.css') }}">
+<style>
+    .view-card {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    
+    .view-card .card-header {
+        padding: 1.25rem;
+        border-bottom: none;
+    }
+    
+    .detail-section {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .detail-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #dee2e6;
+        color: #0d6efd;
+    }
+    
+    .detail-item {
+        margin-bottom: 1rem;
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.25rem;
+    }
+    
+    .detail-value {
+        font-size: 1rem;
+    }
+    
+    .meta-info {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card view-card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-vial me-2"></i> Análisis de Calidad - {{ analisis.folio }}
+                        </h5>
+                        <div>
+                            <a href="{{ url_for('edit_analisis_calidad', category=category, analisis_id=analisis.id) }}" class="btn btn-light btn-sm">
+                                <i class="fas fa-edit me-1"></i> Editar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <!-- Información básica -->
+                    <div class="detail-section">
+                        <h6 class="detail-section-title">Información Básica</h6>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="detail-item">
+                                    <div class="detail-label">Folio:</div>
+                                    <div class="detail-value">{{ analisis.folio }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="detail-item">
+                                    <div class="detail-label">Fecha:</div>
+                                    <div class="detail-value">{{ analisis.fecha.strftime('%d/%m/%Y') }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="detail-item">
+                                    <div class="detail-label">Turno:</div>
+                                    <div class="detail-value">{{ analisis.turno }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="detail-item">
+                                    <div class="detail-label">Horarios:</div>
+                                    <div class="detail-value">{{ analisis.horario }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <div class="detail-item">
+                                    <div class="detail-label">Producto:</div>
+                                    <div class="detail-value">{{ analisis.producto }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Detalles del análisis -->
+                    <div class="detail-section">
+                        <h6 class="detail-section-title">Detalles del Análisis</h6>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <div class="detail-label">Lote:</div>
+                                    <div class="detail-value">{{ analisis.lote }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <div class="detail-label">Analista:</div>
+                                    <div class="detail-value">{{ analisis.analista }}</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="detail-item">
+                                    <div class="detail-label">Peso (g):</div>
+                                    <div class="detail-value">{{ analisis.peso }}</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <div class="detail-item">
+                                    <div class="detail-label">Observaciones:</div>
+                                    <div class="detail-value">
+                                        {% if analisis.observaciones %}
+                                            {{ analisis.observaciones|nl2br }}
+                                        {% else %}
+                                            <span class="text-muted">No se ingresaron observaciones.</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Metadatos -->
+                    <div class="meta-info">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Creado por:</strong> {{ analisis.creator.username }}</p>
+                                <p class="mb-0"><strong>Fecha de creación:</strong> {{ analisis.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                            </div>
+                            <div class="col-md-6 text-md-end">
+                                {% if analisis.updated_at %}
+                                    <p class="mb-0"><strong>Última actualización:</strong> {{ analisis.updated_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('list_analisis_calidad', category=category) }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i> Volver a la lista
+                        </a>
+                        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="fas fa-trash me-1"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmación para eliminar -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmar eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas eliminar el análisis con folio <strong>{{ analisis.folio }}</strong>?
+                <br>Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form action="{{ url_for('delete_analisis_calidad', category=category, analisis_id=analisis.id) }}" method="post">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

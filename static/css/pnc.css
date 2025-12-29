@@ -1,0 +1,77 @@
+/* Estilos específicos para la sección PNC */
+
+/* Tablas horizontales responsivas */
+.pnc-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.pnc-table th {
+    background-color: #343a40;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    padding: 12px;
+    border: 1px solid #dee2e6;
+    text-transform: uppercase;
+}
+
+.pnc-table td {
+    padding: 8px;
+    border: 1px solid #dee2e6;
+    vertical-align: middle;
+}
+
+/* Estilo para los campos de formulario dentro de la tabla */
+.pnc-form .table .form-control {
+    padding: 0.375rem 0.5rem;
+    font-size: 0.9rem;
+    border-radius: 0.25rem;
+    border: 1px solid #ced4da;
+}
+
+.pnc-form .table .form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Estilos para mejorar la responsividad */
+@media (max-width: 768px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .table th, .table td {
+        white-space: nowrap;
+    }
+    
+    /* Hacer las tablas más pequeñas en móviles */
+    .pnc-table th, .pnc-table td {
+        padding: 6px;
+        font-size: 0.85rem;
+    }
+    
+    .pnc-form .table .form-control {
+        padding: 0.25rem 0.4rem;
+        font-size: 0.85rem;
+    }
+}
+
+/* Animaciones para realzar la experiencia de usuario */
+.pnc-form .form-control:focus {
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+/* Estilo para la tabla en la vista de detalle */
+.pnc-detail-table th {
+    width: 20%;
+    text-align: center;
+}
+
+/* Mejoras en los mensajes de error */
+.pnc-form .invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}

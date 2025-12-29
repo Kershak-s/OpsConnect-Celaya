@@ -1,0 +1,694 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pnc.css') }}">
+<style>
+    .nav-tabs .nav-link {
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #495057;
+        padding: 1rem 1.5rem;
+        border-radius: 0;
+        border: none;
+        border-bottom: 3px solid transparent;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #0d6efd;
+        background-color: transparent;
+        border-bottom: 3px solid #0d6efd;
+    }
+    
+    .nav-tabs .nav-link:hover:not(.active) {
+        border-color: transparent;
+        border-bottom: 3px solid #e9ecef;
+    }
+    
+    .tab-content {
+        padding: 2rem 0;
+    }
+    
+    .form-section {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-plus-circle me-2"></i> Registros de Calidad - {{ category }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Tabs de navegación -->
+                    <ul class="nav nav-tabs mb-4" id="formTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="pnc-tab" data-bs-toggle="tab" data-bs-target="#pnc-form" type="button" role="tab" aria-controls="pnc-form" aria-selected="true">
+                                <i class="fas fa-times-circle me-2"></i>Registro PNC
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="analisis-tab" data-bs-toggle="tab" data-bs-target="#analisis-form" type="button" role="tab" aria-controls="analisis-form" aria-selected="false">
+                                <i class="fas fa-vial me-2"></i>Análisis de Calidad
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <!-- Contenido de los tabs -->
+                    <div class="tab-content" id="formTabsContent">
+                        <!-- Tab PNC -->
+                        <div class="tab-pane fade show active" id="pnc-form" role="tabpanel" aria-labelledby="pnc-tab">
+                            <form method="POST" class="pnc-form">
+                                {{ pnc_form.hidden_tag() }}
+                                
+                                <!-- Formulario en formato tabla horizontal responsiva -->
+                                <div class="form-section">
+                                    <h6 class="form-section-title">Información Básica</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered pnc-table">
+                                            <thead class="table-dark">
+                                                <tr>
+                                                    <th>FOLIO</th>
+                                                    <th>FECHA</th>
+                                                    <th>TURNO</th>
+                                                    <th>NOMBRE DEL PRODUCTO</th>
+                                                    <th>HORARIOS</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group">
+                                                            {{ pnc_form.folio(class="form-control", placeholder="Ejemplo: PNC-2025-001") }}
+                                                            {% if pnc_form.folio.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {% for error in pnc_form.folio.errors %}
+                                                                <span>{{ error }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group">
+                                                            {{ pnc_form.fecha(class="form-control", type="date") }}
+                                                            {% if pnc_form.fecha.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {% for error in pnc_form.fecha.errors %}
+                                                                <span>{{ error }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group">
+                                                            {{ pnc_form.turno(class="form-select") }}
+                                                            {% if pnc_form.turno.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {% for error in pnc_form.turno.errors %}
+                                                                <span>{{ error }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group">
+                                                            {{ pnc_form.producto(class="form-select") }}
+                                                            {% if pnc_form.producto.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {% for error in pnc_form.producto.errors %}
+                                                                <span>{{ error }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group">
+                                                            <div class="input-group">
+                                                                <input type="time" class="form-control" name="hora_inicio" id="hora_inicio" required>
+                                                                <span class="input-group-text">a</span>
+                                                                <input type="time" class="form-control" name="hora_fin" id="hora_fin" required>
+                                                                {{ pnc_form.horario(type="hidden", id="horario") }}
+                                                            </div>
+                                                            <small class="form-text text-muted">Formato 24 horas (HH:MM)</small>
+                                                            {% if pnc_form.horario.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {% for error in pnc_form.horario.errors %}
+                                                                <span>{{ error }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <!-- Campos adicionales en formato convencional -->
+                                <div class="form-section">
+                                    <h6 class="form-section-title">Detalles del PNC</h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                {{ pnc_form.cantidad.label(class="form-label") }}
+                                                {{ pnc_form.cantidad(class="form-control") }}
+                                                {% if pnc_form.cantidad.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in pnc_form.cantidad.errors %}
+                                                    <span>{{ error }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                                <small class="form-text text-muted">{{ pnc_form.cantidad.description }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group mb-3">
+                                                {{ pnc_form.origen.label(class="form-label") }}
+                                                {{ pnc_form.origen(class="form-control") }}
+                                                {% if pnc_form.origen.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in pnc_form.origen.errors %}
+                                                    <span>{{ error }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group mb-3">
+                                                {{ pnc_form.no_conformidad.label(class="form-label") }}
+                                                {{ pnc_form.no_conformidad(class="form-control", rows=4) }}
+                                                {% if pnc_form.no_conformidad.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in pnc_form.no_conformidad.errors %}
+                                                    <span>{{ error }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group mb-3">
+                                                {{ pnc_form.status.label(class="form-label") }}
+                                                {{ pnc_form.status(class="form-select") }}
+                                                {% if pnc_form.status.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in pnc_form.status.errors %}
+                                                    <span>{{ error }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group mb-3">
+                                                {{ pnc_form.detector.label(class="form-label") }}
+                                                {{ pnc_form.detector(class="form-control") }}
+                                                {% if pnc_form.detector.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in pnc_form.detector.errors %}
+                                                    <span>{{ error }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group mb-4 mt-4">
+                                                <div class="form-check">
+                                                    {{ pnc_form.rechazo(class="form-check-input") }}
+                                                    {{ pnc_form.rechazo.label(class="form-check-label") }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-4">
+                                    <a href="{{ url_for('list_pnc', category=category) }}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Cancelar
+                                    </a>
+                                    <button type="submit" name="submit_pnc" class="btn btn-success">
+                                        <i class="fas fa-save me-2"></i>Guardar Registro PNC
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- Tab Análisis de Calidad -->
+                        <div class="tab-pane fade" id="analisis-form" role="tabpanel" aria-labelledby="analisis-tab">
+                            <form method="POST" class="analisis-form">
+                                {{ analisis_form.hidden_tag() }}
+                                
+                                <!-- Información básica -->
+                                <div class="form-section">
+                                    <h6 class="form-section-title">Información Básica</h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered pnc-table">
+                                            <thead class="table-primary">
+                                                <tr>
+                                                    <th>FOLIO</th>
+                                                    <th>FECHA</th>
+                                                    <th>TURNO</th>
+                                                    <th>NOMBRE DEL PRODUCTO</th>
+                                                    <th>HORARIOS</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <div class="form-group">
+                                                            {{ analisis_form.folio(class="form-control", placeholder="Ejemplo: ANL-2025-001") }}
+                                                            {% if analisis_form.folio.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {% for error in analisis_form.folio.errors %}
+                                                                <span>{{ error }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group">
+                                                            {{ analisis_form.fecha(class="form-control", type="date") }}
+                                                            {% if analisis_form.fecha.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {% for error in analisis_form.fecha.errors %}
+                                                                <span>{{ error }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group">
+                                                            {{ analisis_form.turno(class="form-select") }}
+                                                            {% if analisis_form.turno.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {% for error in analisis_form.turno.errors %}
+                                                                <span>{{ error }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group">
+                                                            {{ analisis_form.producto(class="form-select") }}
+                                                            {% if analisis_form.producto.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {% for error in analisis_form.producto.errors %}
+                                                                <span>{{ error }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div class="form-group">
+                                                            <div class="input-group">
+                                                                <input type="time" class="form-control" name="analisis_hora_inicio" id="analisis_hora_inicio" required>
+                                                                <span class="input-group-text">a</span>
+                                                                <input type="time" class="form-control" name="analisis_hora_fin" id="analisis_hora_fin" required>
+                                                                {{ analisis_form.horario(type="hidden", id="analisis_horario") }}
+                                                            </div>
+                                                            <small class="form-text text-muted">Formato 24 horas (HH:MM)</small>
+                                                            {% if analisis_form.horario.errors %}
+                                                            <div class="invalid-feedback d-block">
+                                                                {% for error in analisis_form.horario.errors %}
+                                                                <span>{{ error }}</span>
+                                                                {% endfor %}
+                                                            </div>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <!-- Detalles del análisis -->
+                                <div class="form-section">
+                                    <h6 class="form-section-title">Detalles del Análisis</h6>
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group mb-3">
+                                                {{ analisis_form.lote.label(class="form-label") }}
+                                                {{ analisis_form.lote(class="form-control", placeholder="Ejemplo: LOT-20230613-01") }}
+                                                {% if analisis_form.lote.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in analisis_form.lote.errors %}
+                                                    <span>{{ error }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group mb-3">
+                                                {{ analisis_form.analista.label(class="form-label") }}
+                                                {{ analisis_form.analista(class="form-control", placeholder="Nombre del analista") }}
+                                                {% if analisis_form.analista.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in analisis_form.analista.errors %}
+                                                    <span>{{ error }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group mb-3">
+                                                {{ analisis_form.peso.label(class="form-label") }}
+                                                {{ analisis_form.peso(class="form-control", placeholder="Ejemplo: 125.5") }}
+                                                {% if analisis_form.peso.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in analisis_form.peso.errors %}
+                                                    <span>{{ error }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group mb-3">
+                                                {{ analisis_form.observaciones.label(class="form-label") }}
+                                                {{ analisis_form.observaciones(class="form-control", rows=4, placeholder="Ingrese observaciones o comentarios adicionales") }}
+                                                {% if analisis_form.observaciones.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in analisis_form.observaciones.errors %}
+                                                    <span>{{ error }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex justify-content-between mt-4">
+                                    <a href="{{ url_for('list_pnc', category=category) }}" class="btn btn-secondary">
+                                        <i class="fas fa-arrow-left"></i> Cancelar
+                                    </a>
+                                    <button type="submit" name="submit_analisis" class="btn btn-primary">
+                                        <i class="fas fa-vial me-2"></i>Guardar Análisis de Calidad
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Verificar si hay errores en el formulario de análisis
+        const analisisFormHasErrors = {% if analisis_form.errors %}true{% else %}false{% endif %};
+        
+        // Si hay errores en el formulario de análisis, mostrar esa pestaña
+        if (analisisFormHasErrors) {
+            const analisisTab = document.getElementById('analisis-tab');
+            if (analisisTab) {
+                const tabTrigger = new bootstrap.Tab(analisisTab);
+                tabTrigger.show();
+            }
+        }
+        
+        // Referencia a los formularios
+        const pncForm = document.querySelector('.pnc-form');
+        const analisisForm = document.querySelector('.analisis-form');
+
+        // Referencia a los elementos del formulario PNC
+        const turnoSelect = document.getElementById('turno');
+        const horaInicioHSelect = document.getElementById('hora_inicio_h');
+        const horaInicioMSelect = document.getElementById('hora_inicio_m');
+        const horaFinHSelect = document.getElementById('hora_fin_h');
+        const horaFinMSelect = document.getElementById('hora_fin_m');
+        const horarioHiddenInput = document.getElementById('horario');
+        
+        // Referencia a los elementos del formulario de Análisis
+        const analisisTurnoSelect = document.getElementById('turno-0');
+        const analisisHoraInicioHSelect = document.getElementById('analisis_hora_inicio_h');
+        const analisisHoraInicioMSelect = document.getElementById('analisis_hora_inicio_m');
+        const analisisHoraFinHSelect = document.getElementById('analisis_hora_fin_h');
+        const analisisHoraFinMSelect = document.getElementById('analisis_hora_fin_m');
+        const analisisHorarioHiddenInput = document.getElementById('analisis_horario');
+        
+        // Función para poblar los minutos (igual para ambos turnos)
+        function populateMinutes(selectElement) {
+            if (!selectElement) return;
+            
+            // Limpiar opciones actuales excepto la primera
+            while (selectElement.options.length > 1) {
+                selectElement.remove(1);
+            }
+            
+            // Agregar minutos del 00 al 59
+            for (let i = 0; i < 60; i++) {
+                const option = document.createElement('option');
+                option.value = i.toString().padStart(2, '0');
+                option.textContent = i.toString().padStart(2, '0');
+                selectElement.appendChild(option);
+            }
+        }
+        
+        // Función para poblar las horas según el turno
+        function populateHours(selectElement, turnoValue) {
+            if (!selectElement) return;
+            
+            // Limpiar opciones actuales excepto la primera
+            while (selectElement.options.length > 1) {
+                selectElement.remove(1);
+            }
+            
+            let startHour, endHour;
+            
+            // Definir rango de horas según el turno
+            if (turnoValue === 'A') {
+                startHour = 6;
+                endHour = 17;
+            } else if (turnoValue === 'B') {
+                startHour = 18;
+                endHour = 5;
+            } else {
+                // Si no hay turno seleccionado, no mostrar horas
+                return;
+            }
+            
+            // Si el rango cruza la medianoche (como en el turno B)
+            if (endHour < startHour) {
+                // Primero agregar desde la hora de inicio hasta medianoche
+                for (let i = startHour; i <= 23; i++) {
+                    const option = document.createElement('option');
+                    option.value = i.toString().padStart(2, '0');
+                    option.textContent = i.toString().padStart(2, '0');
+                    selectElement.appendChild(option);
+                }
+                
+                // Luego agregar desde medianoche hasta la hora de fin
+                for (let i = 0; i <= endHour; i++) {
+                    const option = document.createElement('option');
+                    option.value = i.toString().padStart(2, '0');
+                    option.textContent = i.toString().padStart(2, '0');
+                    selectElement.appendChild(option);
+                }
+            } else {
+                // Rango normal (como en el turno A)
+                for (let i = startHour; i <= endHour; i++) {
+                    const option = document.createElement('option');
+                    option.value = i.toString().padStart(2, '0');
+                    option.textContent = i.toString().padStart(2, '0');
+                    selectElement.appendChild(option);
+                }
+            }
+        }
+        
+        // Función para inicializar selectores según un valor de horario existente
+        function initializeTimeSelects(horaHSelect, horaMSelect, finHSelect, finMSelect, horarioValue) {
+            if (horarioValue) {
+                try {
+                    const horarioParts = horarioValue.split('-');
+                    if (horarioParts.length === 2) {
+                        let horaInicio = horarioParts[0].trim();
+                        let horaFin = horarioParts[1].trim();
+                        
+                        // Extraer horas y minutos
+                        const inicioMatch = horaInicio.match(/(\d+):(\d+)/);
+                        const finMatch = horaFin.match(/(\d+):(\d+)/);
+                        
+                        if (inicioMatch && inicioMatch.length === 3) {
+                            const h = inicioMatch[1].padStart(2, '0');
+                            const m = inicioMatch[2].padStart(2, '0');
+                            
+                            // Buscar y seleccionar la opción correcta
+                            setSelectOption(horaHSelect, h);
+                            setSelectOption(horaMSelect, m);
+                        }
+                        
+                        if (finMatch && finMatch.length === 3) {
+                            const h = finMatch[1].padStart(2, '0');
+                            const m = finMatch[2].padStart(2, '0');
+                            
+                            // Buscar y seleccionar la opción correcta
+                            setSelectOption(finHSelect, h);
+                            setSelectOption(finMSelect, m);
+                        }
+                    }
+                } catch(e) {
+                    console.error('Error al dividir el horario:', e);
+                }
+            }
+        }
+        
+        // Función para seleccionar una opción en un select
+        function setSelectOption(selectElement, value) {
+            if (!selectElement) return;
+            
+            // Buscar opción por valor
+            for (let i = 0; i < selectElement.options.length; i++) {
+                if (selectElement.options[i].value === value) {
+                    selectElement.selectedIndex = i;
+                    return;
+                }
+            }
+            
+            // Si no existe la opción, agregar y seleccionar
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            selectElement.appendChild(option);
+            selectElement.value = value;
+        }
+        
+        // Inicializar selectores de minutos
+        populateMinutes(horaInicioMSelect);
+        populateMinutes(horaFinMSelect);
+        populateMinutes(analisisHoraInicioMSelect);
+        populateMinutes(analisisHoraFinMSelect);
+        
+        // Manejar cambio de turno para el formulario PNC
+        if (turnoSelect) {
+            turnoSelect.addEventListener('change', function() {
+                const turnoValue = this.value;
+                populateHours(horaInicioHSelect, turnoValue);
+                populateHours(horaFinHSelect, turnoValue);
+            });
+            
+            // Inicializar con el valor actual
+            if (turnoSelect.value) {
+                populateHours(horaInicioHSelect, turnoSelect.value);
+                populateHours(horaFinHSelect, turnoSelect.value);
+            }
+        }
+        
+        // Manejar cambio de turno para el formulario de Análisis
+        if (analisisTurnoSelect) {
+            analisisTurnoSelect.addEventListener('change', function() {
+                const turnoValue = this.value;
+                populateHours(analisisHoraInicioHSelect, turnoValue);
+                populateHours(analisisHoraFinHSelect, turnoValue);
+            });
+            
+            // Inicializar con el valor actual
+            if (analisisTurnoSelect.value) {
+                populateHours(analisisHoraInicioHSelect, analisisTurnoSelect.value);
+                populateHours(analisisHoraFinHSelect, analisisTurnoSelect.value);
+            }
+        }
+        
+        // Inicializar valores si ya existen
+        if (horarioHiddenInput && horarioHiddenInput.value) {
+            initializeTimeSelects(
+                horaInicioHSelect,
+                horaInicioMSelect,
+                horaFinHSelect,
+                horaFinMSelect,
+                horarioHiddenInput.value
+            );
+        }
+        
+        if (analisisHorarioHiddenInput && analisisHorarioHiddenInput.value) {
+            initializeTimeSelects(
+                analisisHoraInicioHSelect,
+                analisisHoraInicioMSelect,
+                analisisHoraFinHSelect,
+                analisisHoraFinMSelect,
+                analisisHorarioHiddenInput.value
+            );
+        }
+        
+        // Manejar envío del formulario PNC
+        if (pncForm) {
+            pncForm.addEventListener('submit', function(e) {
+                // Verificar que todos los selectores tengan un valor
+                if (!horaInicioHSelect.value || !horaInicioMSelect.value || 
+                    !horaFinHSelect.value || !horaFinMSelect.value) {
+                    e.preventDefault();
+                    alert('Por favor, complete todos los campos de horario');
+                    return false;
+                }
+                
+                // Formatear el horario como: HH:MM - HH:MM
+                const horaInicio = `${horaInicioHSelect.value}:${horaInicioMSelect.value}`;
+                const horaFin = `${horaFinHSelect.value}:${horaFinMSelect.value}`;
+                horarioHiddenInput.value = `${horaInicio} - ${horaFin}`;
+            });
+        }
+        
+        // Manejar envío del formulario de Análisis
+        if (analisisForm) {
+            analisisForm.addEventListener('submit', function(e) {
+                // Verificar que todos los selectores tengan un valor
+                if (!analisisHoraInicioHSelect.value || !analisisHoraInicioMSelect.value || 
+                    !analisisHoraFinHSelect.value || !analisisHoraFinMSelect.value) {
+                    e.preventDefault();
+                    alert('Por favor, complete todos los campos de horario');
+                    return false;
+                }
+                
+                // Formatear el horario como: HH:MM - HH:MM
+                const horaInicio = `${analisisHoraInicioHSelect.value}:${analisisHoraInicioMSelect.value}`;
+                const horaFin = `${analisisHoraFinHSelect.value}:${analisisHoraFinMSelect.value}`;
+                analisisHorarioHiddenInput.value = `${horaInicio} - ${horaFin}`;
+            });
+        }
+    });
+</script>
+{% endblock %}

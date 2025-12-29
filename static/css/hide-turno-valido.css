@@ -1,0 +1,31 @@
+/**
+ * CSS para ocultar el botón "Turno Válido: 6:30 am - 18:29 pm"
+ */
+
+/* Ocultar por clase */
+.time-validation-message,
+.horario-info-box,
+.horario-info-turno-a,
+.horario-info-turno-b {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    width: 0 !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    position: absolute !important;
+    z-index: -9999 !important;
+}
+
+/* Ocultar por texto contenido usando attr() */
+*[class]:not(script):not(style) {
+    visibility: visible;
+}
+
+/* Aplicar estilos específicos al modal */
+#createPesoFritaModal .time-validation-message,
+#createPesoFritaModal [class*="horario-info"] {
+    display: none !important;
+}

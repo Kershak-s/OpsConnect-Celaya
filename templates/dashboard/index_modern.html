@@ -1,0 +1,298 @@
+{% extends "base_modern.html" %}
+
+{% block title %}Panel Principal - Ops Connect{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos específicos para iconos de categorías */
+    .card-icon {
+        position: absolute;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        font-size: 3rem;
+        opacity: 0.1;
+        color: white;
+        transition: all 0.3s;
+    }
+    
+    .menu-card-modern:hover .card-icon {
+        opacity: 0.3;
+        transform: scale(1.1);
+    }
+    
+    /* Colores específicos por categoría */
+    .extruidos-card .card-overlay {
+        background: linear-gradient(
+            to bottom,
+            transparent 0%,
+            transparent 40%,
+            rgba(0, 88, 145, 0.4) 70%,
+            rgba(0, 88, 145, 0.9) 100%
+        );
+    }
+    
+    .tortilla-card .card-overlay {
+        background: linear-gradient(
+            to bottom,
+            transparent 0%,
+            transparent 40%,
+            rgba(0, 119, 190, 0.4) 70%,
+            rgba(0, 119, 190, 0.9) 100%
+        );
+    }
+    
+    .papa-card .card-overlay {
+        background: linear-gradient(
+            to bottom,
+            transparent 0%,
+            transparent 40%,
+            rgba(0, 156, 222, 0.4) 70%,
+            rgba(0, 156, 222, 0.9) 100%
+        );
+    }
+    
+    /* Loading animation */
+    .skeleton-loader {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+    }
+    
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header de la página -->
+<div class="page-header">
+    <h1 class="page-title">
+        <i class="fas fa-th-large"></i>
+        Panel Principal
+    </h1>
+    <p class="page-subtitle">Bienvenido al Sistema de Gestión de Operaciones. Seleccione una categoría para continuar.</p>
+</div>
+
+<!-- Estadísticas rápidas (opcional) -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon primary">
+            <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="stat-value">{{ stats.total_products if stats else '24' }}</div>
+        <div class="stat-label">Productos Activos</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon success">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="stat-value">{{ stats.completed_today if stats else '156' }}</div>
+        <div class="stat-label">Registros Hoy</div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon warning">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="stat-value">{{ stats.pending if stats else '8' }}</div>
+        <div class="stat-label">Pendientes</div>
+    </div>
+</div>
+
+<!-- Grid de categorías -->
+<div class="menu-grid">
+    <!-- EXTRUIDOS -->
+    <a href="{{ url_for('line_sections', category='EXTRUIDOS') }}" class="menu-card-modern extruidos-card">
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('edit_menu_item', category='EXTRUIDOS') }}" class="edit-button-modern" title="Editar línea">
+            <i class="fas fa-edit"></i>
+        </a>
+        {% endif %}
+        
+        <div class="card-image-container">
+            <img src="{{ url_for('static', filename=(extruidos.image_path if extruidos is not mapping else extruidos['image_path']).replace('\\', '/')) }}" 
+                 class="card-image" 
+                 alt="EXTRUIDOS">
+            <div class="card-overlay"></div>
+        </div>
+        
+        <div class="card-content">
+            <h3 class="card-title">
+                EXTRUIDOS
+                <i class="fas fa-industry card-icon"></i>
+            </h3>
+            <p class="card-description">
+                {% if extruidos is mapping %}
+                    {{ extruidos['description'] }}
+                {% else %}
+                    {{ extruidos.description or 'Gestión completa de productos extruidos, control de calidad y seguimiento de producción' }}
+                {% endif %}
+            </p>
+        </div>
+        
+        <div class="card-badge">
+            <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
+            Activo
+        </div>
+    </a>
+    
+    <!-- TORTILLA -->
+    <a href="{{ url_for('line_sections', category='TORTILLA') }}" class="menu-card-modern tortilla-card">
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('edit_menu_item', category='TORTILLA') }}" class="edit-button-modern" title="Editar línea">
+            <i class="fas fa-edit"></i>
+        </a>
+        {% endif %}
+        
+        <div class="card-image-container">
+            <img src="{{ url_for('static', filename=(tortilla.image_path if tortilla is not mapping else tortilla['image_path']).replace('\\', '/')) }}" 
+                 class="card-image" 
+                 alt="TORTILLA">
+            <div class="card-overlay"></div>
+        </div>
+        
+        <div class="card-content">
+            <h3 class="card-title">
+                TORTILLA
+                <i class="fas fa-bread-slice card-icon"></i>
+            </h3>
+            <p class="card-description">
+                {% if tortilla is mapping %}
+                    {{ tortilla['description'] }}
+                {% else %}
+                    {{ tortilla.description or 'Control integral de línea de tortillas, análisis de calidad y métricas de producción' }}
+                {% endif %}
+            </p>
+        </div>
+        
+        <div class="card-badge">
+            <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
+            Activo
+        </div>
+    </a>
+    
+    <!-- PAPA -->
+    <a href="{{ url_for('line_sections', category='PAPA') }}" class="menu-card-modern papa-card">
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('edit_menu_item', category='PAPA') }}" class="edit-button-modern" title="Editar línea">
+            <i class="fas fa-edit"></i>
+        </a>
+        {% endif %}
+        
+        <div class="card-image-container">
+            <img src="{{ url_for('static', filename=(papa.image_path if papa is not mapping else papa['image_path']).replace('\\', '/')) }}" 
+                 class="card-image" 
+                 alt="PAPA">
+            <div class="card-overlay"></div>
+        </div>
+        
+        <div class="card-content">
+            <h3 class="card-title">
+                PAPA
+                <i class="fas fa-cookie-bite card-icon"></i>
+            </h3>
+            <p class="card-description">
+                {% if papa is mapping %}
+                    {{ papa['description'] }}
+                {% else %}
+                    {{ papa.description or 'Administración de productos de papa, control de fritura y parámetros de calidad' }}
+                {% endif %}
+            </p>
+        </div>
+        
+        <div class="card-badge">
+            <i class="fas fa-circle" style="font-size: 0.5rem;"></i>
+            Activo
+        </div>
+    </a>
+</div>
+
+<!-- Sección de accesos rápidos -->
+<div class="mt-5">
+    <h2 class="h4 mb-3">
+        <i class="fas fa-bolt text-warning me-2"></i>
+        Accesos Rápidos
+    </h2>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <a href="{{ url_for('create_pnc_simple') }}" class="btn btn-outline-primary w-100 py-3">
+                <i class="fas fa-plus-circle me-2"></i>
+                Nuevo Registro PNC
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="{{ url_for('list_pnc_simple') }}" class="btn btn-outline-info w-100 py-3">
+                <i class="fas fa-list me-2"></i>
+                Ver Registros
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="#" class="btn btn-outline-success w-100 py-3">
+                <i class="fas fa-chart-bar me-2"></i>
+                Reportes
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animación de números en las estadísticas
+    const statValues = document.querySelectorAll('.stat-value');
+    statValues.forEach(stat => {
+        const finalValue = parseInt(stat.textContent);
+        let currentValue = 0;
+        const increment = finalValue / 30;
+        
+        const updateNumber = () => {
+            if (currentValue < finalValue) {
+                currentValue += increment;
+                stat.textContent = Math.floor(currentValue);
+                requestAnimationFrame(updateNumber);
+            } else {
+                stat.textContent = finalValue;
+            }
+        };
+        
+        // Iniciar animación cuando sea visible
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    updateNumber();
+                    observer.unobserve(entry.target);
+                }
+            });
+        });
+        
+        observer.observe(stat);
+    });
+    
+    // Efecto parallax sutil en las cards
+    const cards = document.querySelectorAll('.menu-card-modern');
+    cards.forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = (y - centerY) / 20;
+            const rotateY = (centerX - x) / 20;
+            
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateZ(10px)`;
+        });
+        
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateZ(0)';
+        });
+    });
+});
+</script>
+{% endblock %}

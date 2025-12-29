@@ -1,0 +1,1694 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Análisis de Aceite - {{category}} {% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+    
+    .header-container {
+        padding: 20px;
+        background-color: white;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        border-left: 4px solid #ffc107;
+    }
+    
+    .header-title {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .header-title h1 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #333;
+        margin: 0;
+        display: flex;
+        align-items: center;
+    }
+    
+    .header-title h1 i {
+        margin-right: 12px;
+        color: #ffc107;
+    }
+    
+    .header-subtitle {
+        color: #6c757d;
+        margin-top: 5px;
+    }
+    
+    .btn-nuevo {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .btn-nuevo:hover {
+        background-color: #e0a800;
+        border-color: #e0a800;
+        color: #333;
+    }
+    
+    .content-title {
+        display: flex;
+        align-items: center;
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+    
+    .content-title i {
+        margin-right: 10px;
+    }
+    
+    .content-container {
+        background-color: white;
+        border-radius: 10px;
+        padding: 25px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        margin-bottom: 30px;
+    }
+    
+    .no-registros {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    
+    .no-registros-icon {
+        font-size: 3.5rem;
+        color: #dee2e6;
+        margin-bottom: 20px;
+    }
+    
+    .no-registros-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 10px;
+    }
+    
+    .no-registros-subtitle {
+        color: #6c757d;
+        margin-bottom: 25px;
+    }
+    
+    .btn-crear-registro {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        font-weight: 600;
+        color: #333;
+        padding: 10px 20px;
+        font-size: 1.1rem;
+    }
+    
+    .btn-crear-registro i {
+        margin-right: 8px;
+    }
+    
+    /* Estilo para las pestañas */
+    .nav-tabs {
+        border-bottom: 2px solid #dee2e6;
+        margin-bottom: 20px;
+    }
+    
+    .nav-tabs .nav-link {
+        margin-bottom: -2px;
+        border: none;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        font-weight: 600;
+        color: #6c757d;
+        padding: 0.8rem 1.5rem;
+        transition: all 0.2s ease;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #343a40;
+        border-bottom: 2px solid #ffc107;
+        background-color: transparent;
+    }
+    
+    .nav-tabs .nav-link:hover:not(.active) {
+        border-bottom: 2px solid #adb5bd;
+        background-color: rgba(0,0,0,0.02);
+    }
+    
+    .nav-tabs .nav-link i {
+        margin-right: 8px;
+    }
+    
+    /* Estilo para tarjetas de estadísticas */
+    .stats-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        padding: 1.2rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+        border-left: 4px solid #ffc107;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stats-title {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0;
+        color: #343a40;
+    }
+    
+    .stats-icon {
+        font-size: 2rem;
+        color: rgba(255, 193, 7, 0.4);
+    }
+    
+    /* Estilo para el gráfico */
+    .chart-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        height: 400px;
+    }
+    
+    .chart-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    
+    /* Estilos para el formulario */
+    .form-label {
+        font-weight: 500;
+        color: #495057;
+    }
+    
+    .required-field::after {
+        content: "*";
+        color: #dc3545;
+        margin-left: 4px;
+    }
+    
+    .modal-header {
+        background-color: #ffc107;
+        color: #333;
+    }
+    
+    .btn-submit {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #333;
+        font-weight: 600;
+    }
+    
+    .btn-submit:hover {
+        background-color: #e0a800;
+        border-color: #e0a800;
+        color: #333;
+    }
+    
+    .nav-buttons {
+        margin-bottom: 20px;
+    }
+    
+    .nav-button {
+        margin-right: 10px;
+        border-radius: 6px;
+    }
+
+    .input-verde {
+        border: 2px solid #28a745 !important;
+        background-color: #eafaf1 !important;
+    }
+    .input-rojo {
+        border: 2px solid #dc3545 !important;
+        background-color: #fdeaea !important;
+    }
+
+    /* NUEVO: Estilos para 3 estados de color (verde, amarillo, rojo) */
+    .input-value-verde {
+        background-color: #d4edda !important;
+        border-color: #28a745 !important;
+        color: #155724 !important;
+        transition: all 0.3s ease;
+    }
+    
+    .input-value-amarillo {
+        background-color: #fff3cd !important;
+        border-color: #ffc107 !important;
+        color: #856404 !important;
+        transition: all 0.3s ease;
+    }
+    
+    .input-value-rojo {
+        background-color: #f8d7da !important;
+        border-color: #dc3545 !important;
+        color: #721c24 !important;
+        transition: all 0.3s ease;
+    }
+    
+    /* Para las celdas de la tabla */
+    .cell-verde {
+        background-color: #d4edda !important;
+        color: #155724 !important;
+    }
+    
+    .cell-amarillo {
+        background-color: #fff3cd !important;
+        color: #856404 !important;
+    }
+    
+    .cell-rojo {
+        background-color: #f8d7da !important;
+        color: #721c24 !important;
+    }
+    
+    /* Compatibilidad con estilos antiguos */
+    .input-value-ok {
+        background-color: #d4edda !important;
+        border-color: #c3e6cb !important;
+        color: #155724 !important;
+        transition: background-color 0.3s ease;
+    }
+    .input-value-error {
+        background-color: #f8d7da !important;
+        border-color: #f5c6cb !important;
+        color: #721c24 !important;
+        transition: background-color 0.3s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container" data-category="{{ category }}">
+    <div class="nav-buttons">
+        <a href="{{ url_for('laboratorio', category=category) }}" class="btn btn-light nav-button">
+            <i class="fas fa-arrow-left"></i> Volver a Calidad
+        </a>
+        <a href="{{ url_for('index') }}" class="btn btn-light nav-button">
+            <i class="fas fa-home"></i> Inicio
+        </a>
+    </div>
+
+    <div class="header-container">
+        <div class="header-title">
+            <h1><i class="fas fa-oil-can"></i> Análisis de Aceite - {{category}}</h1>
+            <button type="button" class="btn btn-nuevo" id="nuevoRegistroBtn">
+                <i class="fas fa-plus"></i> Nuevo Análisis de Aceite
+            </button>
+        </div>
+        <div class="header-subtitle">
+            Identificación y seguimiento de parámetros de aceite en el proceso de producción.
+        </div>
+    </div>
+
+    <!-- Pestañas de navegación -->
+    <ul class="nav nav-tabs" id="aceiteTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if active_tab != 'resultados' %}active{% endif %}" id="analisis-tab" data-bs-toggle="tab" data-bs-target="#analisis" type="button" role="tab" aria-controls="analisis" aria-selected="{% if active_tab != 'resultados' %}true{% else %}false{% endif %}">
+                <i class="fas fa-flask"></i>Análisis
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link {% if active_tab == 'resultados' %}active{% endif %}" id="resultados-tab" data-bs-toggle="tab" data-bs-target="#resultados" type="button" role="tab" aria-controls="resultados" aria-selected="{% if active_tab == 'resultados' %}true{% else %}false{% endif %}">
+                <i class="fas fa-chart-line"></i>Resultados
+            </button>
+        </li>
+    </ul>
+
+    <!-- Contenido de las pestañas -->
+    <div class="tab-content" id="aceiteTabContent">
+        <!-- Pestaña de Análisis -->
+        <div class="tab-pane fade {% if active_tab != 'resultados' %}show active{% endif %}" id="analisis" role="tabpanel" aria-labelledby="analisis-tab">
+            <div class="content-container">
+                <div class="content-title">
+                    <i class="fas fa-clipboard-list"></i> Registros de Análisis de Aceite
+                </div>
+                
+                <!-- Contenido cuando no hay registros -->
+                <div class="no-registros" id="no-registros">
+                    <div class="no-registros-icon">
+                        <i class="far fa-clipboard"></i>
+                    </div>
+                    <h3 class="no-registros-title">No hay registros disponibles</h3>
+                    <p class="no-registros-subtitle">Aún no se han creado registros de Análisis de Aceite para TORTILLA.</p>
+                    <button type="button" class="btn btn-crear-registro" id="crearPrimerRegistroBtn">
+                        <i class="fas fa-plus"></i> Crear Primer Registro
+                    </button>
+                </div>
+                
+                <!-- Tabla de registros (inicialmente oculta) -->
+                <div class="table-responsive" id="tabla-registros" style="display: none;">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Turno</th>
+                                <th>Producto</th>
+                                {% if category == 'PAPA' %}
+                                <th>Valor de Oxidación (VO ppm)</th>
+                                <th>Ácidos Grasos Libres (AGL %)</th>
+                                {% else %}
+                                <th>Valor de Oxidación (OV %)</th>
+                                <th>Ácidos Grasos Libres (AGL %)</th>
+                                {% endif %}
+                                <th>Observaciones</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Los registros se cargarán dinámicamente -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pestaña de Resultados -->
+        <div class="tab-pane fade {% if active_tab == 'resultados' %}show active{% endif %}" id="resultados" role="tabpanel" aria-labelledby="resultados-tab">
+            <div class="content-container">
+                <div class="content-title">
+                    <i class="fas fa-chart-pie"></i> Resultados de Análisis de Aceite
+                </div>
+                
+                <!-- Mensaje cuando no hay suficientes datos -->
+                <div class="no-registros" id="no-resultados">
+                    <div class="no-registros-icon">
+                        <i class="far fa-chart-bar"></i>
+                    </div>
+                    <h3 class="no-registros-title">No hay suficientes datos para mostrar resultados</h3>
+                    <p class="no-registros-subtitle">Crea al menos un registro de Análisis de Aceite para ver estadísticas y gráficos.</p>
+                </div>
+                
+                <!-- Contenido de resultados (inicialmente oculto) -->
+                <div id="resultados-contenido" style="display: none;">
+                    <!-- Tarjetas de estadísticas -->
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">Total Registros</div>
+                                        <h5 class="stats-value" id="total-registros">0</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-clipboard-list"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">OV Promedio</div>
+                                        <h5 class="stats-value" id="ov-promedio">0.00%</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-oil-can"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">AGL Promedio</div>
+                                        <h5 class="stats-value" id="agl-promedio">0.00%</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-flask"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">Último Registro</div>
+                                        <h5 class="stats-value" id="ultimo-registro">-</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botón de descarga Excel -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-center align-items-center h-100">
+                                    <button type="button" class="btn btn-success btn-lg" id="btn-descargar-excel-aceite">
+                                        <i class="fas fa-file-excel me-2"></i>Descargar Excel
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Gráficos de tendencias -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <div class="chart-title">Tendencia de Valor de Oxidación (OV)</div>
+                                <canvas id="ovChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="chart-container">
+                                <div class="chart-title">Tendencia de Ácidos Grasos Libres (AGL)</div>
+                                <canvas id="aglChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container mt-4">
+                        <div class="chart-title">Comparación OV vs AGL</div>
+                        <canvas id="comparacionChart"></canvas>
+                    </div>
+                    
+                    <!-- Barra de búsqueda general -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="filtro-busqueda" class="form-label">
+                                    <i class="fas fa-search me-1"></i>Búsqueda General
+                                </label>
+                                <input type="text" class="form-control" id="filtro-busqueda"
+                                       placeholder="Buscar por producto, turno, fecha, observaciones...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filtros para el gráfico -->
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="filtro-producto" class="form-label">Producto</label>
+                                <select class="form-select" id="filtro-producto">
+                                    <option value="todos" selected>Todos los productos</option>
+                                    {% if category == 'EXTRUIDOS' %}
+                                    <option value="CHEETOS TORCIDITOS">CHEETOS TORCIDITOS</option>
+                                    <option value="CHEETOS XTRA FH NUEVO">CHEETOS XTRA FH NUEVO</option>
+                                    <option value="CHEETOS XTRA FLAMIN HOT">CHEETOS XTRA FLAMIN HOT</option>
+                                    <option value="CHEETOS JALAQUEÑO">CHEETOS JALAQUEÑO</option>
+                                    {% elif category == 'TORTILLA' %}
+                                    <option value="DORITOS">DORITOS</option>
+                                    <option value="TOSTITOS SALSA VERDE">TOSTITOS SALSA VERDE</option>
+                                    <option value="TOSTITOS FH">TOSTITOS FH</option>
+                                    <option value="DORITOS INCÓGNITA">DORITOS INCÓGNITA</option>
+                                    <option value="DORITOS PIZZEROLA">DORITOS PIZZEROLA</option>
+                                    <option value="DORITOS FH">DORITOS FH</option>
+                                    <option value="RANCHERITOS">RANCHERITOS</option>
+                                    {% elif category == 'PAPA' %}
+                                    <option value="PAPA SAL">PAPA SAL</option>
+                                    <option value="RUFFLES QUESO">RUFFLES QUESO</option>
+                                    <option value="SABRITAS XTRA FH">SABRITAS XTRA FH</option>
+                                    
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="filtro-turno" class="form-label">Turno</label>
+                                <select class="form-select" id="filtro-turno">
+                                    <option value="todos" selected>Todos los turnos</option>
+                                    <option value="A">Turno A</option>
+                                    <option value="B">Turno B</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="filtro-periodo" class="form-label">Período</label>
+                                <select class="form-select" id="filtro-periodo">
+                                    <option value="semana" selected>Última semana</option>
+                                    <option value="mes">Último mes</option>
+                                    <option value="trimestre">Último trimestre</option>
+                                    <option value="todo">Todo el historial</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-submit" id="aplicar-filtros">
+                            <i class="fas fa-sync-alt me-2"></i>Actualizar Gráficos
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para descarga Excel -->
+<div class="modal fade" id="modalDescargaExcelAceite" tabindex="-1" aria-labelledby="modalDescargaExcelAceiteLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDescargaExcelAceiteLabel">
+                    <i class="fas fa-file-excel text-success me-2"></i>
+                    Descargar Análisis de Aceite en Excel
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-descarga-excel-aceite">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha de Inicio</label>
+                            <input type="date" class="form-control" id="fecha-inicio-aceite" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha de Fin</label>
+                            <input type="date" class="form-control" id="fecha-fin-aceite" required>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Turno</label>
+                            <select class="form-select" id="turno-excel-aceite">
+                                <option value="all">Todos los turnos</option>
+                                <option value="A">Turno A</option>
+                                <option value="B">Turno B</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Producto</label>
+                            <select class="form-select" id="producto-excel-aceite">
+                                <option value="all">Todos los productos</option>
+                                {% if category == 'EXTRUIDOS' %}
+                                <option value="CHEETOS TORCIDITOS">CHEETOS TORCIDITOS</option>
+                                <option value="CHEETOS XTRA FH NUEVO">CHEETOS XTRA FH NUEVO</option>
+                                <option value="CHEETOS XTRA FLAMIN HOT">CHEETOS XTRA FLAMIN HOT</option>
+                                <option value="CHEETOS JALAQUEÑO">CHEETOS JALAQUEÑO</option>
+                                {% elif category == 'TORTILLA' %}
+                                <option value="DORITOS">DORITOS</option>
+                                <option value="TOSTITOS SALSA VERDE">TOSTITOS SALSA VERDE</option>
+                                <option value="TOSTITOS FH">TOSTITOS FH</option>
+                                <option value="DORITOS INCÓGNITA">DORITOS INCÓGNITA</option>
+                                <option value="DORITOS PIZZEROLA">DORITOS PIZZEROLA</option>
+                                <option value="RANCHERITOS">RANCHERITOS</option>
+                                <option value="DORITOS FH">DORITOS FH</option>
+                                {% elif category == 'PAPA' %}
+                                <option value="PAPA SAL">PAPA SAL</option>
+                                <option value="RUFFLES QUESO">RUFFLES QUESO</option>
+                                <option value="SABRITAS XTRA FH">SABRITAS XTRA FH</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <label class="form-label">Incluir rangos de referencia</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="incluir-rangos-aceite" checked>
+                                <label class="form-check-label" for="incluir-rangos-aceite">
+                                    {% if category == 'PAPA' %}
+                                    Incluir hoja con rangos ideales (VO: 0-25 ppm, AGL: 0-0.35%)
+                                    {% else %}
+                                    Incluir hoja con rangos ideales (OV: 0-50%, AGL: 0-5%)
+                                    {% endif %}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Nota:</strong> El archivo Excel incluirá:
+                        <ul class="mb-0 mt-2">
+                            <li>Datos de análisis de aceite con colores por rangos</li>
+                            {% if category == 'PAPA' %}
+                            <li>Verde: VO ≤25 ppm, AGL ≤0.35%</li>
+                            <li>Amarillo: VO 15.1-25 ppm, AGL 0.26-0.35%</li>
+                            <li>Rojo: VO >25 ppm, AGL >0.35%</li>
+                            {% else %}
+                            <li>Verde: Valores dentro del rango ideal</li>
+                            <li>Rojo: Valores fuera del rango aceptable</li>
+                            {% endif %}
+                            <li>Estadísticas y resúmenes por producto</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btn-confirmar-descarga-aceite">
+                    <i class="fas fa-download me-2"></i>Descargar Excel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Nuevo Registro -->
+<div class="modal fade" id="registroAceiteModal" tabindex="-1" aria-labelledby="registroAceiteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="registroAceiteModalLabel"><i class="fas fa-oil-can me-2"></i>Nuevo Análisis de Aceite</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="aceiteForm" method="POST" action="{{ url_for('aceite_create', category=category) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="fecha" class="form-label required-field">Fecha</label>
+                            <input type="date" class="form-control" id="fecha" name="fecha" value="{{ now.strftime('%Y-%m-%d') }}" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="turno" class="form-label required-field">Turno</label>
+                            <select class="form-select" id="turno" name="turno" required>
+                                <option value="A" {% if now.hour >= 7 and now.hour < 19 %}selected{% endif %}>A</option>
+                                <option value="B" {% if now.hour < 7 or now.hour >= 19 %}selected{% endif %}>B</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="horario" class="form-label required-field">Hora</label>
+                            <input type="time" class="form-control" id="horario" name="horario" required>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="producto" class="form-label required-field">Producto</label>
+                            <select class="form-select" id="producto" name="producto" required>
+                                <option value="">Seleccione un producto</option>
+                                {% if category == 'EXTRUIDOS' %}
+                                <option value="CHEETOS TORCIDITOS">CHEETOS TORCIDITOS</option>
+                                <option value="CHEETOS XTRA FH NUEVO">CHEETOS XTRA FH NUEVO</option>
+                                <option value="CHEETOS XTRA FLAMIN HOT">CHEETOS XTRA FLAMIN HOT</option>        
+                                <option value="CHEETOS JALAQUEÑO">CHEETOS JALAQUEÑO</option>
+                                {% elif category == 'TORTILLA' %}
+                                <option value="DORITOS">DORITOS</option>
+                                <option value="TOSTITOS SALSA VERDE">TOSTITOS SALSA VERDE</option>
+                                <option value="TOSTITOS FH">TOSTITOS FH</option>
+                                <option value="DORITOS INCÓGNITA">DORITOS INCÓGNITA</option>
+                                <option value="DORITOS PIZZEROLA">DORITOS PIZZEROLA</option>
+                                <option value="RANCHERITOS">RANCHERITOS</option>
+                                <option value="DORITOS FH">DORITOS FH</option>
+                                {% elif category == 'PAPA' %}
+                                <option value="PAPA SAL">PAPA SAL</option>
+                                <option value="RUFFLES QUESO">RUFFLES QUESO</option>
+                                <option value="SABRITAS XTRA FH">SABRITAS XTRA FH</option>
+                                {% endif %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            {% if category == 'PAPA' %}
+                            <label for="ov" class="form-label required-field">VO (ppm)</label>
+                            <input type="number" class="form-control" id="ov" name="ov" step="0.1" 
+                                   placeholder="Verde: 0-15, Amarillo: 15.1-25, Rojo: >25" required>
+                            {% else %}
+                            <label for="ov" class="form-label required-field">OV (%)</label>
+                            <input type="number" class="form-control" id="ov" name="ov" step="0.1" 
+                                   placeholder="Rango: 0-50%" required>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if category == 'PAPA' %}
+                            <label for="agl" class="form-label required-field">AGL (%)</label>
+                            <input type="number" class="form-control" id="agl" name="agl" step="0.01" 
+                                   placeholder="Verde: 0-0.25, Amarillo: 0.26-0.35, Rojo: >0.35" required>
+                            {% else %}
+                            <label for="agl" class="form-label required-field">AGL (%)</label>
+                            <input type="number" class="form-control" id="agl" name="agl" step="0.01" 
+                                   placeholder="Rango: 0-5%" required>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="observaciones" class="form-label">Observaciones</label>
+                        <textarea class="form-control" id="observaciones" name="observaciones" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="text-end mt-4">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-submit">Guardar Registro</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para mostrar observaciones -->
+<div class="modal fade" id="observacionesModal" tabindex="-1" aria-labelledby="observacionesModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="observacionesModalLabel"><i class="fas fa-sticky-note me-2"></i>Observaciones</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+      </div>
+      <div class="modal-body" id="observacionesModalBody">
+        <!-- Aquí se mostrará el texto de las observaciones -->
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script>
+    // Pasar datos de registros al JavaScript
+    window.aceiteRegistros = {{ registros|tojson|safe }};
+</script>
+<script src="{{ url_for('static', filename='js/custom/aceite-analysis.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Cargar registros desde Flask
+        let registros = {{ registros|tojson|safe }};
+        
+        // Configurar el botón de nuevo registro y crear primer registro
+        setTimeout(function() {
+            const nuevoRegistroBtn = document.getElementById('nuevoRegistroBtn');
+            const crearPrimerRegistroBtn = document.getElementById('crearPrimerRegistroBtn');
+
+            function mostrarModalRegistro() {
+                const modal = new bootstrap.Modal(document.getElementById('registroAceiteModal'));
+                modal.show();
+            }
+
+            if (nuevoRegistroBtn) {
+                nuevoRegistroBtn.addEventListener('click', mostrarModalRegistro);
+            }
+            if (crearPrimerRegistroBtn) {
+                crearPrimerRegistroBtn.addEventListener('click', mostrarModalRegistro);
+            }
+        }, 100);
+        
+        // Función para actualizar la interfaz según los registros disponibles
+        function actualizarInterfaz() {
+            const noRegistros = document.getElementById('no-registros');
+            const tablaRegistros = document.getElementById('tabla-registros');
+            const noResultados = document.getElementById('no-resultados');
+            const resultadosContenido = document.getElementById('resultados-contenido');
+            
+            if (registros.length > 0) {
+                // Mostrar tabla y ocultar mensaje de no registros
+                noRegistros.style.display = 'none';
+                tablaRegistros.style.display = 'block';
+                
+                // Mostrar resultados y ocultar mensaje de no resultados
+                noResultados.style.display = 'none';
+                resultadosContenido.style.display = 'block';
+                
+                // Actualizar tabla de registros
+                actualizarTablaRegistros();
+                
+                // Actualizar gráficos y estadísticas
+                actualizarGraficos();
+            } else {
+                // Mostrar mensajes de no hay datos
+                noRegistros.style.display = 'block';
+                tablaRegistros.style.display = 'none';
+                noResultados.style.display = 'block';
+                resultadosContenido.style.display = 'none';
+            }
+        }
+        
+        // Función para obtener clase de color según valor y categoría
+        function obtenerClaseColor(valor, tipo, categoria) {
+            if (valor === null || valor === undefined || valor === '') return '';
+            
+            const val = parseFloat(valor);
+            if (isNaN(val)) return 'cell-rojo';
+            
+            if (categoria === 'PAPA') {
+                if (tipo === 'ov') {
+                    // VO: Verde 0-15, Amarillo 15.1-25, Rojo >25
+                    if (val >= 0 && val <= 15) {
+                        return 'cell-verde';
+                    } else if (val > 15 && val <= 25) {
+                        return 'cell-amarillo';
+                    } else {
+                        return 'cell-rojo';
+                    }
+                } else if (tipo === 'agl') {
+                    // AGL: Verde 0-0.25, Amarillo 0.26-0.35, Rojo >0.35
+                    if (val >= 0 && val <= 0.25) {
+                        return 'cell-verde';
+                    } else if (val > 0.25 && val <= 0.35) {
+                        return 'cell-amarillo';
+                    } else {
+                        return 'cell-rojo';
+                    }
+                }
+            } else {
+                // Para EXTRUIDOS y TORTILLA (solo 2 estados)
+                if (tipo === 'ov') {
+                    return (val >= 0 && val <= 50) ? 'cell-verde' : 'cell-rojo';
+                } else if (tipo === 'agl') {
+                    return (val >= 0 && val <= 5) ? 'cell-verde' : 'cell-rojo';
+                }
+            }
+            
+            return 'cell-rojo';
+        }
+        
+        // Función para actualizar la tabla de registros
+        function actualizarTablaRegistros() {
+            const tbody = document.querySelector('#tabla-registros tbody');
+            tbody.innerHTML = '';
+
+            // Ordenar registros por fecha (más reciente primero)
+            const registrosOrdenados = [...registros].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+            registrosOrdenados.forEach(registro => {
+                const tr = document.createElement('tr');
+
+                // Formatear la fecha para mostrar dd/mm/yyyy (evitar desfase por zona horaria)
+                const fechaParts = registro.fecha.split('-');
+                const fechaFormateada = `${fechaParts[2]}/${fechaParts[1]}/${fechaParts[0]}`;
+
+                // Determinar clases para OV y AGL según categoría con 3 estados
+                const ovClass = obtenerClaseColor(registro.ov, 'ov', '{{ category }}');
+                const aglClass = obtenerClaseColor(registro.agl, 'agl', '{{ category }}');
+
+                tr.innerHTML = `
+                    <td>${fechaFormateada}</td>
+                    <td>${registro.horario ? registro.horario : ''}</td>
+                    <td>${registro.turno}</td>
+                    <td>${registro.producto}</td>
+                    <td class="${ovClass}">${registro.ov.toFixed(2)}</td>
+                    <td class="${aglClass}">${registro.agl.toFixed(2)}</td>
+                    <td>
+                        <button class="btn btn-outline-secondary btn-sm btn-observaciones" data-observaciones="${registro.observaciones.replace(/"/g, '&quot;')}">
+                            <i class="fas fa-eye"></i> Ver
+                        </button>
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary btn-edit" data-id="${registro.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-outline-danger btn-delete" data-id="${registro.id}">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+
+            // Configurar botones de editar, eliminar y observaciones
+            configurarBotonesTabla();
+            configurarBotonesObservaciones();
+        }
+        
+        // Nueva función para los botones de observaciones
+        function configurarBotonesObservaciones() {
+            document.querySelectorAll('.btn-observaciones').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const observaciones = this.getAttribute('data-observaciones') || 'Sin observaciones';
+                    document.getElementById('observacionesModalBody').textContent = observaciones;
+                    const modal = new bootstrap.Modal(document.getElementById('observacionesModal'));
+                    modal.show();
+                });
+            });
+        }
+        
+        // Función para configurar los botones de la tabla
+        function configurarBotonesTabla() {
+            // Botones de editar
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    const registro = registros.find(r => r.id === id);
+                    if (registro) {
+                        mostrarModalEdicion(registro);
+                    }
+                });
+            });
+            
+            // Botones de eliminar
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    if (confirm(`¿Está seguro que desea eliminar el registro #${id}?`)) {
+                        // Obtener el token CSRF actualizado
+                        const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+                        fetch(`/aceite/{{ category }}/delete/${id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                registros = registros.filter(r => r.id !== id);
+                                actualizarInterfaz();
+                            } else {
+                                alert('Error al eliminar el registro: ' + (data.error || ''));
+                            }
+                        })
+                        .catch(() => {
+                            alert('Error de conexión al eliminar el registro.');
+                        });
+                    }
+                });
+            });
+        }
+        
+        // Variables para gráficos
+        let ovChart = null;
+        let aglChart = null;
+        let comparacionChart = null;
+        let registrosFiltrados = [];
+        
+        function actualizarGraficos() {
+            // Aplicar filtros
+            aplicarFiltros();
+            
+            // Calcular estadísticas
+            if (registrosFiltrados.length > 0) {
+                const ovValues = registrosFiltrados.map(r => r.ov);
+                const aglValues = registrosFiltrados.map(r => r.agl);
+                
+                // Calcular promedios
+                const ovPromedio = ovValues.reduce((a, b) => a + b, 0) / ovValues.length;
+                const aglPromedio = aglValues.reduce((a, b) => a + b, 0) / aglValues.length;
+                
+                // Obtener último registro
+                const ultimoRegistro = registrosFiltrados[registrosFiltrados.length - 1];
+                const fechaUltimo = new Date(ultimoRegistro.fecha).toLocaleDateString('es-ES');
+                
+                // Actualizar tarjetas de estadísticas
+                document.getElementById('total-registros').textContent = registrosFiltrados.length;
+                document.getElementById('ov-promedio').textContent = `${ovPromedio.toFixed(2)}%`;
+                document.getElementById('agl-promedio').textContent = `${aglPromedio.toFixed(2)}%`;
+                document.getElementById('ultimo-registro').textContent = fechaUltimo;
+                
+                // Actualizar gráficos
+                actualizarGraficoOV();
+                actualizarGraficoAGL();
+                actualizarGraficoComparacion();
+            }
+        }
+        
+        function aplicarFiltros() {
+            const filtroProducto = document.getElementById('filtro-producto').value;
+            const filtroTurno = document.getElementById('filtro-turno').value;
+            const filtroPeriodo = document.getElementById('filtro-periodo').value;
+            const filtroBusqueda = document.getElementById('filtro-busqueda')?.value?.toLowerCase().trim() || '';
+
+            let registrosFiltradosTemp = [...registros];
+
+            // Filtrar por búsqueda general (busca en todos los campos)
+            if (filtroBusqueda !== '') {
+                registrosFiltradosTemp = registrosFiltradosTemp.filter(r => {
+                    const fecha = r.fecha || '';
+                    const turno = r.turno || '';
+                    const producto = r.producto || '';
+                    const horario = r.horario || '';
+                    const observaciones = r.observaciones || '';
+                    const ov = r.ov?.toString() || '';
+                    const agl = r.agl?.toString() || '';
+
+                    const textoCompleto = `${fecha} ${turno} ${producto} ${horario} ${observaciones} ${ov} ${agl}`.toLowerCase();
+                    return textoCompleto.includes(filtroBusqueda);
+                });
+            }
+
+            // Filtrar por producto
+            if (filtroProducto !== 'todos') {
+                registrosFiltradosTemp = registrosFiltradosTemp.filter(r => r.producto === filtroProducto);
+            }
+
+            // Filtrar por turno
+            if (filtroTurno !== 'todos') {
+                registrosFiltradosTemp = registrosFiltradosTemp.filter(r => r.turno === filtroTurno);
+            }
+
+            // Filtrar por período
+            if (filtroPeriodo !== 'todo') {
+                const hoy = new Date();
+                let fechaLimite = new Date();
+
+                switch(filtroPeriodo) {
+                    case 'semana':
+                        fechaLimite.setDate(hoy.getDate() - 7);
+                        break;
+                    case 'mes':
+                        fechaLimite.setMonth(hoy.getMonth() - 1);
+                        break;
+                    case 'trimestre':
+                        fechaLimite.setMonth(hoy.getMonth() - 3);
+                        break;
+                }
+
+                registrosFiltradosTemp = registrosFiltradosTemp.filter(r => {
+                    const fechaRegistro = new Date(r.fecha);
+                    return fechaRegistro >= fechaLimite;
+                });
+            }
+
+            // Ordenar por fecha
+            registrosFiltrados = registrosFiltradosTemp.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+        }
+        
+        function prepararEtiquetas() {
+            return registrosFiltrados.map(r => {
+                const fecha = new Date(r.fecha);
+                const fechaStr = `${fecha.getDate()}/${fecha.getMonth() + 1}`;
+                const horaStr = r.horario || '';
+                return horaStr ? `${fechaStr} ${horaStr}` : fechaStr;
+            });
+        }
+        
+        function actualizarGraficoOV() {
+            const ctx = document.getElementById('ovChart').getContext('2d');
+            
+            if (ovChart) {
+                ovChart.destroy();
+            }
+            
+            const etiquetas = prepararEtiquetas();
+            const ovValues = registrosFiltrados.map(r => r.ov);
+            
+            ovChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: etiquetas,
+                    datasets: [{
+                        label: 'OV (%)',
+                        data: ovValues,
+                        borderColor: '#0d6efd',
+                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: ovValues.map(v => v <= 50 ? '#28a745' : '#dc3545'),
+                        pointBorderColor: ovValues.map(v => v <= 50 ? '#28a745' : '#dc3545'),
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const valor = context.parsed.y;
+                                    const status = valor <= 50 ? '✅ Dentro del rango' : '❌ Fuera del rango';
+                                    return [`OV: ${valor.toFixed(2)}%`, status];
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 60,
+                            title: {
+                                display: true,
+                                text: 'Valor de Oxidación (%)'
+                            },
+                            grid: {
+                                color: function(context) {
+                                    if (context.tick.value === 50) {
+                                        return '#ffc107';
+                                    }
+                                    return 'rgba(0, 0, 0, 0.1)';
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Fecha y Hora'
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function actualizarGraficoAGL() {
+            const ctx = document.getElementById('aglChart').getContext('2d');
+
+            if (aglChart) {
+                aglChart.destroy();
+            }
+
+            const etiquetas = prepararEtiquetas();
+            const aglValues = registrosFiltrados.map(r => r.agl);
+
+            // Calcular escala dinámica para mejor visualización
+            const maxValor = Math.max(...aglValues);
+            const minValor = Math.min(...aglValues);
+
+            // Agregar 30% de margen arriba para que los datos no queden pegados
+            // Redondear a un número "bonito" para la escala
+            let maxEscala;
+            if (maxValor <= 1) {
+                maxEscala = Math.ceil(maxValor * 1.5 * 10) / 10; // Redondear a 0.1
+            } else if (maxValor <= 5) {
+                maxEscala = Math.ceil(maxValor * 1.3); // +30% margen
+            } else {
+                maxEscala = Math.ceil(maxValor * 1.2); // +20% margen para valores grandes
+            }
+
+            // Mínimo de escala de 0.5 para datos muy pequeños
+            maxEscala = Math.max(maxEscala, 0.5);
+
+            // Límite de referencia (5 para AGL)
+            const limiteReferencia = 5;
+
+            aglChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: etiquetas,
+                    datasets: [{
+                        label: 'AGL (%)',
+                        data: aglValues,
+                        borderColor: '#198754',
+                        backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                        tension: 0.4,
+                        fill: true,
+                        pointBackgroundColor: aglValues.map(v => v <= 5 ? '#28a745' : '#dc3545'),
+                        pointBorderColor: aglValues.map(v => v <= 5 ? '#28a745' : '#dc3545'),
+                        pointRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const valor = context.parsed.y;
+                                    const status = valor <= 5 ? '✅ Dentro del rango' : '❌ Fuera del rango';
+                                    return [`AGL: ${valor.toFixed(2)}%`, status];
+                                }
+                            }
+                        },
+                        // Agregar línea de referencia del límite si está dentro de la escala
+                        annotation: maxEscala >= limiteReferencia ? {
+                            annotations: {
+                                line1: {
+                                    type: 'line',
+                                    yMin: limiteReferencia,
+                                    yMax: limiteReferencia,
+                                    borderColor: '#ffc107',
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    label: {
+                                        display: true,
+                                        content: 'Límite: 5%',
+                                        position: 'end'
+                                    }
+                                }
+                            }
+                        } : {}
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: maxEscala,
+                            title: {
+                                display: true,
+                                text: 'Ácidos Grasos Libres (%)'
+                            },
+                            grid: {
+                                color: function(context) {
+                                    // Línea amarilla en el límite de 5 si está visible
+                                    if (context.tick.value === limiteReferencia && maxEscala >= limiteReferencia) {
+                                        return '#ffc107';
+                                    }
+                                    return 'rgba(0, 0, 0, 0.1)';
+                                },
+                                lineWidth: function(context) {
+                                    if (context.tick.value === limiteReferencia && maxEscala >= limiteReferencia) {
+                                        return 2;
+                                    }
+                                    return 1;
+                                }
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Fecha y Hora'
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function actualizarGraficoComparacion() {
+            const ctx = document.getElementById('comparacionChart').getContext('2d');
+            
+            if (comparacionChart) {
+                comparacionChart.destroy();
+            }
+            
+            const etiquetas = prepararEtiquetas();
+            const ovValues = registrosFiltrados.map(r => r.ov);
+            const aglValues = registrosFiltrados.map(r => r.agl);
+            
+            comparacionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: etiquetas,
+                    datasets: [
+                        {
+                            label: 'OV (%)',
+                            data: ovValues,
+                            borderColor: '#0d6efd',
+                            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                            tension: 0.4,
+                            fill: false,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'AGL (%)',
+                            data: aglValues,
+                            borderColor: '#198754',
+                            backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                            tension: 0.4,
+                            fill: false,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: {
+                                display: true,
+                                text: 'OV (%)'
+                            },
+                            beginAtZero: true,
+                            max: 60,
+                            grid: {
+                                borderDash: [2, 2]
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: {
+                                display: true,
+                                text: 'AGL (%)'
+                            },
+                            beginAtZero: true,
+                            max: 10,
+                            grid: {
+                                drawOnChartArea: false
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Fecha y Hora'
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Configurar botón de aplicar filtros
+        const aplicarFiltrosBtn = document.getElementById('aplicar-filtros');
+        if (aplicarFiltrosBtn) {
+            aplicarFiltrosBtn.addEventListener('click', function() {
+                actualizarGraficos();
+            });
+        }
+        
+        // Auto-actualizar cuando cambien los filtros
+        document.getElementById('filtro-producto').addEventListener('change', actualizarGraficos);
+        document.getElementById('filtro-turno').addEventListener('change', actualizarGraficos);
+        document.getElementById('filtro-periodo').addEventListener('change', actualizarGraficos);
+
+        // Búsqueda general con debounce para mejor rendimiento
+        let timeoutBusqueda;
+        document.getElementById('filtro-busqueda')?.addEventListener('input', function() {
+            clearTimeout(timeoutBusqueda);
+            timeoutBusqueda = setTimeout(actualizarGraficos, 300);
+        });
+        
+        // Limpiar gráficos al salir
+        window.addEventListener('beforeunload', function() {
+            if (ovChart) ovChart.destroy();
+            if (aglChart) aglChart.destroy();
+            if (comparacionChart) comparacionChart.destroy();
+        });
+        
+        // Adaptar el formulario para edición
+        let modoEdicion = false;
+        let idEdicion = null;
+
+        function limpiarFormulario() {
+            document.getElementById('aceiteForm').reset();
+            idEdicion = null;
+            modoEdicion = false;
+            document.getElementById('registroAceiteModalLabel').innerHTML = '<i class="fas fa-oil-can me-2"></i>Nuevo Análisis de Aceite';
+            document.querySelector('#aceiteForm button[type="submit"]').textContent = 'Guardar Registro';
+            document.getElementById('aceiteForm').action = "{{ url_for('aceite_create', category=category) }}";
+        }
+
+        // Mostrar modal en modo edición
+        function mostrarModalEdicion(registro) {
+            modoEdicion = true;
+            idEdicion = registro.id;
+
+            // Llenar campos
+            document.getElementById('fecha').value = registro.fecha;
+            document.getElementById('turno').value = registro.turno;
+            document.getElementById('horario').value = registro.horario;
+            document.getElementById('producto').value = registro.producto;
+            document.getElementById('ov').value = registro.ov;
+            document.getElementById('agl').value = registro.agl;
+            
+            // Validar colores inmediatamente usando la función con 3 estados
+            const categoria = '{{ category }}';
+            validarCampoRango(document.getElementById('ov'), categoria, 'ov');
+            validarCampoRango(document.getElementById('agl'), categoria, 'agl');
+            document.getElementById('observaciones').value = registro.observaciones || '';
+            // Cambiar título y botón
+            document.getElementById('registroAceiteModalLabel').innerHTML = '<i class="fas fa-edit me-2"></i>Editar Análisis de Aceite';
+            document.querySelector('#aceiteForm button[type="submit"]').textContent = 'Actualizar Registro';
+            // Cambiar acción del formulario (debes tener una ruta para editar en Flask)
+            document.getElementById('aceiteForm').action = `/aceite/{{ category }}/edit/${registro.id}`;
+            // Mostrar modal
+            const modal = new bootstrap.Modal(document.getElementById('registroAceiteModal'));
+            modal.show();
+        }
+
+        // Limpiar formulario al abrir para nuevo registro
+        document.getElementById('nuevoRegistroBtn')?.addEventListener('click', limpiarFormulario);
+        document.getElementById('crearPrimerRegistroBtn')?.addEventListener('click', limpiarFormulario);
+
+        // Modificar configurarBotonesTabla para editar
+        function configurarBotonesTabla() {
+            // Botones de editar
+            document.querySelectorAll('.btn-edit').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    const registro = registros.find(r => r.id === id);
+                    if (registro) {
+                        mostrarModalEdicion(registro);
+                    }
+                });
+            });
+            // Botones de eliminar
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = parseInt(this.getAttribute('data-id'));
+                    if (confirm(`¿Está seguro que desea eliminar el registro #${id}?`)) {
+                        // Obtener el token CSRF actualizado
+                        const csrfToken = document.querySelector('input[name="csrf_token"]').value;
+                        fetch(`/aceite/{{ category }}/delete/${id}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                registros = registros.filter(r => r.id !== id);
+                                actualizarInterfaz();
+                            } else {
+                                alert('Error al eliminar el registro: ' + (data.error || ''));
+                            }
+                        });
+                    }
+                });
+            });
+        }
+
+        // Validar y colorear OV y AGL en el formulario con 3 estados de color
+        function validarCampoRango(input, categoria, tipo) {
+            const valor = input.value;
+            
+            // Limpiar todas las clases de color anteriores
+            input.classList.remove('input-value-verde', 'input-value-amarillo', 'input-value-rojo', 'input-value-ok', 'input-value-error');
+            
+            if (valor !== '') {
+                const val = parseFloat(valor);
+                if (!isNaN(val)) {
+                    let claseColor = '';
+                    
+                    if (categoria === 'PAPA') {
+                        if (tipo === 'ov') {
+                            // VO: Verde 0-15, Amarillo 15.1-25, Rojo >25
+                            if (val >= 0 && val <= 15) {
+                                claseColor = 'input-value-verde';
+                            } else if (val > 15 && val <= 25) {
+                                claseColor = 'input-value-amarillo';
+                            } else {
+                                claseColor = 'input-value-rojo';
+                            }
+                        } else if (tipo === 'agl') {
+                            // AGL: Verde 0-0.25, Amarillo 0.26-0.35, Rojo >0.35
+                            if (val >= 0 && val <= 0.25) {
+                                claseColor = 'input-value-verde';
+                            } else if (val > 0.25 && val <= 0.35) {
+                                claseColor = 'input-value-amarillo';
+                            } else {
+                                claseColor = 'input-value-rojo';
+                            }
+                        }
+                    } else {
+                        // Para EXTRUIDOS y TORTILLA (solo 2 estados)
+                        if (tipo === 'ov') {
+                            claseColor = (val >= 0 && val <= 50) ? 'input-value-verde' : 'input-value-rojo';
+                        } else if (tipo === 'agl') {
+                            claseColor = (val >= 0 && val <= 5) ? 'input-value-verde' : 'input-value-rojo';
+                        }
+                    }
+                    
+                    if (claseColor) {
+                        input.classList.add(claseColor);
+                    }
+                } else {
+                    input.classList.add('input-value-rojo');
+                }
+            }
+        }
+
+        const ovInput = document.getElementById('ov');
+        const aglInput = document.getElementById('agl');
+        const categoria = '{{ category }}';
+
+        if (ovInput && aglInput) {
+            ovInput.addEventListener('input', function() {
+                validarCampoRango(ovInput, categoria, 'ov');
+            });
+            aglInput.addEventListener('input', function() {
+                validarCampoRango(aglInput, categoria, 'agl');
+            });
+            // Validar al cargar (por si hay valores precargados)
+            if (ovInput.value) validarCampoRango(ovInput, categoria, 'ov');
+            if (aglInput.value) validarCampoRango(aglInput, categoria, 'agl');
+        }
+        
+        // Inicializar la interfaz
+        actualizarInterfaz();
+        
+        // NOTA: Los gráficos se manejan en aceite-analysis.js
+    });
+
+    // JavaScript para descarga Excel
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configurar valores por defecto para fechas
+        const hoy = new Date();
+        const hace30Dias = new Date();
+        hace30Dias.setDate(hoy.getDate() - 30);
+        
+        const fechaInicio = document.getElementById('fecha-inicio-aceite');
+        const fechaFin = document.getElementById('fecha-fin-aceite');
+        
+        if (fechaInicio) fechaInicio.value = hace30Dias.toISOString().split('T')[0];
+        if (fechaFin) fechaFin.value = hoy.toISOString().split('T')[0];
+        
+        // Mostrar modal al hacer clic en el botón
+        const btnDescargar = document.getElementById('btn-descargar-excel-aceite');
+        if (btnDescargar) {
+            btnDescargar.addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('modalDescargaExcelAceite'));
+                modal.show();
+            });
+        }
+        
+        // Manejar descarga
+        const btnConfirmar = document.getElementById('btn-confirmar-descarga-aceite');
+        if (btnConfirmar) {
+            btnConfirmar.addEventListener('click', function() {
+                descargarExcelAceite();
+            });
+        }
+    });
+    
+    function descargarExcelAceite() {
+        const categoria = '{{ category }}';
+        const fechaInicio = document.getElementById('fecha-inicio-aceite').value;
+        const fechaFin = document.getElementById('fecha-fin-aceite').value;
+        const turno = document.getElementById('turno-excel-aceite').value;
+        const producto = document.getElementById('producto-excel-aceite').value;
+        const incluirRangos = document.getElementById('incluir-rangos-aceite').checked;
+        
+        // Validaciones
+        if (!fechaInicio || !fechaFin) {
+            alert('Por favor seleccione ambas fechas');
+            return;
+        }
+        
+        if (new Date(fechaInicio) > new Date(fechaFin)) {
+            alert('La fecha de inicio no puede ser mayor que la fecha de fin');
+            return;
+        }
+        
+        // Mostrar loading
+        const btnConfirmar = document.getElementById('btn-confirmar-descarga-aceite');
+        const textoOriginal = btnConfirmar.innerHTML;
+        btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Descargando...';
+        btnConfirmar.disabled = true;
+        
+        // Construir URL con parámetros
+        const params = new URLSearchParams({
+            categoria: categoria,
+            fecha_inicio: fechaInicio,
+            fecha_fin: fechaFin,
+            turno: turno,
+            producto: producto,
+            incluir_rangos: incluirRangos
+        });
+        
+        const url = `/aceite/descargar-excel?${params.toString()}`;
+        
+        // Crear link temporal para descarga
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `analisis_aceite_${categoria.toLowerCase()}_${fechaInicio}_${fechaFin}.xlsx`;
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Restaurar botón
+        setTimeout(() => {
+            btnConfirmar.innerHTML = textoOriginal;
+            btnConfirmar.disabled = false;
+            
+            // Cerrar modal
+            bootstrap.Modal.getInstance(document.getElementById('modalDescargaExcelAceite')).hide();
+        }, 2000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        function asignarTurnoPorHora(hora) {
+            const [hours, minutes] = hora.split(':').map(Number);
+            const totalMinutes = hours * 60 + minutes;
+            const turnoAInicio = 6 * 60 + 30; // 6:30 AM
+            const turnoAFin = 18 * 60 + 29; // 6:29 PM
+            return (totalMinutes >= turnoAInicio && totalMinutes <= turnoAFin) ? 'A' : 'B';
+        }
+
+        function inicializarModalRegistro() {
+            const horarioInput = document.getElementById('horario');
+            const turnoSelect = document.getElementById('turno');
+
+            if (horarioInput && turnoSelect) {
+                const now = new Date();
+                const horaActual = now.toTimeString().slice(0, 5); // Formato HH:mm
+                horarioInput.value = horaActual;
+                turnoSelect.value = asignarTurnoPorHora(horaActual);
+            }
+        }
+
+        const nuevoRegistroBtn = document.getElementById('nuevoRegistroBtn');
+        const crearPrimerRegistroBtn = document.getElementById('crearPrimerRegistroBtn');
+
+        if (nuevoRegistroBtn) {
+            nuevoRegistroBtn.addEventListener('click', function() {
+                inicializarModalRegistro();
+            });
+        }
+
+        if (crearPrimerRegistroBtn) {
+            crearPrimerRegistroBtn.addEventListener('click', function() {
+                inicializarModalRegistro();
+            });
+        }
+    });
+</script>
+{% endblock %}

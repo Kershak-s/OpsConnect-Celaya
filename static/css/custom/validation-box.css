@@ -1,0 +1,27 @@
+/**
+ * Custom styles for the validation message box
+ */
+
+.time-validation-message {
+    background-color: #212529;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-weight: 500;
+    margin: 10px 0;
+    display: inline-block;
+    font-size: 14px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* For Turno A */
+.turno-a-active .time-validation-message {
+    background-color: #0d6efd;
+    border-left: 4px solid #0a58ca;
+}
+
+/* For Turno B */
+.turno-b-active .time-validation-message {
+    background-color: #6f42c1;
+    border-left: 4px solid #5e37a6;
+}

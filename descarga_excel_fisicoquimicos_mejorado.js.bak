@@ -1,0 +1,229 @@
+// JavaScript mejorado para descarga Excel de análisis fisicoquímicos
+// Incluye campos de Producto Terminado (PT)
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔗 Inicializando descarga Excel fisicoquímicos...');
+    
+    const btnDescargar = document.getElementById('btn-descargar-excel-fisico');
+    
+    if (btnDescargar) {
+        btnDescargar.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('📊 Click en descarga Excel fisicoquímicos');
+            
+            const modalElement = document.getElementById('modalDescargaExcelFisico');
+            
+            if (modalElement) {
+                // Abrir modal
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+                
+                // Configurar fechas por defecto
+                configurarFechasPorDefecto();
+            } else {
+                // Descarga directa
+                console.log('⚡ Descarga directa sin modal');
+                descargarExcelDirecto();
+            }
+        });
+        
+        console.log('✅ Event listener configurado para descarga Excel');
+    } else {
+        console.warn('⚠️ Botón de descarga Excel no encontrado');
+    }
+    
+    // Configurar botón confirmar del modal
+    const btnConfirmar = document.getElementById('btn-confirmar-descarga-fisico');
+    if (btnConfirmar) {
+        btnConfirmar.addEventListener('click', procesarDescargaExcel);
+    }
+});
+
+function configurarFechasPorDefecto() {
+    const hoy = new Date();
+    const hace30Dias = new Date();
+    hace30Dias.setDate(hoy.getDate() - 30);
+    
+    const fechaInicio = document.getElementById('fecha-inicio-fisico');
+    const fechaFin = document.getElementById('fecha-fin-fisico');
+    
+    if (fechaInicio && !fechaInicio.value) {
+        fechaInicio.value = hace30Dias.toISOString().split('T')[0];
+    }
+    
+    if (fechaFin && !fechaFin.value) {
+        fechaFin.value = hoy.toISOString().split('T')[0];
+    }
+}
+
+function procesarDescargaExcel() {
+    console.log('🎯 Procesando descarga Excel...');
+    
+    // Obtener parámetros del modal
+    const categoria = obtenerCategoriaActual();
+    const fechaInicio = document.getElementById('fecha-inicio-fisico').value;
+    const fechaFin = document.getElementById('fecha-fin-fisico').value;
+    const turno = document.getElementById('turno-excel-fisico').value || 'all';
+    const producto = document.getElementById('producto-excel-fisico').value || 'all';
+    const incluirRangos = document.getElementById('incluir-rangos-fisico').checked;
+    
+    // Validaciones
+    if (!fechaInicio || !fechaFin) {
+        mostrarAlerta('Por favor seleccione ambas fechas', 'warning');
+        return;
+    }
+    
+    if (new Date(fechaInicio) > new Date(fechaFin)) {
+        mostrarAlerta('La fecha de inicio no puede ser mayor que la fecha de fin', 'warning');
+        return;
+    }
+    
+    // Mostrar estado de carga
+    const btnConfirmar = document.getElementById('btn-confirmar-descarga-fisico');
+    const textoOriginal = btnConfirmar.innerHTML;
+    
+    btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generando Excel...';
+    btnConfirmar.disabled = true;
+    
+    // Crear parámetros de descarga
+    const params = new URLSearchParams({
+        categoria: categoria,
+        fecha_inicio: fechaInicio,
+        fecha_fin: fechaFin,
+        turno: turno,
+        producto: producto,
+        incluir_rangos: incluirRangos.toString()
+    });
+    
+    console.log('📋 Parámetros de descarga:', {
+        categoria, fechaInicio, fechaFin, turno, producto, incluirRangos
+    });
+    
+    // Ejecutar descarga
+    ejecutarDescargaExcel(params, () => {
+        // Restaurar botón
+        setTimeout(() => {
+            btnConfirmar.innerHTML = textoOriginal;
+            btnConfirmar.disabled = false;
+            cerrarModal();
+            mostrarAlerta('Excel generado exitosamente', 'success');
+        }, 2000);
+    });
+}
+
+function descargarExcelDirecto() {
+    const categoria = obtenerCategoriaActual();
+    const hoy = new Date();
+    const hace30Dias = new Date();
+    hace30Dias.setDate(hoy.getDate() - 30);
+    
+    const params = new URLSearchParams({
+        categoria: categoria,
+        fecha_inicio: hace30Dias.toISOString().split('T')[0],
+        fecha_fin: hoy.toISOString().split('T')[0],
+        turno: 'all',
+        producto: 'all',
+        incluir_rangos: 'true'
+    });
+    
+    ejecutarDescargaExcel(params, () => {
+        mostrarAlerta('Descarga iniciada', 'info');
+    });
+}
+
+function ejecutarDescargaExcel(params, callback) {
+    const url = `/analisis_fisicoquimicos/descargar-excel?${params.toString()}`;
+    
+    console.log('🚀 Ejecutando descarga desde:', url);
+    
+    // Crear enlace de descarga
+    const link = document.createElement('a');
+    link.href = url;
+    link.style.display = 'none';
+    
+    // Agregar al DOM temporalmente
+    document.body.appendChild(link);
+    
+    try {
+        // Iniciar descarga
+        link.click();
+        
+        console.log('✅ Descarga iniciada exitosamente');
+        
+        if (callback) callback();
+        
+    } catch (error) {
+        console.error('❌ Error en descarga:', error);
+        mostrarAlerta('Error al generar el archivo Excel', 'danger');
+        
+    } finally {
+        // Limpiar DOM
+        document.body.removeChild(link);
+    }
+}
+
+function obtenerCategoriaActual() {
+    const path = window.location.pathname;
+    
+    if (path.includes('EXTRUIDOS')) return 'EXTRUIDOS';
+    if (path.includes('TORTILLA')) return 'TORTILLA';
+    if (path.includes('PAPA')) return 'PAPA';
+    
+    // Fallback - inferir desde URL o elementos
+    const segments = path.split('/').filter(s => s.length > 0);
+    const categoria = segments.find(s => ['EXTRUIDOS', 'TORTILLA', 'PAPA'].includes(s.toUpperCase()));
+    
+    return categoria ? categoria.toUpperCase() : 'EXTRUIDOS';
+}
+
+function cerrarModal() {
+    const modalElement = document.getElementById('modalDescargaExcelFisico');
+    if (modalElement) {
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        if (modal) {
+            modal.hide();
+        }
+    }
+}
+
+function mostrarAlerta(mensaje, tipo = 'info') {
+    // Crear alerta Bootstrap
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${tipo} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    
+    alertDiv.innerHTML = `
+        <i class="fas fa-${getIconoAlerta(tipo)} me-2"></i>
+        ${mensaje}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(alertDiv);
+    
+    // Auto-remover después de 5 segundos
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+function getIconoAlerta(tipo) {
+    const iconos = {
+        'success': 'check-circle',
+        'info': 'info-circle',
+        'warning': 'exclamation-triangle',
+        'danger': 'exclamation-circle'
+    };
+    
+    return iconos[tipo] || 'info-circle';
+}
+
+// Exportar funciones para uso global
+window.ExcelFisicoquimicos = {
+    descargar: procesarDescargaExcel,
+    descargarDirecto: descargarExcelDirecto,
+    configurarFechas: configurarFechasPorDefecto
+};
+
+console.log('📦 Sistema de descarga Excel fisicoquímicos cargado');

@@ -1,0 +1,2013 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para el formulario de PAE */
+    .pae-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+    
+    .pae-form-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+    
+    .pae-form-header {
+        background-color: #0d6efd;
+        padding: 1.5rem;
+        color: white;
+        position: relative;
+    }
+    
+    .pae-form-title {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+    
+    .pae-form-subtitle {
+        margin: 0.5rem 0 0;
+        opacity: 0.9;
+        font-size: 1rem;
+    }
+    
+    .pae-form-body {
+        padding: 2rem;
+    }
+    
+    /* Estilos para la hora en formato compacto */
+    .pae-time-display {
+        position: absolute;
+        top: 1.5rem;
+        right: 1.5rem;
+        background-color: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem 0.8rem;
+        border-radius: 8px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        color: white;
+        cursor: pointer;
+    }
+    
+    .time-compact-input {
+        background-color: transparent;
+        border: none;
+        color: white;
+        font-weight: bold;
+        font-size: 1.1rem;
+        width: 75px;
+        outline: none;
+        cursor: pointer;
+    }
+    
+    /* Ocultar los botones de incremento/decremento del input type="time" */
+    .time-compact-input::-webkit-calendar-picker-indicator {
+        display: none;
+    }
+    
+    .time-compact-input::-webkit-datetime-edit-ampm-field,
+    .time-compact-input::-webkit-datetime-edit-second-field {
+        display: none;
+    }
+    
+    /* Tooltip que aparece al pasar el mouse sobre el reloj */
+    .pae-time-tooltip {
+        position: absolute;
+        top: 100%;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.8);
+        color: white;
+        padding: 0.3rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        margin-top: 5px;
+        white-space: nowrap;
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        pointer-events: none;
+        z-index: 1000;
+    }
+    
+    .pae-time-display:hover .pae-time-tooltip {
+        opacity: 1;
+    }
+    
+    /* Ocultar mensajes de validación del navegador */
+    input:invalid {
+        box-shadow: none !important;
+        outline: none !important;
+    }
+    
+    /* Ocultar el mensaje de validación personalizado */
+    input::-webkit-validation-bubble-message,
+    input::-webkit-validation-bubble,
+    input::-webkit-validation-bubble-arrow-clipper,
+    input::-webkit-validation-bubble-arrow,
+    input::-webkit-validation-bubble-icon {
+        display: none !important;
+    }
+    
+    /* Evitar que el formulario muestre mensajes de validación */
+    form {
+        position: relative;
+    }
+    
+    /* Estilos para campos del formulario */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .form-control {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    /* Estilos para los campos de valor - ESPECIFICIDAD ALTA para sobrescribir Bootstrap */
+    input.form-control.input-value-ok {
+        background-color: #d4edda !important;
+        border-color: #c3e6cb !important;
+        color: #155724 !important;
+        transition: background-color 0.3s ease;
+    }
+    
+    input.form-control.input-value-warning {
+        background-color: #fff3cd !important;
+        border-color: #ffeaa7 !important;
+        color: #856404 !important;
+        transition: background-color 0.3s ease;
+    }
+    
+    input.form-control.input-value-error {
+        background-color: #f8d7da !important;
+        border-color: #f5c6cb !important;
+        color: #721c24 !important;
+        transition: background-color 0.3s ease;
+    }
+    
+    /* Estilos para tabla de atributos */
+    .attribute-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-bottom: 2rem;
+    }
+    
+    .attribute-table th {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .attribute-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .attribute-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .attribute-code {
+        font-weight: 700;
+        background-color: #e9ecef;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        margin-left: 0.5rem;
+        font-size: 0.8rem;
+    }
+    
+    /* Estilos para la sección sensorial */
+    .sensorial-section {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    /* Estilos para el porcentaje calculado */
+    .percentage-display {
+        font-weight: bold;
+        color: #0d6efd;
+        min-width: 60px;
+        padding: 0.5rem;
+        background-color: #e7f3ff;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 0.95rem;
+    }
+    
+    .form-select {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+    }
+    
+    .form-select:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    /* Estilos responsivos */
+    @media (max-width: 767.98px) {
+        .pae-form-time {
+            position: static;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+        
+        .attribute-table th, 
+        .attribute-table td {
+            padding: 0.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkbox = document.getElementById('registro_4horas');
+    const campos = document.getElementById('campos_4horas');
+    
+    if (checkbox && campos) {
+        checkbox.addEventListener('change', function() {
+            campos.style.display = this.checked ? '' : 'none';
+        });
+    }
+});
+</script>
+<!-- Scripts para la hora de muestreo y cambio de línea -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configurar el campo de hora de muestreo
+        const horaMuestreoField = document.getElementById('hora_muestreo');
+        if (horaMuestreoField) {
+            // Convertir en un selector de tiempo HTML5
+            horaMuestreoField.type = 'time';
+            
+            // Establecer el paso en segundos (1 segundo) para permitir seleccionar minutos
+            horaMuestreoField.step = '1';
+            
+            // Establecer la hora actual como valor por defecto, incluyendo minutos
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            horaMuestreoField.value = `${hours}:${minutes}`;
+            
+            // Añadir clase para estilo específico
+            horaMuestreoField.classList.add('time-select');
+        }
+        
+        // Manejar el cambio de línea con botón
+        const lineaSelector = document.getElementById('lineaSelector');
+        const cambiarLineaBtn = document.getElementById('cambiarLineaBtn');
+        
+        if (lineaSelector && cambiarLineaBtn) {
+            cambiarLineaBtn.addEventListener('click', function() {
+                // Crear formulario temporal para enviar la selección de línea
+                const form = document.createElement('form');
+                form.method = 'GET'; // Usar GET para no perder el CSRF token
+                
+                // Obtener la URL actual sin parámetros
+                const currentUrl = window.location.pathname;
+                form.action = currentUrl;
+                
+                // Crear campo para la línea
+                const lineaField = document.createElement('input');
+                lineaField.type = 'hidden';
+                lineaField.name = 'linea';
+                lineaField.value = lineaSelector.value;
+                
+                // Añadir campo al formulario
+                form.appendChild(lineaField);
+                
+                // Añadir formulario al documento y enviarlo
+                document.body.appendChild(form);
+                form.submit();
+            });
+</script>
+
+
+        }
+    });
+</script>
+
+<!-- Scripts de validación movidos al final -->
+
+<!-- Script para manejo de hora de registro -->
+<script src="{{ url_for('static', filename='js/pae-hora-registro.js') }}"></script>
+
+<!-- Script de verificación y diagnóstico -->
+<script>
+console.log('✅ Scripts PAE cargados correctamente');
+
+// Script de diagnóstico para PAPA
+{% if category == 'PAPA' %}
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🔍 Diagnóstico PAE PAPA:');
+
+    // Verificar que el script de validación se cargó
+    console.log('  - window.papaValidationLoaded:', window.papaValidationLoaded);
+
+    // Verificar campos
+    const campos = document.querySelectorAll('input[data-type]');
+    console.log('  - Campos encontrados:', campos.length);
+
+    // Verificar que los campos tienen los event listeners
+    if (campos.length > 0) {
+        const primerCampo = campos[0];
+        console.log('  - Primer campo tipo:', primerCampo.getAttribute('data-type'));
+        console.log('  - Tiene _papaValidator:', !!primerCampo._papaValidator);
+    }
+
+    // Verificar estilos CSS
+    const styleElement = document.getElementById('papa-validation-styles');
+    console.log('  - CSS inyectado:', !!styleElement);
+});
+{% endif %}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-0">
+    <!-- Botones de navegación -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('index') }}" class="btn btn-light rounded-pill shadow-sm">
+                    <i class="fas fa-home me-2"></i>Inicio
+                </a>
+                <a href="{{ url_for('line_sections', category=category) }}" class="btn btn-light rounded-pill shadow-sm">
+                    <i class="fas fa-th-large me-2"></i>Secciones
+                </a>
+                <a href="{{ url_for('pae_dashboard', category=category) }}" class="btn btn-light rounded-pill shadow-sm">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a PAE
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="pae-container">
+        
+        <div class="pae-form-card">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div style="background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.08); border-left: 8px solid #0d6efd; padding: 2rem;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div style="width: 75%;">
+                                    <div style="display: flex; align-items: center; justify-content: flex-start;">
+                                        <h5 style="font-size: 1.3rem; font-weight: 600; margin-bottom: 0; margin-right: 10px;">Turno:</h5>
+                                        <span style="display: inline-block; background-color: #0d6efd; color: white; font-weight: bold; width: 40px; height: 40px; line-height: 40px; text-align: center; border-radius: 6px; font-size: 1.4rem;">{{ turno }}</span>
+                                    </div>
+                                    <p style="font-size: 1.1rem; color: #6c757d; margin-top: 10px; margin-bottom: 0;">
+                                        {% if turno == 'A' %}
+                                            Horario: 7:00 AM - 6:00 PM
+                                        {% else %}
+                                            Horario: 7:00 PM - 6:00 AM
+                                        {% endif %}
+                                    </p>
+                                </div>
+                                <div class="pae-time-display" style="position: relative; background-color: rgba(13, 110, 253, 0.1); padding: 10px 15px; border-radius: 8px; display: flex; align-items: center; width: 25%; justify-content: flex-end;">
+                                    <i class="fas fa-clock me-2 w-25" style="color: #0d6efd;"></i>
+                                    <span class="time-compact-input w-50" style="color: #0d6efd; font-weight: bold; background: transparent; border: none; outline: none;" required>{{hora_display}}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+            <div class="pae-form-body">
+                <form method="POST" action="{{ url_for('pae_registro', category=category, hora=hora) }}" novalidate>
+                    {{ form.csrf_token }}
+                    
+                    <!-- Campo oculto para la hora de registro -->
+                    <input type="hidden" name="hora_registro_hidden" id="hora_registro_hidden">
+                    
+                    <!-- Alerta para la línea seleccionada -->
+                    <div class="card shadow-sm mb-4" style="border-radius: 10px; border: none; background: white; overflow: hidden;">
+                        <div class="card-body" style="padding: 1.5rem;">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-info-circle me-3 fa-2x text-primary"></i>
+                                <div>
+                                    <h5 class="mb-1" style="font-weight: 600; color: #333;">Línea Actual: {{ category }}</h5>
+                                    <p class="mb-0">Estás trabajando con el formato de la línea <strong>{{ category }}</strong>.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Selector de Producto -->
+                    <div class="form-group">
+                        <label for="producto">Producto</label>
+                        <select class="form-control" id="producto" name="producto" required>
+                            <option value="">Seleccione un producto</option>
+                            {% if category == 'TORTILLA' %}
+                            <option value="DORITOS" {% if form.producto.data=='DORITOS' %}selected{% endif %}>DORITOS</option>
+                            <option value="TOSTITOS SALSA VERDE" {% if form.producto.data=='TOSTITOS SALSA VERDE' %}selected{% endif %}>TOSTITOS SALSA VERDE</option>
+                            <option value="TOSTITOS FH" {% if form.producto.data=='TOSTITOS FH' %}selected{% endif %}>TOSTITOS FH</option>
+                            <option value="DORITOS INCÓGNITA" {% if form.producto.data=='DORITOS INCÓGNITA' %}selected{% endif %}>DORITOS INCÓGNITA</option>
+                            <option value="DORITOS PIZZEROLA" {% if form.producto.data=='DORITOS PIZZEROLA' %}selected{% endif %}>DORITOS PIZZEROLA</option>
+                            <option value="DORITOS FH" {% if form.producto.data=='DORITOS FH' %}selected{% endif %}>DORITOS FH</option>
+                            <option value="RANCHERITOS" {% if form.producto.data=='RANCHERITOS' %}selected{% endif %}>RANCHERITOS</option>
+                            {% elif category == 'EXTRUIDOS' %}
+                            <option value="CHEETOS TORCIDITOS" {% if form.producto.data=='CHEETOS TORCIDITOS' %}selected{% endif %}>CHEETOS TORCIDITOS</option>
+                            <option value="CHEETOS XTRA FH NUEVO" {% if form.producto.data=='CHEETOS XTRA FH NUEVO' %}selected{% endif %}>CHEETOS XTRA FH NUEVO</option>
+                            <option value="CHEETOS XTRA FLAMIN HOT" {% if form.producto.data=='CHEETOS XTRA FLAMIN HOT' %}selected{% endif %}>CHEETOS XTRA FLAMIN HOT</option>
+                            <option value="CHEETOS JALAQUEÑO" {% if form.producto.data=='CHEETOS JALAQUEÑO' %}selected{% endif %}>CHEETOS JALAQUEÑO</option>
+                            <option value="OTROS" {% if form.producto.data=='OTROS' %}selected{% endif %}>OTROS</option>
+                            {% elif category == 'PAPA' %}
+                            <option value="PAPA SAL" {% if form.producto.data=='PAPA SAL' %}selected{% endif %}>PAPA SAL</option>
+                            <option value="RUFFLES QUESO" {% if form.producto.data=='RUFFLES QUESO' %}selected{% endif %}>RUFFLES QUESO</option>
+                            <option value="SABRITAS XTRA FH" {% if form.producto.data=='SABRITAS XTRA FH' %}selected{% endif %}>SABRITAS XTRA FH</option>
+                            <option value="OTROS" {% if form.producto.data=='OTROS' %}selected{% endif %}>OTROS</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    
+                    
+                    <table class="attribute-table">
+                        <thead>
+                            <tr>
+                                <th>Atributo</th>
+                                <th>Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if category == 'TORTILLA' %}
+                            <tr>
+                                <td>
+                                    Puntos Negros
+                                    <span class="attribute-code">A</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="A" placeholder="Verde: <1.0 | Rojo: ≥1.0" data-type="A" value="{{atributos_json.get('A', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Quemado
+                                    <span class="attribute-code">B</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="B" placeholder="Verde: <1.0 | Rojo: ≥1.0" data-type="B" value="{{atributos_json.get('B', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Manchas de condensados
+                                    <span class="attribute-code">C</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="C" placeholder="Verde: <1.0 | Rojo: ≥1.0" data-type="C" value="{{atributos_json.get('C', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Doblados
+                                    <span class="attribute-code">D</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="D" placeholder="Verde: 0 | Rojo: >0" data-type="D" value="{{atributos_json.get('D', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Pegados
+                                    <span class="attribute-code">E</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="E" placeholder="Verde: 0 | Rojo: >0" data-type="E" value="{{atributos_json.get('E', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Aceitoso
+                                    <span class="attribute-code">F</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="F" placeholder="Verde: <2 | Rojo: ≥2" data-type="F" value="{{atributos_json.get('F', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Puntos Tostados
+                                    <span class="attribute-code">G</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="G" placeholder="Verde: <2 | Rojo: ≥2" data-type="G" value="{{atributos_json.get('G', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Forma
+                                    <span class="attribute-code">H</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="H" placeholder="Verde: <5 | Rojo: ≥5" data-type="H" value="{{atributos_json.get('H', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="bg-light">
+                                    <h5 class="mb-0 fw-bold">Burbuja</h5>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Planos
+                                    <span class="attribute-code">I</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="I" placeholder="Verde: <2 | Rojo: ≥2" data-type="I" value="{{atributos_json.get('I', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Ámpulas
+                                    <span class="attribute-code">J</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="J" placeholder="Verde: <5 | Rojo: ≥5" data-type="J" value="{{atributos_json.get('J', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="bg-light">
+                                    <h5 class="mb-0 fw-bold">Laminado</h5>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Cúmulos
+                                    <span class="attribute-code">K</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="K" placeholder="Verde: 0 | Rojo: >0" data-type="K" value="{{atributos_json.get('K', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Hoyos
+                                    <span class="attribute-code">L</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="L" placeholder="Verde: 0 | Rojo: >0" data-type="L" value="{{atributos_json.get('L', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Tiras de masa
+                                    <span class="attribute-code">M</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="M" placeholder="Verde: 0 | Rojo: >0" data-type="M" value="{{atributos_json.get('M', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Pliegue
+                                    <span class="attribute-code">N</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="N" placeholder="Verde: 0 | Rojo: >0" data-type="N" value="{{atributos_json.get('N', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Dobles
+                                    <span class="attribute-code">O</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="O" placeholder="Verde: 0 | Rojo: >0" data-type="O" value="{{atributos_json.get('O', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="bg-light">
+                                    <h5 class="mb-0 fw-bold">Tamaño</h5>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Tamaño
+                                    <span class="attribute-code">P</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="P" placeholder="Verde: <5 | Rojo: ≥5" data-type="P" value="{{atributos_json.get('P', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="bg-light">
+                                    <h5 class="mb-0 fw-bold">Total</h5>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Total de Defectos (A+B+C+D+E+F+G+H+I+J+K+L+M+N+O+P)
+                                    <span class="attribute-code">Q</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="Q" placeholder="Auto-calculado | Verde: <17 | Rojo: ≥17" data-type="Q" readonly style="background-color: #f0f0f0;" value="{{atributos_json.get('Q', '')}}">
+                                </td>
+                            </tr>
+
+                            <!-- Checkbox para Registro cada 4 Horas (TORTILLA) -->
+                            <tr>
+                                <td colspan="2" style="padding: 1.5rem;">
+                                    <div class="form-check" style="background-color: #fff3cd; padding: 1rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+                                        <input class="form-check-input" type="checkbox" id="registro_4horas_tortilla" name="registro_4horas_tortilla" style="width: 20px; height: 20px; margin-top: 0.25rem;">
+                                        <label class="form-check-label fw-bold" for="registro_4horas_tortilla" style="margin-left: 0.5rem; font-size: 1.1rem; cursor: pointer;">
+                                            <i class="fas fa-clock me-2" style="color: #ffc107;"></i>
+                                            Registro cada 4 Horas
+                                        </label>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+
+                        <!-- Campos adicionales para TORTILLA (ocultos por defecto) -->
+                        <tbody id="campos_4horas_tortilla" style="display: none;">
+                            <tr>
+                                <td colspan="2" class="bg-warning bg-opacity-10">
+                                    <h6 class="mb-0 fw-bold">
+                                        <i class="fas fa-clipboard-check me-2"></i>
+                                        REGISTROS ADICIONALES CADA 4 HORAS
+                                    </h6>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="bg-light"><strong>Cocimiento</strong></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Tiempo de reposo
+                                    <small class="text-muted d-block">Verde: 10-18</small>
+                                </td>
+                                <td><input type="number" step="0.1" class="form-control tortilla-4h-input" name="tortilla_tiempo_reposo" data-type="TORTILLA-REPOSO" data-min="10" data-max="18" placeholder="Verde: 10-18"></td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="bg-light"><strong>Molino</strong></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Temperatura de masa
+                                    <small class="text-muted d-block">Verde: 32-38 °C</small>
+                                </td>
+                                <td><input type="number" step="0.1" class="form-control tortilla-4h-input" name="tortilla_temp_masa" data-type="TORTILLA-TEMP-MASA" data-min="32" data-max="38" placeholder="Verde: 32-38 °C"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Humedad de masa
+                                    <small class="text-muted d-block">Verde: 49.5-51.5%</small>
+                                </td>
+                                <td><input type="number" step="0.1" class="form-control tortilla-4h-input" name="tortilla_humedad_masa" data-type="TORTILLA-HUMEDAD" data-min="49.5" data-max="51.5" placeholder="Verde: 49.5-51.5%"></td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="bg-light"><strong>Laminado</strong></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Peso de 10 base frita
+                                    <small class="text-muted d-block" id="peso-base-hint">Verde: 24-27g (Tostitos) / 23.5-26.5g (Doritos/Rancheritos)</small>
+                                </td>
+                                <td><input type="number" step="0.1" class="form-control tortilla-4h-input" name="tortilla_peso_10_base" data-type="TORTILLA-PESO-BASE" placeholder="Depende del producto"></td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="bg-light"><strong>Freidor</strong></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Temperatura de freidor recto
+                                    <small class="text-muted d-block">Verde: 183.3-186.7 °C</small>
+                                </td>
+                                <td><input type="number" step="0.1" class="form-control tortilla-4h-input" name="tortilla_temp_freidor" data-type="TORTILLA-TEMP-FREIDOR" data-min="183.3" data-max="186.7" placeholder="Verde: 183.3-186.7 °C"></td>
+                            </tr>
+                        </tbody>
+                        <tbody>
+                            {% elif category == 'EXTRUIDOS' %}
+                            <tr>
+                                <td colspan="2" class="bg-light">
+                                    <h5 class="mb-0 fw-bold">APARIENCIA</h5>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="bg-light">
+                                    <h6 class="mb-0 fw-bold">CONSUMIDOR <span class="text-muted">(3 BOLSAS CHICAS)</span></h6>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Quemado
+                                    <span class="attribute-code">A</span>
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control" min="0" name="A" placeholder="Verde: 0 | Rojo: >0" data-type="A" value="{{atributos_json.get('A', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Roto <strong>(<=3.8 cm)</strong>
+                                    <span class="attribute-code">B</span>
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control" min="0" name="B" placeholder="Verde: 0-8 | Rojo: >8" data-type="B" value="{{atributos_json.get('B', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Defectos Totales
+                                    <span class="attribute-code">C</span>
+                                </td>
+                                <td>
+                                    <input type="number" class="form-control" min="0" name="C" placeholder="Verde: 0-18 | Rojo: >18" data-type="C" value="{{atributos_json.get('C', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Densidad
+                                    <span class="attribute-code">D</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="any" class="form-control" min="0" name="D" placeholder="Verde: 64-72 g/l | Rojo: fuera de rango" data-type="D" value="{{atributos_json.get('D', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="bg-light">
+                                    <h6 class="mb-0 fw-bold">NO CONSUMIDOR <span class="text-muted">(1 BOLSA CHICA)</span></h6>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Densidad Base Frita
+                                    <span class="attribute-code">E</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="any" class="form-control" min="0" name="E" placeholder="Verde: 95-110 g/l | Rojo: fuera de rango" data-type="E" value="{{atributos_json.get('E', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Diámetro 20 Collects PT
+                                    <span class="attribute-code">F</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="any" class="form-control" min="0" name="F" placeholder="Verde: 21-23 cm | Rojo: fuera de rango" data-type="F" value="{{atributos_json.get('F', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Cobertura
+                                    <span class="attribute-code">G</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="any" class="form-control" min="0" name="G" placeholder="Verde: 100% | Rojo: <100%" data-type="G" value="{{atributos_json.get('G', '')}}">
+                                </td>
+                            </tr>
+
+                            <!-- Checkbox para Registro cada 4 Horas (EXTRUIDOS) -->
+                            <tr>
+                                <td colspan="2" style="padding: 1.5rem;">
+                                    <div class="form-check" style="background-color: #fff3cd; padding: 1rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+                                        <input class="form-check-input" type="checkbox" id="registro_4horas_extruidos" name="registro_4horas_extruidos" style="width: 20px; height: 20px; margin-top: 0.25rem;">
+                                        <label class="form-check-label fw-bold" for="registro_4horas_extruidos" style="margin-left: 0.5rem; font-size: 1.1rem; cursor: pointer;">
+                                            <i class="fas fa-clock me-2" style="color: #ffc107;"></i>
+                                            Registro cada 4 Horas
+                                        </label>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+
+                        <!-- Campos adicionales para EXTRUIDOS (ocultos por defecto) -->
+                        <tbody id="campos_4horas_extruidos" style="display: none;">
+                            <tr>
+                                <td colspan="2" class="bg-warning bg-opacity-10">
+                                    <h6 class="mb-0 fw-bold">
+                                        <i class="fas fa-clipboard-check me-2"></i>
+                                        REGISTROS ADICIONALES CADA 4 HORAS
+                                    </h6>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="bg-light"><strong>Extrusores</strong></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Humedad de cereal en el trompo
+                                    <small class="text-muted d-block">Verde: 15-16.5%</small>
+                                </td>
+                                <td><input type="number" step="0.1" class="form-control" name="extrusor_humedad_cereal" data-type="EXT-HUMEDAD" placeholder="Verde: 15-16.5%"></td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="bg-light"><strong>Freidor</strong></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Tiempo de residencia en el freidor
+                                    <small class="text-muted d-block">Verde: 30-40 seg</small>
+                                </td>
+                                <td><input type="number" step="0.1" class="form-control" name="freidor_tiempo_residencia" data-type="EXT-TIEMPO" placeholder="Verde: 30-40 seg"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Temperatura del freidor
+                                    <small class="text-muted d-block">Verde: 188-194 °C</small>
+                                </td>
+                                <td><input type="number" step="0.1" class="form-control" name="freidor_temperatura" data-type="EXT-TEMP" placeholder="Verde: 188-194 °C"></td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="bg-light"><strong>Sazonado</strong></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Temperatura del slurry en marmitas
+                                    <small class="text-muted d-block">Verde: 40-46 °C</small>
+                                </td>
+                                <td><input type="number" step="0.1" class="form-control" name="sazonado_temp_slurry" data-type="EXT-SLURRY" placeholder="Verde: 40-46 °C"></td>
+                            </tr>
+                        </tbody>
+                        <tbody>
+                            {% elif category == 'PAPA' %}
+                            <tr>
+                                <td colspan="2" class="bg-light">
+                                    <h6 class="mb-0 fw-bold">DEFECTOS MATERIA PRIMA</h6>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Defectos de color
+                                    <span class="attribute-code">A</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="A" placeholder="Verde: 0-4 | Amarillo: 4.1-10 | Rojo: >10" data-type="A" value="{{atributos_json.get('A', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Daño seco
+                                    <span class="attribute-code">B</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="B" placeholder="Verde: 0-4 | Amarillo: 4.1-10 | Rojo: >10" data-type="B" value="{{atributos_json.get('B', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Color Indeseable
+                                    <span class="attribute-code">C</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="C" placeholder="Verde: 0-4 | Amarillo: 4.1-10 | Rojo: >10" data-type="C" value="{{atributos_json.get('C', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Defectos internos papa
+                                    <span class="attribute-code">D</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="D" placeholder="Verde: 0-10 | Amarillo: 10.1-20 | Rojo: >20" data-type="D" value="{{atributos_json.get('D', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Defectos externos papa
+                                    <span class="attribute-code">E</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="E" placeholder="Verde: 0-10 | Amarillo: 10.1-20 | Rojo: >20" data-type="E" value="{{atributos_json.get('E', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Defectos totales de papa
+                                    <span class="attribute-code">F</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="F" placeholder="Verde: 0-10 | Amarillo: 10.1-20 | Rojo: >20" data-type="F" value="{{atributos_json.get('F', '')}}">
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td colspan="2" class="bg-light">
+                                    <h6 class="mb-0 fw-bold">DEFECTOS DE PROCESO</h6>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Centros suaves + clusters
+                                    <span class="attribute-code">G</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="G" placeholder="Verde: 0-1 | Amarillo: 1.1-2 | Rojo: >2" data-type="G" value="{{atributos_json.get('G', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Exceso de cáscara
+                                    <span class="attribute-code">H</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="H" placeholder="Verde: 0-6 | Amarillo: 6.1-20 | Rojo: >20" data-type="H" value="{{atributos_json.get('H', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Hojuelas aceitosas
+                                    <span class="attribute-code">I</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="I" placeholder="Verde: 0-6 | Amarillo: 6.1-20 | Rojo: >20" data-type="I" value="{{atributos_json.get('I', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Ampulas
+                                    <span class="attribute-code">J</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="J" placeholder="Verde: 0-6 | Amarillo: 6.1-20 | Rojo: >20" data-type="J" value="{{atributos_json.get('J', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Puntos obscuros
+                                    <span class="attribute-code">K</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="K" placeholder="Verde: 0-6 | Amarillo: 6.1-20 | Rojo: >20" data-type="K" value="{{atributos_json.get('K', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Defectos Totales de Proceso
+                                    <span class="attribute-code">L</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="L" placeholder="Verde: 0-20 | Amarillo: 20.1-40 | Rojo: >40" data-type="L" value="{{atributos_json.get('L', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Hojuelas dobladas
+                                    <span class="attribute-code">M</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="M" placeholder="Verde: 0-30 | Amarillo: 30.1-35 | Rojo: >35" data-type="M" value="{{atributos_json.get('M', '')}}">
+                                </td>
+                            </tr>
+                            
+                            <!-- Sección de Rotura (Método A-517) - Campos Fijos -->
+                            <tr>
+                                <td colspan="2" class="bg-warning bg-opacity-10">
+                                    <div class="fw-bold">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        Evaluar Rotura (Método A-517)
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Hojuela Entera
+                                    <span class="attribute-code">N</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="N" placeholder="Verde: 75-100% | Rojo: <75%" data-type="N" value="{{atributos_json.get('N', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Hojuela Entera (FIESTA)
+                                    <span class="attribute-code">O</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="O" placeholder="Verde: 73-100% | Rojo: <73%" data-type="O" value="{{atributos_json.get('O', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Pedacera (scrap)
+                                    <span class="attribute-code">P</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.01" class="form-control" min="0" name="P" placeholder="Verde: 0-12% | Amarillo: 12.1-15% | Rojo: >15%" data-type="P" value="{{atributos_json.get('P', '')}}">
+                                </td>
+                            </tr>
+
+                            <!-- Color de la Base -->
+                            <tr>
+                                <td colspan="2" class="bg-light">
+                                    <h6 class="mb-0 fw-bold">COLOR DE LA BASE</h6>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Color de la Base L
+                                    <span class="attribute-code">Q</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.1" class="form-control" min="0" name="Q" placeholder="Verde: 61-100 | Amarillo: 58-60.9 | Rojo: <58" data-type="Q" value="{{atributos_json.get('Q', '')}}">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Color de la base a
+                                    <span class="attribute-code">R</span>
+                                </td>
+                                <td>
+                                    <input type="number" step="0.1" class="form-control" min="0" name="R" placeholder="Verde: -3 a 2.5 | Amarillo: 2.51-10 | Rojo: <-3, >10" data-type="R" value="{{atributos_json.get('R', '')}}">
+                                </td>
+                            </tr>
+                            
+                            <!-- Checkbox para Registro cada 4 Horas -->
+                            <tr>
+                                <td colspan="2" style="padding: 1.5rem;">
+                                    <div class="form-check" style="background-color: #fff3cd; padding: 1rem; border-radius: 8px; border-left: 4px solid #ffc107;">
+                                        <input class="form-check-input" type="checkbox" id="registro_4horas" name="registro_4horas" style="width: 20px; height: 20px; margin-top: 0.25rem;">
+                                        <label class="form-check-label fw-bold" for="registro_4horas" style="margin-left: 0.5rem; font-size: 1.1rem; cursor: pointer;">
+                                            <i class="fas fa-clock me-2" style="color: #ffc107;"></i>
+                                            Registro cada 4 Horas
+                                        </label>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                        
+                        <!-- Campos adicionales (ocultos por defecto) -->
+                        <tbody id="campos_4horas" style="display: none;">
+                            <tr>
+                                <td colspan="2" class="bg-warning bg-opacity-10">
+                                    <h6 class="mb-0 fw-bold">
+                                        <i class="fas fa-clipboard-check me-2"></i>
+                                        REGISTROS ADICIONALES CADA 4 HORAS
+                                    </h6>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="bg-light"><strong>Pelado</strong></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Remoción de cáscara en papa cruda
+                                    <small class="text-muted d-block">Verde: 95-100% | Rojo: <95%</small>
+                                </td>
+                                <td><input type="number" step="0.1" class="form-control" name="pelado_remocion" data-type="4H-PELADO" placeholder="Verde: 95-100%"></td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="bg-light"><strong>Rebanado</strong></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span id="label-grosor">Grosor (Lays)</span>
+                                    <small class="text-muted d-block" id="hint-grosor">Objetivo: 1.35 mm | Verde: 1.3-1.4 mm</small>
+                                </td>
+                                <td><input type="number" step="0.01" class="form-control" name="rebanado_grosor" data-type="4H-GROSOR" id="input-grosor" placeholder="Verde: 1.3-1.4 mm"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span id="label-desviacion">Desviación (Lays)</span>
+                                    <small class="text-muted d-block" id="hint-desviacion">Verde: 0-0.071 mm</small>
+                                </td>
+                                <td><input type="number" step="0.001" class="form-control" name="rebanado_desviacion" data-type="4H-DESVIACION" id="input-desviacion" placeholder="Verde: 0-0.071 mm"></td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="bg-light"><strong>Lavador</strong></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Almidón superficial
+                                    <small class="text-muted d-block">Verde: 0-3 | Rojo: >3</small>
+                                </td>
+                                <td><input type="number" step="0.1" class="form-control" name="lavador_almidon" data-type="4H-ALMIDON" placeholder="Verde: 0-3"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Humedad superficial
+                                    <small class="text-muted d-block">Verde: <10% | Rojo: ≥10%</small>
+                                </td>
+                                <td><input type="number" step="0.1" class="form-control" name="lavador_humedad" data-type="4H-HUMEDAD" placeholder="Verde: <10% | Rojo: ≥10%"></td>
+                            </tr>
+
+                            <tr>
+                                <td colspan="2" class="bg-light"><strong>Freidor</strong></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span id="label-tiempo">Tiempo de residencia (Lays)</span>
+                                    <small class="text-muted d-block" id="hint-tiempo">Objetivo: 3 min | Verde: 2.83-3.16 min</small>
+                                </td>
+                                <td><input type="number" step="0.01" class="form-control" name="freidor_tiempo" data-type="4H-TIEMPO" id="input-tiempo" placeholder="Verde: 2.83-3.16 min"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    Temperatura de entrada a freidor
+                                    <small class="text-muted d-block">Verde: >171 °C</small>
+                                </td>
+                                <td><input type="number" step="0.1" class="form-control" name="freidor_temp_entrada" data-type="4H-TEMP" placeholder="Ingrese temperatura (°C)"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    OV
+                                    <small class="text-muted d-block">Verde: 0-15 ppm | Amarillo: 15.1-25 ppm | Rojo: >25 ppm</small>
+                                </td>
+                                <td><input type="number" step="0.1" class="form-control" name="freidor_ov" data-type="4H-OV" placeholder="Ingrese OV (ppm)"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    AGL
+                                    <small class="text-muted d-block">Verde: 0-0.25% | Amarillo: 0.26-0.35% | Rojo: >0.35%</small>
+                                </td>
+                                <td><input type="number" step="0.01" class="form-control" name="freidor_agl" data-type="4H-AGL" placeholder="Ingrese AGL (%)"></td>
+                            </tr>
+                            </tbody>
+                            <tbody>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <td colspan="2" class="bg-light">
+                                    <h5 class="mb-0 fw-bold">SENSORIAL</h5>
+                                </td>
+                            </tr>
+                            {% if category != 'EXTRUIDOS' %}
+                            <tr>
+                                <td>Apariencia</td>
+                                <td>
+                                    <div class="sensorial-section">
+                                        {{ form.sensorial_apariencia(class="form-select mb-2") }}
+                                        {{ form.sensorial_apariencia_comentario(class="form-control", placeholder="Comentarios sobre la apariencia", rows=2) }}
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <td>Textura</td>
+                                <td>
+                                    <div class="sensorial-section">
+                                        {{ form.sensorial_textura(class="form-select mb-2") }}
+                                        {{ form.sensorial_textura_comentario(class="form-control", placeholder="Comentarios sobre la textura", rows=2) }}
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Sabor</td>
+                                <td>
+                                    <div class="sensorial-section">
+                                        {{ form.sensorial_sabor(class="form-select mb-2") }}
+                                        {{ form.sensorial_sabor_comentario(class="form-control", placeholder="Comentarios sobre el sabor", rows=2) }}
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <div class="form-group">
+                        <label for="observaciones">Observaciones</label>
+                        {{ form.observaciones(class="form-control", rows=3, placeholder="Ingrese cualquier observación adicional sobre el producto") }}
+                    </div>
+                    
+                    {% if category == 'PAPA' %}
+                    <!-- Información específica para PAPA SAL -->
+                    <div class="mt-4 p-3" style="background-color: #f8f9fa; border-radius: 10px; border-left: 4px solid #0d6efd;">
+                        <h5 class="mb-3" style="font-weight: 600; color: #333;">Información PAE - PAPA SAL</h5>
+                        <div id="info-rangos-papa">
+                            <!-- El contenido se carga automáticamente por JavaScript -->
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Criterios de Evaluación:</label>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Los rangos están basados en las especificaciones de calidad para papa sal.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Notas:</label>
+                                    <p class="mb-1"><small>• Verde: Dentro de especificación</small></p>
+                                    <p class="mb-1"><small>• Amarillo: Tomar acción correctiva</small></p>
+                                    <p class="mb-0"><small>• Rojo: Parámetro abierto - Acción inmediata</small></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Leyenda de colores -->
+                    <div class="mt-4 mb-3 p-3" style="background-color: #f8f9fa; border-radius: 8px;">
+                        <h6 class="mb-3 fw-bold">Leyenda de colores:</h6>
+                        <div class="d-flex flex-wrap gap-3">
+                            <div class="d-flex align-items-center">
+                                <span style="display: inline-block; width: 20px; height: 20px; background-color: #d4edda; border: 1px solid #c3e6cb; margin-right: 8px; border-radius: 4px;"></span>
+                                <span>Verde - Aceptable</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span style="display: inline-block; width: 20px; height: 20px; background-color: #fff3cd; border: 1px solid #ffeaa7; margin-right: 8px; border-radius: 4px;"></span>
+                                <span>Amarillo - Tomar acción</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span style="display: inline-block; width: 20px; height: 20px; background-color: #f8d7da; border: 1px solid #f5c6cb; margin-right: 8px; border-radius: 4px;"></span>
+                                <span>Rojo - Abierto</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% elif category == 'TORTILLA' %}
+                    <!-- Sección agregada para información adicional -->
+                    <div class="mt-4 p-3" style="background-color: #f8f9fa; border-radius: 10px; border-left: 4px solid #0d6efd;">
+                        <h5 class="mb-3" style="font-weight: 600; color: #333;">Información Adicional</h5>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Valores de Referencia:</label>
+                                    <ul class="list-group">
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Puntos Negros
+                                           
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Quemado
+                                            <span class="badge bg-primary rounded-pill">Max. 3</span>
+                                        </li>
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            Manchas
+                                            <span class="badge bg-primary rounded-pill">Max. 4</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Criterios de Evaluación:</label>
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Utilice los códigos de atributos (A-P) como referencia para el llenado del registro.
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Notas:</label>
+                                    <p class="mb-1"><small>• Registre todos los valores observados sin excepción</small></p>
+                                    <p class="mb-1"><small>• Para valores no encontrados coloque 0</small></p>
+                                    <p class="mb-0"><small>• Notifique inmediatamente valores fuera de rango</small></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Leyenda de colores -->
+                    <div class="mt-4 mb-3 p-3" style="background-color: #f8f9fa; border-radius: 8px;">
+                        <h6 class="mb-3 fw-bold">Leyenda:</h6>
+                        <div class="d-flex flex-wrap gap-3">
+                            <div class="d-flex align-items-center">
+                                <span style="display: inline-block; width: 20px; height: 20px; background-color: #e9ecef; border: 1px solid #ced4da; margin-right: 8px; border-radius: 4px;"></span>
+                                <span>Bloqueado</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span style="display: inline-block; width: 20px; height: 20px; background-color: #007bff; border: 1px solid #0069d9; margin-right: 8px; border-radius: 4px;"></span>
+                                <span>Hora actual</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span style="display: inline-block; width: 20px; height: 20px; background-color: #28a745; border: 1px solid #218838; margin-right: 8px; border-radius: 4px;"></span>
+                                <span>Completado</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span style="display: inline-block; width: 20px; height: 20px; background-color: #dc3545; border: 1px solid #c82333; margin-right: 8px; border-radius: 4px;"></span>
+                                <span>Pendiente</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="d-flex justify-content-between mt-4">
+                        <a href="{{ url_for('pae_dashboard', category=category) }}" class="btn btn-light rounded-pill shadow-sm">
+                            <i class="fas fa-arrow-left me-2"></i> Volver a PAE
+                        </a>
+                        <button type="submit" class="btn btn-primary rounded-pill">
+                            <i class="fas fa-save me-2"></i> Guardar Registro
+                        </button>
+                    </div>
+                    <!-- Campo oculto para el JSON de atributos -->
+                    <input type="hidden" name="data" id="data">
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Al enviar el formulario, recolecta los valores de la tabla y guárdalos en el campo oculto "data"
+    const paeForm = document.querySelector('form');
+    paeForm.addEventListener('submit', function(e) {
+        const atributos = {};
+        const categoria = '{{ category }}';
+        const camposPorcentajeDirecto = ['N', 'O', 'P']; // Estos campos ya son porcentajes (solo PAPA)
+
+        // Selecciona todos los inputs de la tabla de atributos
+        paeForm.querySelectorAll('input[type="number"][data-type]').forEach(input => {
+            const campo = input.getAttribute('data-type');
+            const valorCampo = input.value || "0";
+
+            // Guardar el valor del campo
+            atributos[campo] = valorCampo;
+
+            // SOLO calcular porcentajes para PAPA
+            if (categoria === 'PAPA') {
+                // Si el campo tiene porcentaje calculado, guardarlo también
+                const porcentaje = input.getAttribute('data-porcentaje');
+                if (porcentaje && porcentaje !== '') {
+                    atributos[campo + '_porcentaje'] = porcentaje;
+                } else if (valorCampo && parseFloat(valorCampo) > 0) {
+                    // Calcular el porcentaje si no está en el atributo
+                    let porcCalculado;
+
+                    if (camposPorcentajeDirecto.includes(campo)) {
+                        // N, O, P: el valor YA ES el porcentaje
+                        porcCalculado = parseFloat(valorCampo).toFixed(2);
+                    } else {
+                        // A-M: calcular porcentaje (gramos/200*100)
+                        porcCalculado = ((parseFloat(valorCampo) / 200) * 100).toFixed(2);
+                    }
+
+                    atributos[campo + '_porcentaje'] = porcCalculado;
+                }
+            }
+        });
+        // Guarda el JSON en el campo oculto
+        document.getElementById('data').value = JSON.stringify(atributos);
+        console.log('📦 Datos a guardar:', atributos);
+    });
+});
+</script>
+
+<script>
+console.log('✅ Template PAE registro.html cargado completamente');
+
+// SCRIPT DE VALIDACIÓN PAE - Cada categoría con sus propios rangos
+console.log('📍 CATEGORIA:', '{{ category }}');
+console.log('📍 Iniciando validación inline...');
+
+// RANGOS POR CATEGORÍA
+const RANGOS_PAPA = {
+    'A': { verde: [0, 4], amarillo: [4.1, 10] },
+    'B': { verde: [0, 4], amarillo: [4.1, 10] },
+    'C': { verde: [0, 4], amarillo: [4.1, 10] },
+    'D': { verde: [0, 10], amarillo: [10.1, 20] },
+    'E': { verde: [0, 10], amarillo: [10.1, 20] },
+    'F': { verde: [0, 10], amarillo: [10.1, 20] },
+    'G': { verde: [0, 1], amarillo: [1.1, 2] },
+    'H': { verde: [0, 6], amarillo: [6.1, 20] },
+    'I': { verde: [0, 6], amarillo: [6.1, 20] },
+    'J': { verde: [0, 6], amarillo: [6.1, 20] },
+    'K': { verde: [0, 6], amarillo: [6.1, 20] },
+    'L': { verde: [0, 20], amarillo: [20.1, 40] },
+    'M': { verde: [0, 30], amarillo: [30.1, 35] },
+    'N': { verde: [75, 100], amarillo: null },
+    'O': { verde: [73, 100], amarillo: null },
+    'P': { verde: [0, 12], amarillo: [12.1, 15] },
+    'Q': { verde: [61, 100], amarillo: [58, 60.9] },
+    'R': { verde: [-3, 2.5], amarillo: [2.51, 10] },
+    // Campos de Registro cada 4 Horas
+    '4H-PELADO': { verde: [95, 100], amarillo: null },     // Pelado - Remoción de cáscara
+    '4H-GROSOR': { verde: [1.3, 1.4], amarillo: null },
+    '4H-DESVIACION': { verde: [0, 0.071], amarillo: null },
+    '4H-ALMIDON': { verde: [0, 3], amarillo: null },       // Lavador - Almidón superficial
+    '4H-HUMEDAD': { verde: [0, 9.99], amarillo: null },
+    '4H-TIEMPO': { verde: [2.83, 3.16], amarillo: null },
+    '4H-TEMP': { verde: [171, 9999], amarillo: null },
+    '4H-OV': { verde: [0, 15], amarillo: [15.1, 25] },
+    '4H-AGL': { verde: [0, 0.25], amarillo: [0.26, 0.35] }
+};
+
+const RANGOS_EXTRUIDOS = {
+    'A': { verde: [0, 0], amarillo: null },        // Quemado: Verde si 0, Rojo si >0
+    'B': { verde: [0, 8], amarillo: null },        // Roto: Verde si ≤8, Rojo si >8
+    'C': { verde: [0, 18], amarillo: null },       // Defectos totales: Verde si ≤18, Rojo si >18
+    'D': { verde: [64.0, 72.0], amarillo: null },  // Densidad extrusor: Verde 64-72, Rojo fuera
+    'E': { verde: [95, 110], amarillo: null },     // Densidad base frita: Verde 95-110, Rojo fuera
+    'F': { verde: [21.0, 23], amarillo: null },    // Diámetro: Verde 21-23, Rojo fuera
+    'G': { verde: [100, 100], amarillo: null },    // Cobertura: Verde si 100%, Rojo si <100%
+    // Campos Registro cada 4 Horas (EXTRUIDOS)
+    'EXT-HUMEDAD': { verde: [15, 16.5], amarillo: null },     // Humedad de cereal en el trompo
+    'EXT-TIEMPO': { verde: [30, 40], amarillo: null },        // Tiempo de residencia en el freidor
+    'EXT-TEMP': { verde: [188, 194], amarillo: null },        // Temperatura del freidor
+    'EXT-SLURRY': { verde: [40, 46], amarillo: null }         // Temperatura del slurry en marmitas
+};
+
+const RANGOS_TORTILLA = {
+    'A': { verde: [0, 0.99], amarillo: null },    // Puntos Negros: Verde <1.0, Rojo ≥1.0
+    'B': { verde: [0, 0.99], amarillo: null },    // Quemado: Verde <1.0, Rojo ≥1.0
+    'C': { verde: [0, 0.99], amarillo: null },    // Manchas de condensados: Verde <1.0, Rojo ≥1.0
+    'D': { verde: [0, 0], amarillo: null },       // Doblados: Verde 0, Rojo >0
+    'E': { verde: [0, 0], amarillo: null },       // Pegados: Verde 0, Rojo >0
+    'F': { verde: [0, 1.99], amarillo: null },    // Aceitoso: Verde <2, Rojo ≥2
+    'G': { verde: [0, 1.99], amarillo: null },    // Puntos Tostados: Verde <2, Rojo ≥2
+    'H': { verde: [0, 4.99], amarillo: null },    // Forma: Verde <5, Rojo ≥5
+    'I': { verde: [0, 1.99], amarillo: null },    // Planos: Verde <2, Rojo ≥2
+    'J': { verde: [0, 4.99], amarillo: null },    // Ámpulas: Verde <5, Rojo ≥5
+    'K': { verde: [0, 0], amarillo: null },       // Cúmulos: Verde 0, Rojo >0
+    'L': { verde: [0, 0], amarillo: null },       // Hoyos: Verde 0, Rojo >0
+    'M': { verde: [0, 0], amarillo: null },       // Tiras de masa: Verde 0, Rojo >0
+    'N': { verde: [0, 0], amarillo: null },       // Pliegue: Verde 0, Rojo >0
+    'O': { verde: [0, 0], amarillo: null },       // Dobles: Verde 0, Rojo >0
+    'P': { verde: [0, 4.99], amarillo: null },    // Tamaño: Verde <5, Rojo ≥5
+    'Q': { verde: [0, 16.99], amarillo: null }    // Total de Defectos: Verde <17, Rojo ≥17
+};
+
+// Rangos específicos para RUFFLES QUESO (solo campos diferentes)
+const RANGOS_RUFFLES_QUESO = {
+    '4H-GROSOR': { verde: [2.73, 2.83], amarillo: null },      // Rebanado - Grosor
+    '4H-DESVIACION': { verde: [0, 0.089], amarillo: null },    // Rebanado - Desviación
+    '4H-TIEMPO': { verde: [3.08, 3.41], amarillo: null }       // Freidor - Tiempo de residencia
+};
+
+// Seleccionar rangos según categoría y producto
+const categoria = '{{ category }}';
+const productoSeleccionado = document.getElementById('producto')?.value || '';
+let RANGOS = {};
+
+if (categoria === 'PAPA') {
+    RANGOS = {...RANGOS_PAPA};  // Clonar rangos base de PAPA
+
+    // Si es Ruffles Queso, sobrescribir solo los campos específicos
+    if (productoSeleccionado === 'RUFFLES QUESO') {
+        Object.assign(RANGOS, RANGOS_RUFFLES_QUESO);
+        console.log('📦 Producto: RUFFLES QUESO - Aplicando rangos especiales');
+    }
+} else if (categoria === 'EXTRUIDOS') {
+    RANGOS = RANGOS_EXTRUIDOS;
+} else if (categoria === 'TORTILLA') {
+    RANGOS = RANGOS_TORTILLA;
+}
+
+console.log('✅ Rangos cargados para:', categoria, productoSeleccionado, RANGOS);
+
+// INYECTAR CSS
+const style = document.createElement('style');
+style.textContent = `
+    input[data-type].input-value-ok {
+        background-color: #d4edda !important;
+        border-color: #28a745 !important;
+        color: #155724 !important;
+    }
+    input[data-type].input-value-warning {
+        background-color: #fff3cd !important;
+        border-color: #ffc107 !important;
+        color: #856404 !important;
+    }
+    input[data-type].input-value-error {
+        background-color: #f8d7da !important;
+        border-color: #dc3545 !important;
+        color: #721c24 !important;
+    }
+`;
+document.head.appendChild(style);
+console.log('✅ CSS inyectado');
+
+// FUNCIÓN PARA CALCULAR CAMPOS AUTO-SUMADOS
+// PAPA: calcula F y L
+// TORTILLA: calcula Q
+function calcularCamposAutomaticos() {
+    if (categoria === 'PAPA') {
+        // F = A + B + C + D + E (Defectos totales de papa)
+        const campoF = document.querySelector('input[data-type="F"]');
+        const valorA = parseFloat(document.querySelector('input[data-type="A"]')?.value) || 0;
+        const valorB = parseFloat(document.querySelector('input[data-type="B"]')?.value) || 0;
+        const valorC = parseFloat(document.querySelector('input[data-type="C"]')?.value) || 0;
+        const valorD = parseFloat(document.querySelector('input[data-type="D"]')?.value) || 0;
+        const valorE = parseFloat(document.querySelector('input[data-type="E"]')?.value) || 0;
+
+        const sumaF = valorA + valorB + valorC + valorD + valorE;
+        if (campoF) {
+            campoF.value = sumaF.toFixed(2);
+            validarPAE(campoF);
+            calcularPorcentaje(campoF);
+        }
+
+        // L = G + H + I + J + K (Defectos Totales de Proceso - NO incluye M ni F)
+        const campoL = document.querySelector('input[data-type="L"]');
+        const valorG = parseFloat(document.querySelector('input[data-type="G"]')?.value) || 0;
+        const valorH = parseFloat(document.querySelector('input[data-type="H"]')?.value) || 0;
+        const valorI = parseFloat(document.querySelector('input[data-type="I"]')?.value) || 0;
+        const valorJ = parseFloat(document.querySelector('input[data-type="J"]')?.value) || 0;
+        const valorK = parseFloat(document.querySelector('input[data-type="K"]')?.value) || 0;
+
+        const sumaL = valorG + valorH + valorI + valorJ + valorK;
+        if (campoL) {
+            campoL.value = sumaL.toFixed(2);
+            validarPAE(campoL);
+            calcularPorcentaje(campoL);
+        }
+
+        console.log(`📊 Cálculos PAPA: F=${sumaF.toFixed(2)}, L=${sumaL.toFixed(2)}`);
+    } else if (categoria === 'TORTILLA') {
+        // Q = A + B + C + D + E + F + G + H + I + J + K + L + M + N + O + P (Total de Defectos)
+        const campoQ = document.querySelector('input[data-type="Q"]');
+        const valorA = parseFloat(document.querySelector('input[data-type="A"]')?.value) || 0;
+        const valorB = parseFloat(document.querySelector('input[data-type="B"]')?.value) || 0;
+        const valorC = parseFloat(document.querySelector('input[data-type="C"]')?.value) || 0;
+        const valorD = parseFloat(document.querySelector('input[data-type="D"]')?.value) || 0;
+        const valorE = parseFloat(document.querySelector('input[data-type="E"]')?.value) || 0;
+        const valorF = parseFloat(document.querySelector('input[data-type="F"]')?.value) || 0;
+        const valorG = parseFloat(document.querySelector('input[data-type="G"]')?.value) || 0;
+        const valorH = parseFloat(document.querySelector('input[data-type="H"]')?.value) || 0;
+        const valorI = parseFloat(document.querySelector('input[data-type="I"]')?.value) || 0;
+        const valorJ = parseFloat(document.querySelector('input[data-type="J"]')?.value) || 0;
+        const valorK = parseFloat(document.querySelector('input[data-type="K"]')?.value) || 0;
+        const valorL = parseFloat(document.querySelector('input[data-type="L"]')?.value) || 0;
+        const valorM = parseFloat(document.querySelector('input[data-type="M"]')?.value) || 0;
+        const valorN = parseFloat(document.querySelector('input[data-type="N"]')?.value) || 0;
+        const valorO = parseFloat(document.querySelector('input[data-type="O"]')?.value) || 0;
+        const valorP = parseFloat(document.querySelector('input[data-type="P"]')?.value) || 0;
+
+        const sumaQ = valorA + valorB + valorC + valorD + valorE + valorF + valorG + valorH +
+                      valorI + valorJ + valorK + valorL + valorM + valorN + valorO + valorP;
+        if (campoQ) {
+            campoQ.value = sumaQ.toFixed(2);
+            validarPAE(campoQ);
+        }
+
+        console.log(`📊 Cálculos TORTILLA: Q=${sumaQ.toFixed(2)}`);
+    }
+}
+
+// FUNCIÓN VALIDAR - Genérica para todas las categorías
+function validarPAE(input) {
+    const tipo = input.getAttribute('data-type');
+    const valorStr = input.value.trim();
+
+    console.log(`Validando ${tipo} = "${valorStr}" en ${categoria}`);
+
+    input.classList.remove('input-value-ok', 'input-value-warning', 'input-value-error');
+
+    // Si el campo está vacío, no validar
+    if (valorStr === '' || valorStr === null) return;
+
+    const valor = parseFloat(valorStr);
+    if (isNaN(valor)) return;  // Solo salir si NO es un número válido
+    if (!RANGOS[tipo]) return;  // Si no hay rangos para este campo, no validar
+
+    const rango = RANGOS[tipo];
+    let estado = 'error';
+
+    // Casos especiales para PAPA
+    if (categoria === 'PAPA') {
+        if (tipo === 'N') {
+            // Verde: 75-100%, Rojo: <75%, Sin amarillo
+            if (valor >= 75 && valor <= 100) estado = 'ok';
+            else estado = 'error';
+        } else if (tipo === 'O') {
+            // Verde: 73-100%, Rojo: <73%, Sin amarillo
+            if (valor >= 73 && valor <= 100) estado = 'ok';
+            else estado = 'error';
+        } else if (tipo === 'R') {
+            if (valor >= rango.verde[0] && valor <= rango.verde[1]) estado = 'ok';
+            else if (rango.amarillo && ((valor >= rango.amarillo[0] && valor <= rango.amarillo[1]) || valor < -3)) estado = 'warning';
+            else estado = 'error';
+        } else {
+            // Lógica estándar para otros campos de PAPA
+            if (valor >= rango.verde[0] && valor <= rango.verde[1]) estado = 'ok';
+            else if (rango.amarillo && valor >= rango.amarillo[0] && valor <= rango.amarillo[1]) estado = 'warning';
+            else estado = 'error';
+        }
+    } else {
+        // Lógica para EXTRUIDOS y TORTILLA (sin amarillo, solo verde/rojo)
+        if (valor >= rango.verde[0] && valor <= rango.verde[1]) {
+            estado = 'ok';
+        } else {
+            estado = 'error';
+        }
+    }
+
+    const clase = `input-value-${estado}`;
+    input.classList.add(clase);
+    console.log(`  → ${estado} (${clase})`);
+}
+
+// Alias para compatibilidad
+const validarPAPA = validarPAE;
+
+// FUNCIÓN PARA CALCULAR Y MOSTRAR PORCENTAJE (valor / 200)
+// NOTA: Esta función SOLO aplica a la categoría PAPA
+// TORTILLA y EXTRUIDOS NO usan este cálculo
+function calcularPorcentaje(input) {
+    // Solo calcular porcentajes para PAPA
+    const categoria = '{{ category }}';
+    if (categoria !== 'PAPA') {
+        return;  // Salir si no es PAPA
+    }
+
+    const tipo = input.getAttribute('data-type');
+    const valor = parseFloat(input.value);
+
+    // No calcular porcentaje para campos de 4 Horas (tienen unidades diferentes)
+    if (tipo && tipo.startsWith('4H-')) {
+        return;
+    }
+
+    // Campos N, O, P: el valor ingresado YA ES el porcentaje
+    const camposPorcentajeDirecto = ['N', 'O', 'P'];
+
+    // Buscar el span de porcentaje (puede estar en el parent directo o en un flex-container)
+    let container = input.parentElement;
+    let spanPorcentaje = null;
+
+    // Verificar si ya existe un span de porcentaje
+    if (container.classList.contains('flex-container') || container.style.display === 'flex') {
+        spanPorcentaje = container.querySelector('.porcentaje-display');
+    }
+
+    // Si no existe el span, crear la estructura
+    if (!spanPorcentaje) {
+        // Verificar si ya está en un contenedor flex (HTML estático)
+        if (container.style.display === 'flex') {
+            // Ya está en flex, solo crear el span
+            spanPorcentaje = document.createElement('span');
+            spanPorcentaje.className = 'porcentaje-display';
+            spanPorcentaje.setAttribute('data-for', tipo);
+            spanPorcentaje.style.minWidth = '80px';
+            spanPorcentaje.style.fontWeight = 'bold';
+            spanPorcentaje.style.color = '#666';
+            spanPorcentaje.style.padding = '4px 8px';
+            spanPorcentaje.style.borderRadius = '4px';
+            spanPorcentaje.style.textAlign = 'center';
+            container.appendChild(spanPorcentaje);
+        } else {
+            // Necesita crear el contenedor flex
+            const tdParent = input.parentElement;
+
+            // Crear contenedor flex
+            const flexDiv = document.createElement('div');
+            flexDiv.style.display = 'flex';
+            flexDiv.style.alignItems = 'center';
+            flexDiv.style.gap = '10px';
+            flexDiv.classList.add('flex-container');
+
+            // Insertar el flex container ANTES del input
+            tdParent.insertBefore(flexDiv, input);
+
+            // Mover el input al flex container
+            flexDiv.appendChild(input);
+            input.style.flex = '1';
+
+            // Crear el span de porcentaje
+            spanPorcentaje = document.createElement('span');
+            spanPorcentaje.className = 'porcentaje-display';
+            spanPorcentaje.setAttribute('data-for', tipo);
+            spanPorcentaje.style.minWidth = '80px';
+            spanPorcentaje.style.fontWeight = 'bold';
+            spanPorcentaje.style.color = '#666';
+            spanPorcentaje.style.padding = '4px 8px';
+            spanPorcentaje.style.borderRadius = '4px';
+            spanPorcentaje.style.textAlign = 'center';
+            flexDiv.appendChild(spanPorcentaje);
+        }
+    }
+
+    if (spanPorcentaje) {
+        // Calcular porcentaje: (valor/200)*100 para obtener el % real
+        // EXCEPTO N, O, P que ya son porcentajes
+        if (!valor || isNaN(valor) || valor <= 0) {
+            spanPorcentaje.textContent = '-';
+            spanPorcentaje.style.color = '#666';
+            spanPorcentaje.style.backgroundColor = 'transparent';
+        } else {
+            let porcentaje;
+
+            if (camposPorcentajeDirecto.includes(tipo)) {
+                // N, O, P: el valor YA ES el porcentaje, solo mostrar
+                porcentaje = valor.toFixed(2);
+            } else {
+                // A-M: calcular porcentaje (valor/200*100)
+                porcentaje = ((valor / 200) * 100).toFixed(2);
+            }
+
+            spanPorcentaje.textContent = `${porcentaje}%`;
+
+            // Guardar el porcentaje calculado en un atributo data para usarlo al guardar
+            input.setAttribute('data-porcentaje', porcentaje);
+
+            // Aplicar el mismo color que la validación del input
+            if (input.classList.contains('input-value-ok')) {
+                spanPorcentaje.style.color = '#155724'; // Verde oscuro
+                spanPorcentaje.style.backgroundColor = '#d4edda'; // Fondo verde claro
+            } else if (input.classList.contains('input-value-warning')) {
+                spanPorcentaje.style.color = '#856404'; // Amarillo oscuro
+                spanPorcentaje.style.backgroundColor = '#fff3cd'; // Fondo amarillo claro
+            } else if (input.classList.contains('input-value-error')) {
+                spanPorcentaje.style.color = '#721c24'; // Rojo oscuro
+                spanPorcentaje.style.backgroundColor = '#f8d7da'; // Fondo rojo claro
+            } else {
+                spanPorcentaje.style.color = '#666'; // Gris por defecto
+                spanPorcentaje.style.backgroundColor = '#f0f0f0'; // Fondo gris claro
+            }
+        }
+    }
+}
+
+// CONFIGURAR CAMPOS
+const campos = document.querySelectorAll('input[data-type]');
+console.log(`📋 Encontrados ${campos.length} campos con data-type`);
+
+// Campos que afectan el cálculo de F y L (M NO se suma a L)
+const camposQueAfectanCalculos = ['A', 'B', 'C', 'D', 'E', 'G', 'H', 'I', 'J', 'K'];
+
+// Campos auto-calculados que NO necesitan mostrar porcentaje manualmente
+const camposAutoCalculados = ['F', 'L'];
+
+campos.forEach((input, i) => {
+    const tipo = input.getAttribute('data-type');
+    console.log(`  ${i+1}. ${tipo}`);
+
+    // Agregar eventos de validación
+    input.addEventListener('input', () => {
+        validarPAPA(input);
+
+        // Calcular y mostrar porcentaje para todos los campos
+        calcularPorcentaje(input);
+
+        // Si es un campo que afecta los cálculos, recalcular F y L
+        if (camposQueAfectanCalculos.includes(tipo)) {
+            calcularCamposAutomaticos();
+        }
+    });
+
+    input.addEventListener('change', () => {
+        validarPAPA(input);
+        calcularPorcentaje(input);
+
+        // Si es un campo que afecta los cálculos, recalcular F y L
+        if (camposQueAfectanCalculos.includes(tipo)) {
+            calcularCamposAutomaticos();
+        }
+    });
+
+    // Validar si tiene valor inicial
+    if (input.value) {
+        validarPAPA(input);
+        calcularPorcentaje(input);
+    }
+});
+
+// Calcular valores iniciales
+calcularCamposAutomaticos();
+
+console.log('🎉 VALIDACIÓN CONFIGURADA - Escribe en los campos para probar');
+
+// FUNCIÓN PARA ACTUALIZAR LABELS Y PLACEHOLDERS SEGÚN PRODUCTO
+function actualizarLabelsProducto(producto) {
+    if (categoria !== 'PAPA') return;
+
+    const labelGrosor = document.getElementById('label-grosor');
+    const hintGrosor = document.getElementById('hint-grosor');
+    const inputGrosor = document.getElementById('input-grosor');
+
+    const labelDesviacion = document.getElementById('label-desviacion');
+    const hintDesviacion = document.getElementById('hint-desviacion');
+    const inputDesviacion = document.getElementById('input-desviacion');
+
+    const labelTiempo = document.getElementById('label-tiempo');
+    const hintTiempo = document.getElementById('hint-tiempo');
+    const inputTiempo = document.getElementById('input-tiempo');
+
+    if (producto === 'RUFFLES QUESO') {
+        // Cambiar a Ruffles
+        if (labelGrosor) labelGrosor.textContent = 'Grosor (Ruffles)';
+        if (hintGrosor) hintGrosor.textContent = 'Objetivo: 2.78 mm | Verde: 2.73-2.83 mm';
+        if (inputGrosor) inputGrosor.placeholder = 'Verde: 2.73-2.83 mm';
+
+        if (labelDesviacion) labelDesviacion.textContent = 'Desviación (Ruffles)';
+        if (hintDesviacion) hintDesviacion.textContent = 'Verde: 0-0.089 mm';
+        if (inputDesviacion) inputDesviacion.placeholder = 'Verde: 0-0.089 mm';
+
+        if (labelTiempo) labelTiempo.textContent = 'Tiempo de residencia (Ruffles)';
+        if (hintTiempo) hintTiempo.textContent = 'Objetivo: 3.25 min | Verde: 3.08-3.41 min';
+        if (inputTiempo) inputTiempo.placeholder = 'Verde: 3.08-3.41 min';
+    } else {
+        // Cambiar a Lays (estándar)
+        if (labelGrosor) labelGrosor.textContent = 'Grosor (Lays)';
+        if (hintGrosor) hintGrosor.textContent = 'Objetivo: 1.35 mm | Verde: 1.3-1.4 mm';
+        if (inputGrosor) inputGrosor.placeholder = 'Verde: 1.3-1.4 mm';
+
+        if (labelDesviacion) labelDesviacion.textContent = 'Desviación (Lays)';
+        if (hintDesviacion) hintDesviacion.textContent = 'Verde: 0-0.071 mm';
+        if (inputDesviacion) inputDesviacion.placeholder = 'Verde: 0-0.071 mm';
+
+        if (labelTiempo) labelTiempo.textContent = 'Tiempo de residencia (Lays)';
+        if (hintTiempo) hintTiempo.textContent = 'Objetivo: 3 min | Verde: 2.83-3.16 min';
+        if (inputTiempo) inputTiempo.placeholder = 'Verde: 2.83-3.16 min';
+    }
+}
+
+// Aplicar labels al cargar según producto inicial
+if (categoria === 'PAPA') {
+    const productoInicial = document.getElementById('producto')?.value || '';
+    actualizarLabelsProducto(productoInicial);
+}
+
+// LISTENER PARA CAMBIO DE PRODUCTO (recarga rangos específicos)
+const selectProducto = document.getElementById('producto');
+if (selectProducto && categoria === 'PAPA') {
+    selectProducto.addEventListener('change', function() {
+        const nuevoProducto = this.value;
+        console.log('📦 Producto cambiado a:', nuevoProducto);
+
+        // Recargar rangos base
+        RANGOS = {...RANGOS_PAPA};
+
+        // Aplicar rangos específicos si es Ruffles Queso
+        if (nuevoProducto === 'RUFFLES QUESO') {
+            Object.assign(RANGOS, RANGOS_RUFFLES_QUESO);
+            console.log('✅ Rangos de RUFFLES QUESO aplicados');
+        } else {
+            console.log('✅ Rangos estándar de PAPA aplicados');
+        }
+
+        // Actualizar labels y placeholders
+        actualizarLabelsProducto(nuevoProducto);
+
+        // Re-validar todos los campos con los nuevos rangos
+        campos.forEach(input => {
+            if (input.value) {
+                validarPAE(input);
+            }
+        });
+    });
+}
+
+// SCRIPT PARA MOSTRAR/OCULTAR CAMPOS DE 4 HORAS
+const checkbox4h = document.getElementById('registro_4horas');
+const campos4h = document.getElementById('campos_4horas');
+
+if (checkbox4h && campos4h) {
+    console.log('✅ Checkbox 4H encontrado');
+    checkbox4h.addEventListener('change', function() {
+        console.log('🔄 Checkbox cambiado:', this.checked);
+        if (this.checked) {
+            campos4h.style.display = 'table-row-group';
+            console.log('📂 Campos 4H mostrados');
+        } else {
+            campos4h.style.display = 'none';
+            console.log('📁 Campos 4H ocultados');
+        }
+    });
+} else {
+    console.log('❌ No se encontró checkbox o campos 4H');
+    console.log('Checkbox:', checkbox4h);
+    console.log('Campos:', campos4h);
+}
+
+// Mostrar/ocultar campos de Registro cada 4 Horas para EXTRUIDOS
+const checkbox4hExtruidos = document.getElementById('registro_4horas_extruidos');
+const campos4hExtruidos = document.getElementById('campos_4horas_extruidos');
+
+if (checkbox4hExtruidos && campos4hExtruidos) {
+    console.log('✅ Checkbox 4H EXTRUIDOS encontrado');
+    checkbox4hExtruidos.addEventListener('change', function() {
+        console.log('🔄 Checkbox EXTRUIDOS cambiado:', this.checked);
+        if (this.checked) {
+            campos4hExtruidos.style.display = 'table-row-group';
+            console.log('📂 Campos 4H EXTRUIDOS mostrados');
+        } else {
+            campos4hExtruidos.style.display = 'none';
+            console.log('📁 Campos 4H EXTRUIDOS ocultados');
+        }
+    });
+} else {
+    console.log('❌ No se encontró checkbox o campos 4H EXTRUIDOS');
+    console.log('Checkbox:', checkbox4hExtruidos);
+    console.log('Campos:', campos4hExtruidos);
+}
+
+// Mostrar/ocultar campos de Registro cada 4 Horas para TORTILLA
+const checkbox4hTortilla = document.getElementById('registro_4horas_tortilla');
+const campos4hTortilla = document.getElementById('campos_4horas_tortilla');
+
+if (checkbox4hTortilla && campos4hTortilla) {
+    console.log('✅ Checkbox 4H TORTILLA encontrado');
+    checkbox4hTortilla.addEventListener('change', function() {
+        console.log('🔄 Checkbox TORTILLA cambiado:', this.checked);
+        if (this.checked) {
+            campos4hTortilla.style.display = 'table-row-group';
+            console.log('📂 Campos 4H TORTILLA mostrados');
+        } else {
+            campos4hTortilla.style.display = 'none';
+            console.log('📁 Campos 4H TORTILLA ocultados');
+        }
+    });
+}
+
+// Rangos para Peso de 10 base frita según producto TORTILLA
+const rangosPesoBaseTortilla = {
+    'TOSTITOS SALSA VERDE': { min: 24, max: 27 },
+    'TOSTITOS FH': { min: 24, max: 27 },
+    'DORITOS': { min: 23.5, max: 26.5 },
+    'DORITOS INCÓGNITA': { min: 23.5, max: 26.5 },
+    'DORITOS PIZZEROLA': { min: 23.5, max: 26.5 },
+    'DORITOS FH': { min: 23.5, max: 26.5 },
+    'RANCHERITOS': { min: 23.5, max: 26.5 }
+};
+
+// Función para validar campos de 4 horas TORTILLA
+function validarCampo4hTortilla(input) {
+    const valor = parseFloat(input.value);
+    if (isNaN(valor)) {
+        input.classList.remove('input-value-ok', 'input-value-error');
+        return;
+    }
+
+    const tipo = input.getAttribute('data-type');
+    let min, max;
+
+    if (tipo === 'TORTILLA-PESO-BASE') {
+        // Obtener rango según producto seleccionado
+        const productoSelect = document.getElementById('producto');
+        const producto = productoSelect ? productoSelect.value : '';
+        const rango = rangosPesoBaseTortilla[producto];
+        if (rango) {
+            min = rango.min;
+            max = rango.max;
+        } else {
+            // Default para productos no especificados
+            min = 23.5;
+            max = 27;
+        }
+    } else {
+        min = parseFloat(input.getAttribute('data-min'));
+        max = parseFloat(input.getAttribute('data-max'));
+    }
+
+    // Aplicar color: verde si está en rango, rojo si está fuera
+    if (valor >= min && valor <= max) {
+        input.classList.remove('input-value-error');
+        input.classList.add('input-value-ok');
+    } else {
+        input.classList.remove('input-value-ok');
+        input.classList.add('input-value-error');
+    }
+}
+
+// Agregar eventos a los campos de 4 horas TORTILLA
+document.querySelectorAll('.tortilla-4h-input').forEach(input => {
+    input.addEventListener('input', function() {
+        validarCampo4hTortilla(this);
+    });
+    input.addEventListener('change', function() {
+        validarCampo4hTortilla(this);
+    });
+});
+
+// Actualizar validación de peso base cuando cambia el producto
+const productoSelectTortilla = document.getElementById('producto');
+if (productoSelectTortilla) {
+    productoSelectTortilla.addEventListener('change', function() {
+        const producto = this.value;
+        const pesoBaseInput = document.querySelector('input[name="tortilla_peso_10_base"]');
+        const pesoBaseHint = document.getElementById('peso-base-hint');
+
+        if (pesoBaseInput && rangosPesoBaseTortilla[producto]) {
+            const rango = rangosPesoBaseTortilla[producto];
+            pesoBaseInput.placeholder = `Verde: ${rango.min}-${rango.max}g`;
+            if (pesoBaseHint) {
+                if (['TOSTITOS SALSA VERDE', 'TOSTITOS FH'].includes(producto)) {
+                    pesoBaseHint.textContent = `Verde: ${rango.min}-${rango.max}g (Tostitos)`;
+                } else {
+                    pesoBaseHint.textContent = `Verde: ${rango.min}-${rango.max}g (Doritos/Rancheritos)`;
+                }
+            }
+            // Re-validar si ya hay un valor
+            if (pesoBaseInput.value) {
+                validarCampo4hTortilla(pesoBaseInput);
+            }
+        }
+    });
+}
+</script>
+
+{% endblock %}

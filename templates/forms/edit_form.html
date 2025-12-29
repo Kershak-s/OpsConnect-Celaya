@@ -1,0 +1,581 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para editar formulario */
+    body {
+        background-color: #f8f9fa;
+        background-image: linear-gradient(135deg, #f5f7fa 0%, #e4eaec 100%);
+    }
+    
+    .breadcrumb-section {
+        padding: 1rem 0;
+        background-color: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(5px);
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .breadcrumb {
+        margin-bottom: 0;
+        padding: 0.5rem 1rem;
+    }
+    
+    .form-container {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: #343a40;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-title i {
+        margin-right: 0.8rem;
+        font-size: 1.6rem;
+        color: #0d6efd;
+    }
+    
+    .nav-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .nav-button {
+        border-radius: 50px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 500;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        background-color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+    }
+    
+    .nav-button:hover {
+        transform: translateX(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+    
+    .nav-button i {
+        margin-right: 0.5rem;
+    }
+    
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #343a40;
+    }
+    
+    .form-group .form-text {
+        color: #6c757d;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .btn-submit {
+        padding: 0.75rem 2rem;
+        font-weight: 500;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .btn-cancel {
+        padding: 0.75rem 2rem;
+        font-weight: 500;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        color: #6c757d;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-cancel:hover {
+        background-color: #e9ecef;
+        color: #343a40;
+    }
+    
+    /* Estilos para las tabs */
+    .nav-tabs {
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 1.5rem;
+    }
+    
+    .nav-tabs .nav-link {
+        border: none;
+        color: #6c757d;
+        padding: 1rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #0d6efd;
+        border-bottom: 3px solid #0d6efd;
+        background-color: transparent;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        border-color: transparent;
+        color: #0d6efd;
+    }
+    
+    /* Estilos para las preguntas */
+    .questions-container {
+        margin-top: 2rem;
+    }
+    
+    .question-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 5px solid #0d6efd;
+        transition: all 0.3s ease;
+    }
+    
+    .question-card:hover {
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transform: translateY(-3px);
+    }
+    
+    .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .question-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #343a40;
+    }
+    
+    .question-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .question-action {
+        background-color: transparent;
+        border: none;
+        color: #6c757d;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+    }
+    
+    .question-action:hover {
+        background-color: #f8f9fa;
+        color: #343a40;
+    }
+    
+    .question-type {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .question-required {
+        font-size: 0.875rem;
+        color: #dc3545;
+        margin-bottom: 0.5rem;
+    }
+    
+    .question-options {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    .question-option {
+        margin-bottom: 0.5rem;
+        padding: 0.5rem 1rem;
+        background-color: #f8f9fa;
+        border-radius: 4px;
+        color: #343a40;
+    }
+    
+    .add-question-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border-left: 5px solid #28a745;
+    }
+    
+    .add-question-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #343a40;
+        margin-bottom: 1.5rem;
+    }
+    
+    .no-questions {
+        text-align: center;
+        padding: 3rem;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    }
+    
+    .no-questions i {
+        font-size: 3rem;
+        color: #dee2e6;
+        margin-bottom: 1rem;
+    }
+    
+    .no-questions h3 {
+        font-size: 1.5rem;
+        color: #343a40;
+        margin-bottom: 0.5rem;
+    }
+    
+    .no-questions p {
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Animaciones */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .form-container {
+        animation: fadeIn 0.5s ease;
+    }
+    
+    @keyframes slideInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .question-card {
+        animation: slideInUp 0.5s ease;
+    }
+    
+    /* Opciones dinámicas */
+    .options-container {
+        display: none;
+    }
+    
+    .options-container.show {
+        display: block;
+        animation: fadeIn 0.5s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="nav-buttons">
+    <a href="{{ url_for('index') }}" class="nav-button">
+        <i class="fas fa-home"></i>Inicio
+    </a>
+    <a href="{{ url_for('list_forms', category=form_db.category, section=form_db.section) }}" class="nav-button">
+        <i class="fas fa-clipboard-list"></i>Formularios
+    </a>
+    <a href="{{ url_for('view_form', form_id=form_db.id) }}" class="nav-button">
+        <i class="fas fa-eye"></i>Ver Formulario
+    </a>
+</div>
+
+<div class="breadcrumb-section">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('line_sections', category=form_db.category) }}">{{ form_db.category }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('list_forms', category=form_db.category, section=form_db.section) }}">Formularios</a></li>
+            <li class="breadcrumb-item active">Editar: {{ form_db.title }}</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="container">
+    <ul class="nav nav-tabs" id="formTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="details-tab" data-bs-toggle="tab" data-bs-target="#details" type="button" role="tab" aria-controls="details" aria-selected="true">
+                <i class="fas fa-info-circle me-2"></i>Detalles
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="questions-tab" data-bs-toggle="tab" data-bs-target="#questions" type="button" role="tab" aria-controls="questions" aria-selected="false">
+                <i class="fas fa-question-circle me-2"></i>Preguntas
+            </button>
+        </li>
+    </ul>
+    
+    <div class="tab-content" id="formTabsContent">
+        <!-- Pestaña de Detalles -->
+        <div class="tab-pane fade show active" id="details" role="tabpanel" aria-labelledby="details-tab">
+            <div class="form-container">
+                <h2 class="form-title">
+                    <i class="fas fa-file-alt"></i>Editar Detalles del Formulario
+                </h2>
+                
+                <form method="POST" action="{{ url_for('edit_form', form_id=form_db.id) }}">
+                    {{ form.hidden_tag() }}
+                    <input type="hidden" name="action" value="update_details">
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-8">
+                            <div class="form-group mb-3">
+                                <label for="title">{{ form.title.label }}</label>
+                                {{ form.title(class="form-control") }}
+                                <div class="form-text">Ingrese un título descriptivo para el formulario.</div>
+                                {% for error in form.title.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group mb-3">
+                                <label for="is_active">Estado</label>
+                                <div class="form-check form-switch mt-2">
+                                    {{ form.is_active(class="form-check-input") }}
+                                    <label class="form-check-label" for="is_active">{{ form.is_active.label }}</label>
+                                </div>
+                                <div class="form-text">Los formularios inactivos no son visibles para los usuarios.</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group mb-4">
+                        <label for="description">{{ form.description.label }}</label>
+                        {{ form.description(class="form-control", rows=4) }}
+                        <div class="form-text">Una descripción clara ayudará a los usuarios a entender el propósito del formulario.</div>
+                        {% for error in form.description.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="category">{{ form.category.label }}</label>
+                                {{ form.category(class="form-select") }}
+                                {% for error in form.category.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                <label for="section">{{ form.section.label }}</label>
+                                {{ form.section(class="form-select") }}
+                                {% for error in form.section.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end">
+                        {{ form.submit(class="btn btn-primary btn-submit", value="Actualizar Detalles") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Pestaña de Preguntas -->
+        <div class="tab-pane fade" id="questions" role="tabpanel" aria-labelledby="questions-tab">
+            <div class="form-container">
+                <h2 class="form-title">
+                    <i class="fas fa-question-circle"></i>Gestionar Preguntas
+                </h2>
+                
+                <div class="questions-container">
+                    <!-- Lista de preguntas existentes -->
+                    {% if questions %}
+                        {% for question in questions %}
+                        <div class="question-card" id="question-{{ question.id }}">
+                            <div class="question-header">
+                                <div class="question-title">{{ question.question_text }}</div>
+                                <div class="question-actions">
+                                    <form method="POST" action="{{ url_for('edit_form', form_id=form_db.id) }}" class="d-inline">
+                                        <input type="hidden" name="action" value="delete_question">
+                                        <input type="hidden" name="question_id" value="{{ question.id }}">
+                                        <button type="submit" class="question-action" title="Eliminar Pregunta" onclick="return confirm('¿Está seguro de eliminar esta pregunta?')">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="question-type">
+                                <i class="fas 
+                                    {% if question.question_type == 'text' %}fa-font
+                                    {% elif question.question_type == 'textarea' %}fa-align-left
+                                    {% elif question.question_type == 'number' %}fa-hashtag
+                                    {% elif question.question_type == 'date' %}fa-calendar-alt
+                                    {% elif question.question_type == 'time' %}fa-clock
+                                    {% elif question.question_type == 'radio' %}fa-dot-circle
+                                    {% elif question.question_type == 'checkbox' %}fa-check-square
+                                    {% elif question.question_type == 'select' %}fa-caret-square-down
+                                    {% endif %}
+                                    me-1"></i>
+                                Tipo: 
+                                {% if question.question_type == 'text' %}Texto Corto
+                                {% elif question.question_type == 'textarea' %}Texto Largo
+                                {% elif question.question_type == 'number' %}Número
+                                {% elif question.question_type == 'date' %}Fecha
+                                {% elif question.question_type == 'time' %}Hora
+                                {% elif question.question_type == 'radio' %}Selección Única
+                                {% elif question.question_type == 'checkbox' %}Casillas de Verificación
+                                {% elif question.question_type == 'select' %}Lista Desplegable
+                                {% endif %}
+                            </div>
+                            {% if question.is_required %}
+                            <div class="question-required">
+                                <i class="fas fa-asterisk me-1"></i>Obligatorio
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Opciones para preguntas de selección -->
+                            {% if question.question_type in ['radio', 'checkbox', 'select'] and question.options %}
+                            <div class="question-options">
+                                <div class="question-type">Opciones:</div>
+                                {% for option in question.get_options() %}
+                                <div class="question-option">{{ option }}</div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="no-questions">
+                            <i class="fas fa-question-circle"></i>
+                            <h3>No hay preguntas aún</h3>
+                            <p>Agrega preguntas para completar tu formulario</p>
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Formulario para agregar nueva pregunta -->
+                    <div class="add-question-card">
+                        <h3 class="add-question-title">Agregar Nueva Pregunta</h3>
+                        
+                        <form method="POST" action="{{ url_for('edit_form', form_id=form_db.id) }}">
+                            {{ question_form.hidden_tag() }}
+                            <input type="hidden" name="action" value="add_question">
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <div class="form-group mb-3">
+                                        <label for="question_text">{{ question_form.question_text.label }}</label>
+                                        {{ question_form.question_text(class="form-control", placeholder="Ej: ¿Cuál es el nivel de calidad del producto?") }}
+                                        {% for error in question_form.question_text.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        <label for="question_type">{{ question_form.question_type.label }}</label>
+                                        {{ question_form.question_type(class="form-select", id="question_type") }}
+                                        {% for error in question_form.question_type.errors %}
+                                            <div class="text-danger">{{ error }}</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group mb-3 options-container" id="options-container">
+                                <label for="options">{{ question_form.options.label }}</label>
+                                {{ question_form.options(class="form-control", rows=4, placeholder="Opción 1\nOpción 2\nOpción 3") }}
+                                <div class="form-text">Ingrese una opción por línea para preguntas de selección.</div>
+                                {% for error in question_form.options.errors %}
+                                    <div class="text-danger">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="form-check mb-4">
+                                {{ question_form.is_required(class="form-check-input") }}
+                                <label class="form-check-label" for="is_required">{{ question_form.is_required.label }}</label>
+                            </div>
+                            
+                            <div class="d-flex justify-content-end">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-plus me-2"></i>Agregar Pregunta
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mostrar/ocultar campo de opciones según tipo de pregunta
+        const questionType = document.getElementById('question_type');
+        const optionsContainer = document.getElementById('options-container');
+        
+        function toggleOptionsField() {
+            const selectedType = questionType.value;
+            if (['radio', 'checkbox', 'select'].includes(selectedType)) {
+                optionsContainer.classList.add('show');
+            } else {
+                optionsContainer.classList.remove('show');
+            }
+        }
+        
+        // Inicializar estado
+        toggleOptionsField();
+        
+        // Escuchar cambios
+        questionType.addEventListener('change', toggleOptionsField);
+        
+        // Inicializar la pestaña activa desde la URL si existe
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get('tab');
+        if (tab === 'questions') {
+            const questionsTab = document.getElementById('questions-tab');
+            questionsTab.click();
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,2546 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pnc.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/papa_sal_colors.css') }}">
+<style>
+    .form-section {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .input-group-text {
+        background-color: #e9ecef;
+        color: #495057;
+        font-size: 0.9rem;
+        min-width: 85px;
+        justify-content: center;
+    }
+
+    /* Estilo para el subtítulo de la sección de tambores */
+    .form-section-title.mt-4 {
+        font-size: 1.1rem;
+        color: #0d6efd;
+        margin-top: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .time-input-group {
+        display: flex;
+        align-items: center;
+        position: relative;
+    }
+
+    .time-input-group select {
+        min-width: 70px;
+        margin-right: 5px;
+    }
+
+    .time-input-group span {
+        margin: 0 5px;
+    }
+
+    /* Eliminar todos los estilos relacionados con el tooltip */
+
+    .btn-add-new {
+        border-radius: 30px;
+        padding: 10px 20px;
+        margin-bottom: 20px;
+        font-weight: 600;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .btn-add-new:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .table-container {
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .table-header {
+        background: linear-gradient(to right, #17a2b8, #20c997);
+        color: white;
+        padding: 15px;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+    }
+
+    .table-header h5 {
+        margin: 0;
+        font-weight: 600;
+    }
+
+    .table-responsive {
+        border-radius: 0 0 10px 10px;
+    }
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    .table thead th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .btn-group-sm .btn {
+        border-radius: 20px;
+        padding: 0.25rem 0.75rem;
+    }
+
+    .record-date {
+        white-space: nowrap;
+    }
+
+    .empty-message {
+        text-align: center;
+        padding: 40px 20px;
+        color: #6c757d;
+    }
+
+    .empty-message i {
+        font-size: 3rem;
+        margin-bottom: 15px;
+        color: #adb5bd;
+    }
+
+    /* Asegurarse de que no hay estilos para elementos de información de horario */
+    .horario-info-box,
+    .horario-info-turno-a,
+    .horario-info-turno-b {
+        display: none !important;
+    }
+
+    /* Estilos para los gráficos */
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin-bottom: 1rem;
+    }
+
+    /* Tabla compacta y responsiva */
+    .table-compact {
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+    
+    .table-compact th {
+        padding: 0.5rem 0.3rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-align: center;
+        vertical-align: middle;
+        min-width: 70px;
+        max-width: 120px;
+    }
+    
+    .table-compact td {
+        padding: 0.4rem 0.3rem;
+        font-size: 0.75rem;
+        text-align: center;
+        vertical-align: middle;
+        min-width: 70px;
+        max-width: 120px;
+    }
+    
+    /* Hacer la tabla horizontalmente scrolleable */
+    .table-wrapper {
+        overflow-x: auto;
+        max-width: 100%;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .table-wrapper .table {
+        min-width: 1800px; /* Ancho mínimo para todas las columnas */
+        margin-bottom: 0;
+    }
+    
+    /* Columnas fijas para info básica */
+    .col-fixed {
+        position: sticky;
+        left: 0;
+        background: white;
+        z-index: 10;
+    }
+    
+    /* Botones más compactos */
+    .btn-group-sm .btn {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.7rem;
+    }
+    .pnc-simple-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 1rem;
+        overflow-x: auto;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .pnc-simple-table th {
+        background: linear-gradient(135deg, #0d6efd, #0a58ca);
+        color: white;
+        font-weight: 600;
+        text-align: center;
+        padding: 1.2rem 1rem;
+        border-bottom: 2px solid #dee2e6;
+        position: relative;
+    }
+
+    .pnc-simple-table th:first-child {
+        border-top-left-radius: 10px;
+    }
+
+    .pnc-simple-table th:last-child {
+        border-top-right-radius: 10px;
+    }
+
+    .pnc-simple-table td {
+        padding: 1.1rem 1rem;
+        text-align: center;
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: middle;
+        transition: all 0.2s ease;
+    }
+
+    .pnc-simple-table tr:last-child td:first-child {
+        border-bottom-left-radius: 10px;
+    }
+
+    .pnc-simple-table tr:last-child td:last-child {
+        border-bottom-right-radius: 10px;
+    }
+
+    .pnc-simple-table tr:hover td {
+        background-color: #f0f7ff;
+    }
+
+    .pnc-table-section {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        padding: 2rem;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .pnc-table-section:hover {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .text-success {
+        background-color: #d4edda !important; /* Verde claro */
+        color: #155724 !important;
+    }
+
+    .text-warning {
+        background-color: #fff3cd !important; /* Amarillo claro */
+        color: #856404 !important;
+    }
+
+    .text-danger {
+        background-color: #f8d7da !important; /* Rojo claro */
+        color: #721c24 !important;
+    }
+
+    .text-empty {
+        background-color: #bfbfbf !important; /* Gris claro */
+    }
+
+    /* Selectores de fecha más grandes */
+    input[type="date"] {
+        padding: 12px 16px !important;
+        font-size: 16px !important;
+        height: 50px !important;
+        min-width: 180px !important;
+        border-radius: 8px !important;
+        border: 2px solid #ced4da !important;
+        background-color: #ffffff !important;
+    }
+
+    input[type="date"]:focus {
+        border-color: #0d6efd !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+    }
+
+    /* Texto del placeholder y etiquetas más grandes */
+    .form-label {
+        font-size: 14px !important;
+        font-weight: 600 !important;
+    }
+
+    /* Ajuste específico para el contenedor de fechas */
+    .input-group input[type="date"] {
+        flex: 1;
+        min-width: 160px !important;
+    }
+
+    .input-group-text {
+        padding: 12px 16px !important;
+        font-size: 16px !important;
+        height: 50px !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{# Definir rangos dinámicos según la categoría y producto #}
+{% if category == 'TORTILLA' %}
+    {% set rangos_productos = {
+        'default': {
+            'humedad_base_min': 1, 'humedad_base_max': 1.2, 'humedad_base_warning_low': 0.8, 'humedad_base_warning_high': 1.3,
+            'aceite_base_min': 20, 'aceite_base_max': 23, 'aceite_base_warning_low': 21, 'aceite_base_warning_high': 24,
+            'aceite_pt_min': 23.45, 'aceite_pt_max': 26.45, 'aceite_pt_warning_low': 22.45, 'aceite_pt_warning_high': 27.45,
+            'humedad_pt_min': 0.78, 'humedad_pt_max': 1.58, 'humedad_pt_warning_low': 0.68, 'humedad_pt_warning_high': 1.68,
+            'sal_pt_min': 0.9, 'sal_pt_max': 1.5, 'sal_pt_warning_low': 0.8, 'sal_pt_warning_high': 1.6
+        },
+        'TOSTITOS SALSA VERDE': {
+            'humedad_base_min': 0.9, 'humedad_base_max': 1.3, 'humedad_base_warning_low': 0.8, 'humedad_base_warning_high': 1.4,
+            'aceite_base_min': 22, 'aceite_base_max': 24, 'aceite_base_warning_low': 21, 'aceite_base_warning_high': 25,
+            'aceite_pt_min': 23.14, 'aceite_pt_max': 26.14, 'aceite_pt_warning_low': 22.14, 'aceite_pt_warning_high': 27.14,
+            'humedad_pt_min': 1.03, 'humedad_pt_max': 1.63, 'humedad_pt_warning_low': 0.93, 'humedad_pt_warning_high': 1.73,
+            'sal_pt_min': 0.97, 'sal_pt_max': 1.57, 'sal_pt_warning_low': 0.67, 'sal_pt_warning_high': 1.87
+        },
+        'TOSTITOS FH': {
+            'humedad_base_min': 0.9, 'humedad_base_max': 1.3, 'humedad_base_warning_low': 0.8, 'humedad_base_warning_high': 1.4,
+            'aceite_base_min': 22, 'aceite_base_max': 24, 'aceite_base_warning_low': 21, 'aceite_base_warning_high': 25,
+            'aceite_pt_min': 22.98, 'aceite_pt_max': 25.98, 'aceite_pt_warning_low': 21.98, 'aceite_pt_warning_high': 26.98,
+            'humedad_pt_min': 0.94, 'humedad_pt_max': 1.44, 'humedad_pt_warning_low': 0.84, 'humedad_pt_warning_high': 1.54,
+            'sal_pt_min': 1.38, 'sal_pt_max': 1.98, 'sal_pt_warning_low': 1.18, 'sal_pt_warning_high': 2.18
+        },
+        'DORITOS PIZZEROLA': {
+            'humedad_base_min': 1, 'humedad_base_max': 1.2, 'humedad_base_warning_low': 0.9, 'humedad_base_warning_high': 1.3,
+            'aceite_base_min': 20, 'aceite_base_max': 23, 'aceite_base_warning_low': 19.99, 'aceite_base_warning_high': 24,
+            'aceite_pt_min': 22.83, 'aceite_pt_max': 25.83, 'aceite_pt_warning_low': 21.83, 'aceite_pt_warning_high': 26.83,
+            'humedad_pt_min': 0.99, 'humedad_pt_max': 1.49, 'humedad_pt_warning_low': 0.89, 'humedad_pt_warning_high': 1.59,
+            'sal_pt_min': 1.10, 'sal_pt_max': 1.7, 'sal_pt_warning_low': 0.9, 'sal_pt_warning_high': 1.3
+        },
+        'DORITOS FH': {
+            'humedad_base_min': 0.9, 'humedad_base_max': 1.3, 'humedad_base_warning_low': 0.8, 'humedad_base_warning_high': 1.4,
+            'aceite_base_min': 22, 'aceite_base_max': 24, 'aceite_base_warning_low': 21, 'aceite_base_warning_high': 25,
+            'aceite_pt_min': 22.98, 'aceite_pt_max': 25.98, 'aceite_pt_warning_low': 21.98, 'aceite_pt_warning_high': 26.98,
+            'humedad_pt_min': 0.94, 'humedad_pt_max': 1.44, 'humedad_pt_warning_low': 0.84, 'humedad_pt_warning_high': 1.54,
+            'sal_pt_min': 1.38, 'sal_pt_max': 1.98, 'sal_pt_warning_low': 1.18, 'sal_pt_warning_high': 2.18
+        },
+        'RANCHERITOS': {
+            'humedad_base': {'min': 0.8, 'max': 1.40, 'warning_low': 0.6, 'warning_high': 1.6},
+            'aceite_base': {'min': 21.35, 'max': 22.75, 'warning_low': 20.25, 'warning_high': 23.75},
+            'aceite_pt': {'min': 22.01, 'max': 22.75, 'warning_low': 20.25, 'warning_high': 23.75},
+            'humedad_pt': {'min': 0.94, 'max': 1.44, 'warning_low': 0.84, 'warning_high': 1.54},
+            'sal_pt': {'min': 1.38, 'max': 1.98, 'warning_low': 1.18, 'warning_high': 2.18}
+                        },
+        'DORITOS INCÓGNITA': {
+            'humedad_base_min': 1.00, 'humedad_base_max': 1.20, 'humedad_base_warning_low': 0.90, 'humedad_base_warning_high': 1.30,
+            'aceite_base_min': 20.00, 'aceite_base_max': 23.00, 'aceite_base_warning_low': 19.00, 'aceite_base_warning_high': 24.00,
+            'aceite_pt_min': 22.35, 'aceite_pt_max': 25.35, 'aceite_pt_warning_low': 21.35, 'aceite_pt_warning_high': 26.35,
+            'humedad_pt_min': 1.07, 'humedad_pt_max': 1.57, 'humedad_pt_warning_low': 0.97, 'humedad_pt_warning_high': 1.67,
+            'sal_pt_min': 0.81, 'sal_pt_max': 1.41, 'sal_pt_warning_low': 0.61, 'sal_pt_warning_high': 1.61
+        }
+    } %}
+{% else %} {# EXTRUIDOS y PAPA #}
+    {% set rangos_productos = {
+        'PAPA SAL': {
+            'humedad_base_min': 1.35, 'humedad_base_max': 1.65, 'humedad_base_warning_low': 1.20, 'humedad_base_warning_high': 1.80,
+            'aceite_base_min': 31, 'aceite_base_max': 35, 'aceite_base_warning_low': 30, 'aceite_base_warning_high': 36,
+            'aceite_pt_min': -1, 'aceite_pt_max': -1, 'aceite_pt_warning_low': -1, 'aceite_pt_warning_high': -1,
+            'humedad_pt_min': 1.35, 'humedad_pt_max': 1.8, 'humedad_pt_warning_low': 1.20, 'humedad_pt_warning_high': 2,
+            'sal_pt_min': 0.55, 'sal_pt_max': 0.85, 'sal_pt_warning_low': 0.45, 'sal_pt_warning_high': 0.95
+        },
+        'SABRITAS XTRA FH': {
+            'humedad_base_min': 1.20, 'humedad_base_max': 1.5, 'humedad_base_warning_low': 1.05, 'humedad_base_warning_high': 1.65,
+            'aceite_base_min': 31, 'aceite_base_max': 35, 'aceite_base_warning_low': 30, 'aceite_base_warning_high': 36,
+            'aceite_pt_min': -1, 'aceite_pt_max': -1, 'aceite_pt_warning_low': -1, 'aceite_pt_warning_high': -1,
+            'humedad_pt_min': 1.35, 'humedad_pt_max': 1.8, 'humedad_pt_warning_low': 1.20, 'humedad_pt_warning_high': 2,
+            'sal_pt_min': 1.24, 'sal_pt_max': 1.54, 'sal_pt_warning_low': 1.19, 'sal_pt_warning_high': 1.59
+        },
+        'RUFFLES QUESO': {
+            'humedad_base_min': 1.20, 'humedad_base_max': 1.5, 'humedad_base_warning_low': 1.05, 'humedad_base_warning_high': 1.65,
+            'aceite_base_min': 31, 'aceite_base_max': 35, 'aceite_base_warning_low': 30, 'aceite_base_warning_high': 36,
+            'aceite_pt_min': -1, 'aceite_pt_max': -1, 'aceite_pt_warning_low': -1, 'aceite_pt_warning_high': -1,
+            'humedad_pt_min': 1.35, 'humedad_pt_max': 1.8, 'humedad_pt_warning_low': 1.20, 'humedad_pt_warning_high': 2,
+            'sal_pt_min': 1.24, 'sal_pt_max': 1.54, 'sal_pt_warning_low': 1.19, 'sal_pt_warning_high': 1.59
+        },
+        'default': {
+            'humedad_base_min': 1.35, 'humedad_base_max': 1.8, 'humedad_base_warning_low': 1.20, 'humedad_base_warning_high': 2.0,
+            'aceite_base_min': 31, 'aceite_base_max': 35, 'aceite_base_warning_low': 30, 'aceite_base_warning_high': 36,
+            'aceite_pt_min': -1, 'aceite_pt_max': -1, 'aceite_pt_warning_low': -1, 'aceite_pt_warning_high': -1,
+            'humedad_pt_min': 1.35, 'humedad_pt_max': 1.65, 'humedad_pt_warning_low': 1.20, 'humedad_pt_warning_high': 1.80,
+            'sal_pt_min': 0.55, 'sal_pt_max': 0.85, 'sal_pt_warning_low': 0.45, 'sal_pt_warning_high': 0.95
+        },
+        'CHEETOS XTRA FLAMIN HOT': {
+            'humedad_base_min': 0.7, 'humedad_base_max': 1.7, 'humedad_base_warning_low': 0.6, 'humedad_base_warning_high': 1.8,
+            'aceite_base_min': 21.7, 'aceite_base_max': 27.7, 'aceite_base_warning_low': 20.7, 'aceite_base_warning_high': 28.7,
+            'aceite_pt_min': 29.52, 'aceite_pt_max': 35.52, 'aceite_pt_warning_low': 28.51, 'aceite_pt_warning_high': 36.01,
+            'humedad_pt_min': 0.47, 'humedad_pt_max': 1.67, 'humedad_pt_warning_low': 0.47, 'humedad_pt_warning_high': 2.07,
+            'sal_pt_min': 1.4, 'sal_pt_max': 1.8, 'sal_pt_warning_low': 1.19, 'sal_pt_warning_high': 2.01
+        },
+        'CHEETOS JALAQUEÑO': {
+            'humedad_base_min': 0.7, 'humedad_base_max': 1.7, 'humedad_base_warning_low': 0.60, 'humedad_base_warning_high': 1.80,
+            'aceite_base_min': 21.7, 'aceite_base_max': 27.7, 'aceite_base_warning_low': 20.70, 'aceite_base_warning_high': 28.70,
+            'aceite_pt_min': 31.64, 'aceite_pt_max': 37.64, 'aceite_pt_warning_low': 29.64, 'aceite_pt_warning_high': 39.64,
+            'humedad_pt_min': 0.5, 'humedad_pt_max': 1.9, 'humedad_pt_warning_low': 0.49, 'humedad_pt_warning_high': 2.10,
+            'sal_pt_min': 1.06, 'sal_pt_max': 1.66, 'sal_pt_warning_low': 0.95, 'sal_pt_warning_high': 1.77
+        }
+    } %}
+{% endif %}
+
+{# Macro para obtener clase de color según especificaciones exactas #}
+{% macro get_color_class(valor, tipo_campo, producto) %}
+    {% if valor is not none and valor != '' %}
+        {% set valor_num = valor|float %}
+        
+        {# CHEETOS JALAQUEÑO - Rangos discontinuos #}
+        {% if 'JALAPEÑO' in producto %}
+            {% if tipo_campo == 'aceite_pt' %}
+                {% if valor_num >= 31.64 and valor_num <= 37.64 %}
+                    text-success
+                {% elif (valor_num >= 29.64 and valor_num <= 31.63) or (valor_num >= 37.65 and valor_num <= 39.64) %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endif %}
+            {% elif tipo_campo == 'sal_pt' %}
+                {% if valor_num >= 1.06 and valor_num <= 1.66 %}
+                    text-success
+                {% elif (valor_num >= 0.95 and valor_num <= 1.05) or (valor_num >= 1.67 and valor_num <= 1.77) %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endif %}
+            {% else %}
+                {# Otros campos usan rangos estándar EXTRUIDOS #}
+                {% set rangos = rangos_productos['CHEETOS JALAQUEÑO'] %}
+                {% if tipo_campo == 'humedad_base' %}
+                    {% if valor_num >= 0.7 and valor_num <= 1.7 %}
+                        text-success
+                    {% elif (valor_num >= 0.60 and valor_num <= 0.69) or (valor_num >= 1.71 and valor_num <= 1.80) %}
+                        text-warning
+                    {% else %}
+                        text-danger
+                    {% endif %}
+                {% elif tipo_campo == 'aceite_base' %}
+                    {% if valor_num >= 21.7 and valor_num <= 27.7 %}
+                        text-success
+                    {% elif (valor_num >= 20.70 and valor_num <= 21.69) or (valor_num >= 27.71 and valor_num <= 28.70) %}
+                        text-warning
+                    {% else %}
+                        text-danger
+                    {% endif %}
+                {% elif tipo_campo == 'humedad_pt' %}
+                    {% if valor_num >= 0.5 and valor_num <= 1.9 %}
+                        text-success
+                    {% elif valor_num >= 1.91 and valor_num <= 2.10 %}
+                        text-warning
+                    {% else %}
+                        text-danger
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+            
+        {# CHEETOS XTRA FLAMIN HOT - Rangos específicos #}
+        {% elif 'XTRA FLAMIN' in producto or 'FLAMIN HOT' in producto %}
+            {% if tipo_campo == 'aceite_pt' %}
+                {% if valor_num >= 29.52 and valor_num <= 35.52 %}
+                    text-success
+                {% elif (valor_num >= 28.51 and valor_num <= 29.51) or (valor_num >= 35.53 and valor_num <= 36.01) %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endif %}
+            {% elif tipo_campo == 'humedad_pt' %}
+                {% if valor_num >= 0.47 and valor_num <= 1.67 %}
+                    text-success
+                {% elif valor_num >= 1.68 and valor_num <= 2.07 %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endif %}
+            {% elif tipo_campo == 'sal_pt' %}
+                {% if valor_num >= 1.4 and valor_num <= 1.8 %}
+                    text-success
+                {% elif (valor_num >= 1.19 and valor_num <= 1.39) or (valor_num >= 1.81 and valor_num <= 2.01) %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endif %}
+            {% else %}
+                {# Otros campos usan rangos estándar EXTRUIDOS #}
+                {% set rangos = rangos_productos['default'] %}
+                {% if tipo_campo == 'humedad_base' %}
+                    {% if valor_num >= rangos.humedad_base_min and valor_num <= rangos.humedad_base_max %}
+                        text-success
+                    {% elif (valor_num >= rangos.humedad_base_warning_low and valor_num < rangos.humedad_base_min) or (valor_num > rangos.humedad_base_max and valor_num <= rangos.humedad_base_warning_high) %}
+                        text-warning
+                    {% else %}
+                        text-danger
+                    {% endif %}
+                {% elif tipo_campo == 'aceite_base' %}
+                    {% if valor_num >= rangos.aceite_base_min and valor_num <= rangos.aceite_base_max %}
+                        text-success
+                    {% elif (valor_num >= rangos.aceite_base_warning_low and valor_num < rangos.aceite_base_min) or (valor_num > rangos.aceite_base_max and valor_num <= rangos.aceite_base_warning_high) %}
+                        text-warning
+                    {% else %}
+                        text-danger
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+            
+        {# PAPA SAL - Rangos específicos #}
+        {% elif 'PAPA SAL' in producto %}
+            {% if tipo_campo == 'humedad_base' %}
+                {% if valor_num >= 1.35 and valor_num <= 1.65 %}
+                    text-success
+                {% elif (valor_num >= 1.20 and valor_num < 1.34) or (valor_num > 1.66 and valor_num <= 1.80) %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endif %}
+            {% elif tipo_campo == 'aceite_base' %}
+                {% if valor_num >= 31 and valor_num <= 35 %}
+                    text-success
+                {% elif (valor_num >= 30 and valor_num < 30.9) or (valor_num > 35.1 and valor_num <= 36) %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endif %}
+            {% elif tipo_campo == 'humedad_pt' %}
+                {% if valor_num >= 1.35 and valor_num <= 1.8 %}
+                    text-success
+                {% elif (valor_num >= 1.20 and valor_num < 1.34) or (valor_num > 1.81 and valor_num <= 2.0) %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endif %}
+            {% elif tipo_campo == 'sal_pt' %}
+                {% if valor_num >= 0.55 and valor_num <= 0.85 %}
+                    text-success
+                {% elif (valor_num >= 0.45 and valor_num < 0.54) or (valor_num > 0.86 and valor_num <= 0.95) %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endif %}
+            {% elif tipo_campo == 'aceite_pt' %}
+                text-empty
+            {% endif %}
+            
+        {# TODOS LOS OTROS PRODUCTOS (incluye TORCIDITOS) - Rangos estándar #}
+        {% else %}
+            {% set rangos = rangos_productos['default'] %}
+            {% if tipo_campo == 'humedad_base' %}
+                {% if valor_num >= rangos.humedad_base_min and valor_num <= rangos.humedad_base_max %}
+                    text-success
+                {% elif (valor_num >= rangos.humedad_base_warning_low and valor_num < rangos.humedad_base_min) or (valor_num > rangos.humedad_base_max and valor_num <= rangos.humedad_base_warning_high) %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endif %}
+            {% elif tipo_campo == 'aceite_base' %}
+                {% if valor_num >= rangos.aceite_base_min and valor_num <= rangos.aceite_base_max %}
+                    text-success
+                {% elif (valor_num >= rangos.aceite_base_warning_low and valor_num < rangos.aceite_base_min) or (valor_num > rangos.aceite_base_max and valor_num <= rangos.aceite_base_warning_high) %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endif %}
+            {% elif tipo_campo == 'aceite_pt' %}
+                {% if valor_num >= rangos.aceite_pt_min and valor_num <= rangos.aceite_pt_max %}
+                    text-success
+                {% elif (valor_num >= rangos.aceite_pt_warning_low and valor_num < rangos.aceite_pt_min) or (valor_num > rangos.aceite_pt_max and valor_num <= rangos.aceite_pt_warning_high) %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endif %}
+            {% elif tipo_campo == 'humedad_pt' %}
+                {% if valor_num >= rangos.humedad_pt_min and valor_num <= rangos.humedad_pt_max %}
+                    text-success
+                {% elif (valor_num >= rangos.humedad_pt_warning_low and valor_num < rangos.humedad_pt_min) or (valor_num > rangos.humedad_pt_max and valor_num <= rangos.humedad_pt_warning_high) %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endif %}
+            {% elif tipo_campo == 'sal_pt' %}
+                {% if valor_num >= rangos.sal_pt_min and valor_num <= rangos.sal_pt_max %}
+                    text-success
+                {% elif (valor_num >= rangos.sal_pt_warning_low and valor_num < rangos.sal_pt_min) or (valor_num > rangos.sal_pt_max and valor_num <= rangos.sal_pt_warning_high) %}
+                    text-warning
+                {% else %}
+                    text-danger
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    {% else %}
+        text-empty
+    {% endif %}
+{% endmacro %}
+
+<div class="container-fluid px-4 mt-0" data-categoria="{{ category }}">
+    <!-- Botones de navegación en formato pill -->
+    <div class="row mb-4 mt-4">
+        <div class="col-12">
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('index') }}" class="btn btn-light rounded-pill shadow-sm">
+                    <i class="fas fa-home me-2"></i>Inicio
+                </a>
+                <a href="{{ url_for('line_sections', category=category) }}"
+                    class="btn btn-light rounded-pill shadow-sm">
+                    <i class="fas fa-th-large me-2"></i>Secciones
+                </a>
+                <a href="{{ url_for('laboratorio', category=category) }}" class="btn btn-light rounded-pill shadow-sm">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a Calidad
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel principal con barra lateral roja -->
+    <div class="card mb-4 shadow-sm border-0 overflow-hidden">
+        <div class="row g-0">
+            <div class="col-auto" style="width:12px; background-color:#00D9FF;"></div>
+            <div class="col">
+                <div class="card-body d-flex justify-content-between align-items-center py-3">
+                    <div>
+                        <h4 class="mb-0 d-flex align-items-center">
+                            <i class="fas fa-flask me-2" style="color:#00D9FF;"></i> Análisis Fisicoquímicos - {{
+                            category }}
+                        </h4>
+                        <p class="text-muted mb-0">Registro y análisis de resultados fisicoquímicos para la línea de {{
+                            category }}</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                            data-bs-target="#createAnalisisModal">
+                            <i class="fas fa-plus-circle me-1"></i> Nuevo Registro
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pestañas -->
+    <ul class="nav nav-tabs mb-4" id="analisisTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="registros-tab" data-bs-toggle="tab" data-bs-target="#registros"
+                type="button" role="tab" aria-controls="registros" aria-selected="true">
+                <i class="fas fa-list me-1"></i> Registros
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="resultados-tab" data-bs-toggle="tab" data-bs-target="#resultados" type="button"
+                role="tab" aria-controls="resultados" aria-selected="false">
+                <i class="fas fa-chart-bar me-1"></i> Resultados
+            </button>
+        </li>
+    </ul>
+
+    <!-- Contenido de las pestañas -->
+    <div class="tab-content" id="analisisTabContent">
+        <!-- Pestaña de Registros -->
+        <div class="tab-pane fade show active" id="registros" role="tabpanel" aria-labelledby="registros-tab">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex gap-2">
+                    <div class="position-relative">
+                        <input type="text" class="form-control" placeholder="Buscar..." id="searchInput">
+                        <i class="fas fa-search position-absolute" style="right: 10px; top: 10px; color: #aaa;"></i>
+                    </div>
+                    <button class="btn btn-outline-primary" id="filterBtn">
+                        <i class="fas fa-filter me-1"></i> Filtrar
+                    </button>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <label class="form-label mb-0">Mostrar:</label>
+                    <select class="form-select" id="recordsPerPage" style="width: auto;">
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                    </select>
+                    <span class="text-muted">registros</span>
+                </div>
+            </div>
+
+            {% if analisis_records %}
+            <div class="pnc-table-section"
+                style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 1rem; margin-bottom: 2rem;">
+                <div class="table-wrapper">
+                    <table class="table table-striped table-hover align-middle table-compact">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Turno</th>
+                                <th>Producto</th>
+                                <th>Horario</th>
+                                <th>Humedad Base</th>
+                                <th>Aceite Base</th>
+                                {% if category == 'PAPA' %}
+                                <th>Cloruros Base</th>
+                                {% endif %}
+                                <th>Producto Aceite</th>
+                                <th>Producto Humedad</th>
+                                <th>Producto Sal</th>
+                                <th>Aceite PT T1</th>
+                                <th>Humedad PT T1</th>
+                                {% if category == 'PAPA' %}
+                                <th>Sal Titulador T1</th>
+                                {% endif %}
+                                <th>Sal PT T1</th>
+                                <th>Aceite PT T2</th>
+                                <th>Humedad PT T2</th>
+                                {% if category == 'PAPA' %}
+                                <th>Sal Titulador T2</th>
+                                {% endif %}
+                                <th>Sal PT T2</th>
+                                {% if category != 'EXTRUIDOS' %}
+                                <th>Aceite PT T3</th>
+                                <th>Humedad PT T3</th>
+                                {% if category == 'PAPA' %}
+                                <th>Sal Titulador T3</th>
+                                {% endif %}
+                                <th>Sal PT T3</th>
+                                {% endif %}
+                                <th style="min-width: 100px;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for analisis in analisis_records %}
+                            <tr>
+                                <td>{{ analisis.fecha.strftime('%d/%m/%Y') }}</td>
+                                <td>{{ analisis.turno }}</td>
+                                <td>{{ analisis.producto }}</td>
+                                <td>{{ analisis.horario }}</td>
+                                <td class="{{ get_color_class(analisis.humedad_base_frita, 'humedad_base', analisis.producto) }}">
+                                    {{ analisis.humedad_base_frita or '' }}
+                                </td>
+                                <td class="{{ get_color_class(analisis.aceite_base_frita, 'aceite_base', analisis.producto) }}">
+                                    {{ analisis.aceite_base_frita or '' }}
+                                </td>
+                                {% if category == 'PAPA' %}
+                                <!-- Cloruros Base -->
+                                <td class="{{ get_color_class(analisis.cloruros_base, 'cloruros_base', analisis.producto) }}">
+                                    {{ analisis.cloruros_base or '' }}
+                                </td>
+                                {% endif %}
+                                <!-- Campos PT Producto Terminado -->
+                                <td class="{{ get_color_class(analisis.aceite_pt_producto_terminado, 'aceite_pt', analisis.producto) }}">
+                                    {{ analisis.aceite_pt_producto_terminado or '' }}
+                                </td>
+                                <td class="{{ get_color_class(analisis.humedad_pt_producto_terminado, 'humedad_pt', analisis.producto) }}">
+                                    {{ analisis.humedad_pt_producto_terminado or '' }}
+                                </td>
+                                <td class="{{ get_color_class(analisis.sal_pt_producto_terminado, 'sal_pt', analisis.producto) }}">
+                                    {{ analisis.sal_pt_producto_terminado or '' }}
+                                </td>
+                                <!-- Tambor 1 -->
+                                <td class="{{ get_color_class(analisis.tanque1_aceite_pt, 'aceite_pt', analisis.producto) }}">
+                                    {{ analisis.tanque1_aceite_pt or '' }}
+                                </td>
+                                <td class="{{ get_color_class(analisis.tanque1_humedad_pt, 'humedad_pt', analisis.producto) }}">
+                                    {{ analisis.tanque1_humedad_pt or '' }}
+                                </td>
+                                {% if category == 'PAPA' %}
+                                <!-- Sal Titulador T1 -->
+                                <td>{{ analisis.tanque1_sal_titulador or '' }}</td>
+                                {% endif %}
+                                <td class="{{ get_color_class(analisis.tanque1_sal_pt, 'sal_pt', analisis.producto) }}">
+                                    {{ analisis.tanque1_sal_pt or '' }}
+                                </td>
+                                <!-- Tambor 2 -->
+                                <td class="{{ get_color_class(analisis.tanque2_aceite_pt, 'aceite_pt', analisis.producto) }}">
+                                    {{ analisis.tanque2_aceite_pt or '' }}
+                                </td>
+                                <td class="{{ get_color_class(analisis.tanque2_humedad_pt, 'humedad_pt', analisis.producto) }}">
+                                    {{ analisis.tanque2_humedad_pt or '' }}
+                                </td>
+                                {% if category == 'PAPA' %}
+                                <!-- Sal Titulador T2 -->
+                                <td>{{ analisis.tanque2_sal_titulador or '' }}</td>
+                                {% endif %}
+                                <td class="{{ get_color_class(analisis.tanque2_sal_pt, 'sal_pt', analisis.producto) }}">
+                                    {{ analisis.tanque2_sal_pt or '' }}
+                                </td>
+                                {% if category != 'EXTRUIDOS' %}
+                                <!-- Tambor 3 -->
+                                <td class="{{ get_color_class(analisis.tanque3_aceite_pt, 'aceite_pt', analisis.producto) }}">
+                                    {{ analisis.tanque3_aceite_pt or '' }}
+                                </td>
+                                <td class="{{ get_color_class(analisis.tanque3_humedad_pt, 'humedad_pt', analisis.producto) }}">
+                                    {{ analisis.tanque3_humedad_pt or '' }}
+                                </td>
+                                {% if category == 'PAPA' %}
+                                <!-- Sal Titulador T3 -->
+                                <td>{{ analisis.tanque3_sal_titulador or '' }}</td>
+                                {% endif %}
+                                <td class="{{ get_color_class(analisis.tanque3_sal_pt, 'sal_pt', analisis.producto) }}">
+                                    {{ analisis.tanque3_sal_pt or '' }}
+                                </td>
+                                {% endif %}
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal"
+                                            data-bs-target="#editAnalisisModal" data-id="{{ analisis.id }}"
+                                            data-folio="{{ analisis.folio }}"
+                                            data-fecha="{{ analisis.fecha.strftime('%Y-%m-%d') }}"
+                                            data-turno="{{ analisis.turno }}" data-producto="{{ analisis.producto }}"
+                                            data-horario="{{ analisis.horario }}"
+                                            data-humedad_base_frita="{{ analisis.humedad_base_frita }}"
+                                            data-aceite_base_frita="{{ analisis.aceite_base_frita }}"
+                                            data-cloruros_base="{{ analisis.cloruros_base }}"
+                                            data-tanque1_aceite_pt="{{ analisis.tanque1_aceite_pt }}"
+                                            data-tanque1_humedad_pt="{{ analisis.tanque1_humedad_pt }}"
+                                            data-tanque1_sal_titulador="{{ analisis.tanque1_sal_titulador }}"
+                                            data-tanque1_sal_pt="{{ analisis.tanque1_sal_pt }}"
+                                            data-tanque2_aceite_pt="{{ analisis.tanque2_aceite_pt }}"
+                                            data-tanque2_humedad_pt="{{ analisis.tanque2_humedad_pt }}"
+                                            data-tanque2_sal_titulador="{{ analisis.tanque2_sal_titulador }}"
+                                            data-tanque2_sal_pt="{{ analisis.tanque2_sal_pt }}"
+                                            data-tanque3_aceite_pt="{{ analisis.tanque3_aceite_pt }}"
+                                            data-tanque3_humedad_pt="{{ analisis.tanque3_humedad_pt }}"
+                                            data-tanque3_sal_titulador="{{ analisis.tanque3_sal_titulador }}"
+                                            data-tanque3_sal_pt="{{ analisis.tanque3_sal_pt }}"
+                                            data-aceite_pt_producto_terminado="{{ analisis.aceite_pt_producto_terminado }}"
+                                            data-humedad_pt_producto_terminado="{{ analisis.humedad_pt_producto_terminado }}"
+                                            data-sal_pt_producto_terminado="{{ analisis.sal_pt_producto_terminado }}"
+                                            data-observaciones="{{ analisis.observaciones|default('')|e }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger"
+                                            onclick="confirmDelete('{{ url_for('delete_analisis_fisicoquimico', category=category, analisis_id=analisis.id) }}')">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Controles de Paginación -->
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div id="paginationInfo" class="text-muted">
+                        Mostrando <span id="showingFrom">1</span> a <span id="showingTo">20</span> de <span id="totalRecords">{{ analisis_records|length }}</span> registros
+                    </div>
+                    <nav aria-label="Navegación de páginas">
+                        <ul class="pagination mb-0" id="paginationControls">
+                            <li class="page-item" id="prevPage">
+                                <a class="page-link" href="#" aria-label="Anterior">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            <li class="page-item" id="nextPage">
+                                <a class="page-link" href="#" aria-label="Siguiente">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+            {% else %}
+            <div class="pnc-table-section"
+                style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 2rem; margin-bottom: 2rem;">
+                <div class="text-center py-5">
+                    <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                    <h5>No hay registros de análisis fisicoquímicos disponibles</h5>
+                    <p class="text-muted">Utilice el botón "Nuevo Registro" para crear el primer análisis</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Pestaña de Resultados -->
+        <div class="tab-pane fade" id="resultados" role="tabpanel" aria-labelledby="resultados-tab">
+            <!-- Selector de período y filtros -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Filtros</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="periodo-selector" class="form-label">Período</label>
+                                    <select class="form-select" id="periodo-selector">
+                                        <option value="semana">Última Semana</option>
+                                        <option value="mes">Último Mes</option>
+                                        <option value="trimestre">Último Trimestre</option>
+                                        <option value="todo">Todo el tiempo</option>
+                                        <option value="personalizado" selected>Fechas personalizadas</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="producto-selector" class="form-label">Producto</label>
+                                    <select class="form-select" id="producto-selector">
+                                        <option value="todos">Todos</option>
+                                        {% if category == 'EXTRUIDOS' %}
+                                        <option value="CHEETOS TORCIDITOS">CHEETOS TORCIDITOS</option>
+                                        <option value="CHEETOS XTRA FH NUEVO">CHEETOS XTRA FH NUEVO</option>    
+                                        <option value="CHEETOS XTRA FLAMIN HOT">CHEETOS XTRA FLAMIN HOT</option>
+                                        {% elif category == 'TORTILLA' %}
+                                        <option value="DORITOS">DORITOS</option>
+                                        <option value="TOSTITOS SALSA VERDE">TOSTITOS SALSA VERDE</option>
+                                        <option value="TOSTITOS FH">TOSTITOS FH</option>
+                                        <option value="DORITOS PIZZEROLA">DORITOS PIZZEROLA</option>
+                                        <option value="DORITOS FH">DORITOS FH</option>
+                                        <option value="RANCHERITOS">RANCHERITOS</option>
+                                        {% elif category == 'PAPA' %}
+                                        <option value="PAPA SAL">PAPA SAL</option>
+                                        <option value="RUFFLES QUESO">RUFFLES QUESO</option>
+                                        <option value="SABRITAS XTRA FH">SABRITAS XTRA FH</option>
+                                        {% endif %}
+                                    </select>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">Rango de fechas</label>
+                                    <div class="input-group">
+                                        <input type="date" class="form-control" id="fecha-inicio-filtro" title="Fecha inicio">
+                                        <span class="input-group-text">a</span>
+                                        <input type="date" class="form-control" id="fecha-fin-filtro" title="Fecha fin">
+                                    </div>
+                                    <small class="text-muted">Por defecto: ayer a hoy</small>
+                                </div>
+                            </div>
+                            <div class="d-grid">
+                                <button class="btn btn-primary" id="actualizar-graficos-btn">
+                                    <i class="fas fa-sync-alt me-1"></i> Actualizar Gráficos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Resumen</h5>
+                        </div>
+                        <div class="card-body d-flex align-items-center">
+                            <div class="row w-100">
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-flask fa-2x text-primary"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-0">Total de análisis</h6>
+                                            <h4 class="mb-0" id="total-analisis">0</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-calendar-check fa-2x text-success"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h6 class="mb-0">Último análisis</h6>
+                                            <h4 class="mb-0" id="ultimo-analisis">-</h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón de descarga Excel -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Exportar Datos</h5>
+                        </div>
+                        <div class="card-body d-flex align-items-center justify-content-center">
+                            <button type="button" class="btn btn-success btn-lg" id="btn-descargar-excel-fisico">
+                                <i class="fas fa-file-excel me-2"></i>Descargar Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficas para Base Frita -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Humedad Base Frita</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="position: relative; height:500px;">
+                                <canvas id="humedad-base-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Aceite Base Frita</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container" style="position: relative; height:500px;">
+                                <canvas id="aceite-base-chart"></canvas>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráficas para Tambores -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">Resultados por Tambor</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="tabDrums" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="aceite-tab" data-bs-toggle="tab"
+                                data-bs-target="#aceite" type="button" role="tab" aria-controls="aceite"
+                                aria-selected="true">Aceite PT</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="humedad-tab" data-bs-toggle="tab" data-bs-target="#humedad"
+                                type="button" role="tab" aria-controls="humedad" aria-selected="false">Humedad
+                                PT</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="sal-tab" data-bs-toggle="tab" data-bs-target="#sal"
+                                type="button" role="tab" aria-controls="sal" aria-selected="false">Sal PT</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content pt-3" id="tabDrumsContent">
+                        <div class="tab-pane fade show active" id="aceite" role="tabpanel" aria-labelledby="aceite-tab">
+                            <div class="chart-container" style="position: relative; height:350px;">
+                                <canvas id="aceite-pt-chart"></canvas>
+                            </div>
+                            <div class="text-center mt-2">
+                                <small class="text-muted">Rango ideal: {{ aceite_pt_min }} - {{ aceite_pt_max }}</small>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="humedad" role="tabpanel" aria-labelledby="humedad-tab">
+                            <div class="chart-container" style="position: relative; height:350px;">
+                                <canvas id="humedad-pt-chart"></canvas>
+                            </div>
+                            <div class="text-center mt-2">
+                                <small class="text-muted">Rango ideal: {{ humedad_pt_min }} - {{ humedad_pt_max }}</small>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="sal" role="tabpanel" aria-labelledby="sal-tab">
+                            <div class="chart-container" style="position: relative; height:350px;">
+                                <canvas id="sal-pt-chart"></canvas>
+                            </div>
+                            <div class="text-center mt-2">
+                                <small class="text-muted">Rango ideal: {{ sal_pt_min }} - {{ sal_pt_max }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<!-- Modal para descarga Excel -->
+<div class="modal fade" id="modalDescargaExcelFisico" tabindex="-1" aria-labelledby="modalDescargaExcelFisicoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalDescargaExcelFisicoLabel">
+                    <i class="fas fa-file-excel text-success me-2"></i>
+                    Descargar Análisis Fisicoquímicos en Excel
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="form-descarga-excel-fisico">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha de Inicio</label>
+                            <input type="date" class="form-control" id="fecha-inicio-fisico" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Fecha de Fin</label>
+                            <input type="date" class="form-control" id="fecha-fin-fisico" required>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Turno</label>
+                            <select class="form-select" id="turno-excel-fisico">
+                                <option value="all">Todos los turnos</option>
+                                <option value="A">Turno A</option>
+                                <option value="B">Turno B</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Producto</label>
+                            <select class="form-select" id="producto-excel-fisico">
+                                <option value="all">Todos los productos</option>
+                                {% if category == 'EXTRUIDOS' %}
+                                <option value="CHEETOS TORCIDITOS">CHEETOS TORCIDITOS</option>
+                                <option value="CHEETOS XTRA FH NUEVO">CHEETOS XTRA FH NUEVO</option>
+                                <option value="CHEETOS XTRA FLAMIN HOT">CHEETOS XTRA FLAMIN HOT</option>
+                                {% elif category == 'TORTILLA' %}
+                                <option value="DORITOS">DORITOS</option>
+                                <option value="DORITOS PIZZEROLA">DORITOS PIZZEROLA</option>
+                                <option value="TOSTITOS SALSA VERDE">TOSTITOS SALSA VERDE</option>
+                                <option value="DORITOS FH">DORITOS FH</option>
+                                <option value="TOSTITOS FH">TOSTITOS FH</option>
+                                <option value="RANCHERITOS">RANCHERITOS</option>
+                                {% elif category == 'PAPA' %}
+                                <option value="PAPA SAL">PAPA SAL</option>
+                                <option value="RUFFLES QUESO">RUFFLES QUESO</option>
+                                <option value="SABRITAS XTRA FH">SABRITAS XTRA FH</option>
+                                    {% endif %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <label class="form-label">Incluir rangos de referencia</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="incluir-rangos-fisico" checked>
+                                <label class="form-check-label" for="incluir-rangos-fisico">
+                                    Incluir hoja con rangos ideales por producto
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="alert alert-info mt-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Nota:</strong> El archivo Excel incluirá:
+                        <ul class="mb-0 mt-2">
+                            <li>Datos de análisis fisicoquímicos con colores por rangos</li>
+                            <li>Estadísticas y resúmenes por producto</li>
+                            <li>Hoja con rangos de referencia por producto</li>
+                        </ul>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btn-confirmar-descarga-fisico">
+                    <i class="fas fa-download me-2"></i>Descargar Excel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para crear nuevo análisis -->
+<div class="modal fade" id="createAnalisisModal" tabindex="-1" aria-labelledby="createAnalisisModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="createAnalisisModalLabel">
+                    <i class="fas fa-flask me-2"></i> Nuevo Análisis Fisicoquímico
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('list_analisis_fisicoquimicos', category=category) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="modal-body">
+                    <div class="form-section">
+                        <h6 class="form-section-title">Información</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6" hidden>
+                                <label for="folio" class="form-label">Folio</label>
+                                <input type="text" class="form-control" id="folio" name="folio"
+                                    value="{{ 'ANL_' + now.strftime('%d%m') + '_' + (category[:2] if category == 'PAPA' else category[:2]) + '_' + '001' }}"
+                                    required readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="fecha" class="form-label">Fecha</label>
+                                <input type="date" class="form-control" id="fecha" name="fecha"
+                                    value="{{ now.strftime('%Y-%m-%d') }}" required readonly>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="turno" class="form-label">Turno</label>
+                                <select class="form-select" id="turno" name="turno" required>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="hora-select" class="form-label">Hora</label>
+                                <div class="time-input-group">
+                                    <select class="form-select" id="hora-select">
+                                        <!-- Las opciones se cargarán dinámicamente con JavaScript -->
+                                    </select>
+                                    <span>:</span>
+                                    <select class="form-select" id="minutos-select">
+                                        <!-- Las opciones se cargarán dinámicamente con JavaScript -->
+                                    </select>
+                                    <input type="hidden" id="horario-completo" name="horario">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="producto" class="form-label">Producto <span
+                                        class="text-danger">*</span></label>
+                                <select class="form-select" id="producto" name="producto" required>
+                                    <option value="">Seleccione producto</option>
+                                    {% if category == 'EXTRUIDOS' %}
+                                    <option value="CHEETOS TORCIDITOS">CHEETOS TORCIDITOS</option>
+                                    <option value="CHEETOS XTRA FH NUEVO">CHEETOS XTRA FH NUEVO</option>
+                                    <option value="CHEETOS XTRA FLAMIN HOT">CHEETOS XTRA FLAMIN HOT</option>
+                                    <option value="CHEETOS JALAQUEÑO">CHEETOS JALAQUEÑO</option>
+                                    {% elif category == 'TORTILLA' %}
+                                    <option value="DORITOS">DORITOS</option>
+                                    <option value="DORITOS FH">DORITOS FH</option>  
+                                    <option value="DORITOS PIZZEROLA">DORITOS PIZZEROLA</option>
+                                    <option value="TOSTITOS SALSA VERDE">TOSTITOS SALSA VERDE</option>
+                                    <option value="TOSTITOS FH">TOSTITOS FH</option>
+                                     <option value="RANCHERITOS">RANCHERITOS</option>
+                                    <option value="DORITOS INCÓGNITA">DORITOS INCÓGNITA</option>
+                                    {% elif category == 'PAPA' %}
+                                    <option value="PAPA SAL">PAPA SAL</option>
+                                    <option value="RUFFLES QUESO">RUFFLES QUESO</option>
+                                    <option value="SABRITAS XTRA FH">SABRITAS XTRA FH</option>
+                                    {% endif %}
+                                </select>
+                                <div class="invalid-feedback">
+                                    Por favor seleccione un producto
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Se eliminaron los campos de Lote, Analista y Peso -->
+                    </div>
+
+                    <div class="form-section">
+                        <h6 class="form-section-title">Detalles del Análisis</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="humedad_base_frita" class="form-label">Humedad Base Frita</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control{% if category == 'PAPA' %} papa-sal-field{% endif %}" id="humedad_base_frita"
+                                        name="humedad_base_frita" placeholder="Ingrese valor"
+                                        {% if category == 'PAPA' %}data-tipo="humedad_base" data-rango="1.35-1.65 (ideal) / 1.20-1.80 (aceptable)"{% endif %}>
+                                    <span class="input-group-text">
+                                        {% if category == 'PAPA' %}
+                                        1.35 - 1.65
+                                        {% elif category == 'TORTILLA' %}
+                                        1 - 1.2
+                                        {% else %}
+                                        0.7 - 1.7
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="aceite_base_frita" class="form-label">Aceite Base Frita</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control{% if category == 'PAPA' %} papa-sal-field{% endif %}" id="aceite_base_frita"
+                                        name="aceite_base_frita" placeholder="Ingrese valor"
+                                        {% if category == 'PAPA' %}data-tipo="aceite_base" data-rango="31-35 (ideal) / 30-36 (aceptable)"{% endif %}>
+                                    <span class="input-group-text">
+                                        {% if category == 'PAPA' %}
+                                        31 - 35
+                                        {% elif category == 'TORTILLA' %}
+                                        20 - 23
+                                        {% else %}
+                                        21.7 - 27.7
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% if category == 'PAPA' %}
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="cloruros_base" class="form-label">Cloruros en la base (%)</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control papa-sal-field" id="cloruros_base"
+                                        name="cloruros_base" placeholder="Ingrese valor"
+                                        data-tipo="cloruros_base" data-rango="0-1 (verde) / fuera=rojo">
+                                    <span class="input-group-text">
+                                        0 - 1
+                                    </span>
+                                </div>
+                                <small class="text-muted">Este valor se restará del Sal Titulador de cada tambor para calcular Sal PT</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="form-section-title mt-4">Tambores</div>
+                        <div class="row mb-3 d-flex justify-content-around">
+                            {% if category == 'EXTRUIDOS' or category == 'PAPA' %}
+                            {% set num_tambores = 2 %}
+                            {% else %}
+                            {% set num_tambores = 3 %}
+                            {% endif %}
+                            {% for i in range(1, num_tambores + 1) %}
+                            <div class="col-md-4">
+                                <h6 class="mb-3">Tambor {{ i }}</h6>
+                                <div class="mb-3">
+                                    <label for="tanque{{i}}_aceite_pt" class="form-label">Aceite PT</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="tanque{{i}}_aceite_pt"
+                                            name="tanque{{i}}_aceite_pt" placeholder="{% if category == 'PAPA' %}N/A{% else %}Ingrese valor{% endif %}"
+                                            {% if category == 'PAPA' %}disabled{% endif %}>
+                                        <span class="input-group-text">
+                                            {% if category == 'PAPA' %}
+                                            N/A
+                                            {% elif category == 'TORTILLA' %}
+                                            22-26
+                                            {% else %}
+                                            29-38
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="tanque{{i}}_humedad_pt" class="form-label">Humedad PT</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control{% if category == 'PAPA' %} papa-sal-field{% endif %}" id="tanque{{i}}_humedad_pt"
+                                            name="tanque{{i}}_humedad_pt" placeholder="{% if category == 'PAPA' %}N/A{% else %}Ingrese valor{% endif %}"
+                                            {% if category == 'PAPA' %}disabled{% endif %}>
+                                        <span class="input-group-text">
+                                            {% if category == 'PAPA' %}
+                                            N/A
+                                            {% elif category == 'TORTILLA' %}
+                                            0.78 - 1.58
+                                            {% else %}
+                                            0.5 - 1.9
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                {% if category == 'PAPA' %}
+                                <div class="mb-3">
+                                    <label for="tanque{{i}}_sal_titulador" class="form-label">Sal Titulador (%)</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control papa-sal-field" id="tanque{{i}}_sal_titulador"
+                                            name="tanque{{i}}_sal_titulador" placeholder="Ingrese valor"
+                                            data-tanque="{{i}}">
+                                        <span class="input-group-text">
+                                            Entrada
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">Se restará Cloruros para calcular Sal PT</small>
+                                </div>
+                                {% endif %}
+                                <div class="mb-3">
+                                    <label for="tanque{{i}}_sal_pt" class="form-label">Sal PT {% if category == 'PAPA' %}(Calculado){% endif %}</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control{% if category == 'PAPA' %} papa-sal-field{% endif %}" id="tanque{{i}}_sal_pt"
+                                            name="tanque{{i}}_sal_pt" placeholder="{% if category == 'PAPA' %}Calculado automáticamente{% else %}Ingrese valor{% endif %}"
+                                            {% if category == 'PAPA' %}readonly data-tipo="sal_pt" data-rango="0.55-0.85 (ideal) / 0.45-0.95 (aceptable)" data-calculado="true"{% endif %}>
+                                        <span class="input-group-text">
+                                            {% if category == 'PAPA' %}
+                                            0.55 - 0.85
+                                            {% elif category == 'TORTILLA' %}
+                                            0.9 - 1.5
+                                            {% else %}
+                                            0.95 - 1.55
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    {% if category == 'PAPA' %}
+                                    <small class="text-muted">Fórmula: Sal Titulador - Cloruros Base</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="form-section-title mt-4">Producto Terminado</div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="aceite_pt_producto_terminado" class="form-label">Producto Aceite {% if category == 'PAPA' %}<span class="text-muted">(Deshabilitado)</span>{% endif %}</label>
+                                <input type="text" class="form-control" id="aceite_pt_producto_terminado"
+                                    name="aceite_pt_producto_terminado" placeholder="{% if category == 'PAPA' %}No aplica para PAPA{% else %}Ingrese valor{% endif %}"
+                                    {% if category == 'PAPA' %}readonly disabled{% endif %}>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="humedad_pt_producto_terminado" class="form-label">Producto Humedad {% if category == 'PAPA' %}<span class="text-muted">(Deshabilitado)</span>{% endif %}</label>
+                                <input type="text" class="form-control" id="humedad_pt_producto_terminado"
+                                    name="humedad_pt_producto_terminado" placeholder="{% if category == 'PAPA' %}No aplica para PAPA{% else %}Ingrese valor{% endif %}"
+                                    {% if category == 'PAPA' %}readonly disabled{% endif %}>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="sal_pt_producto_terminado" class="form-label">Producto Sal</label>
+                                <input type="text" class="form-control" id="sal_pt_producto_terminado"
+                                    name="sal_pt_producto_terminado" placeholder="Ingrese valor">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="observaciones" class="form-label">Observaciones</label>
+                                <textarea class="form-control" id="observaciones" name="observaciones" rows="3"
+                                    placeholder="Ingrese observaciones o comentarios adicionales"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" name="submit_analisis" value="submit_analisis">Guardar
+                        Análisis Fisicoquímico</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para editar análisis -->
+<div class="modal fade" id="editAnalisisModal" tabindex="-1" aria-labelledby="editAnalisisModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark">
+                <h5 class="modal-title" id="editAnalisisModalLabel">
+                    <i class="fas fa-edit me-2"></i> Editar Análisis Fisicoquímico
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editAnalisisForm" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" id="edit_id" name="edit_id">
+                <div class="modal-body">
+                    <div class="form-section">
+                        <h6 class="form-section-title">Información</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6" hidden>
+                                <label for="edit_folio" class="form-label">Folio</label>
+                                <input type="text" class="form-control" id="edit_folio" name="folio" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_fecha" class="form-label">Fecha</label>
+                                <input type="date" class="form-control" id="edit_fecha" name="fecha">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="edit_turno" class="form-label">Turno</label>
+                                <select class="form-select" id="edit_turno" name="turno" required>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="edit_hora-select" class="form-label">Hora</label>
+                                <div class="time-input-group">
+                                    <select class="form-select" id="edit_hora-select">
+                                        <!-- Opciones llenadas por JS -->
+                                    </select>
+                                    <span>:</span>
+                                    <select class="form-select" id="edit_minutos-select">
+                                        <!-- Opciones llenadas por JS -->
+                                    </select>
+                                    <input type="hidden" id="edit_horario-completo" name="horario">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="edit_producto" class="form-label">Producto <span
+                                        class="text-danger">*</span></label>
+                                <select class="form-select" id="edit_producto" name="producto" required>
+                                    <option value="">Seleccione producto</option>
+                                    {% if category == 'EXTRUIDOS' %}
+                                    <option value="CHEETOS TORCIDITOS">CHEETOS TORCIDITOS</option>
+                                    <option value="CHEETOS XTRA FH NUEVO">CHEETOS XTRA FH NUEVO</option>
+                                    <option value="CHEETOS XTRA FLAMIN HOT">CHEETOS X 
+                                    <option value="CHEETOS XTRA FH NUEVO">CHEETOS XTRA FH NUEVO</option>
+                                    <option value="CHEETOS JALAQUEÑO">CHEETOS JALAQUEÑO</option>
+                                    {% elif category == 'TORTILLA' %}
+                                    <option value="DORITOS">DORITOS</option>
+                                    <option value="TOSTITOS SALSA VERDE">TOSTITOS SALSA VERDE</option>
+                                    <option value="TOSTITOS FH">TOSTITOS FH</option>
+                                    <option value="DORITOS INCÓGNITA">DORITOS INCÓGNITA</option>
+                                    <option value="RANCHERITOS">RANCHERITOS</option>
+                                    <option value="DORITOS FH">DORITOS FH</option>
+                                    <option value="DORITOS PIZZEROLA">DORITOS PIZZEROLA</option>
+                                    {% elif category == 'PAPA' %}
+                                    <option value="PAPA SAL">PAPA SAL</option>
+                                    <option value="RUFFLES QUESO">RUFFLES QUESO</option>
+                                    <option value="SABRITAS XTRA FH">SABRITAS XTRA FH</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <h6 class="form-section-title">Detalles del Análisis</h6>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="edit_humedad_base_frita" class="form-label">Humedad Base Frita</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control{% if category == 'PAPA' %} papa-sal-field{% endif %}" id="edit_humedad_base_frita"
+                                        name="humedad_base_frita"
+                                        {% if category == 'PAPA' %}data-tipo="humedad_base" data-rango="1.35-1.65 (ideal) / 1.20-1.80 (aceptable)"{% endif %}>
+                                    <span class="input-group-text">
+                                        {% if category == 'PAPA' %}
+                                        1.35 - 1.65
+                                        {% elif category=='TORTILLA' %}
+                                        1 - 1.2
+                                        {% else %}
+                                        0.7 - 1.7
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="edit_aceite_base_frita" class="form-label">Aceite Base Frita</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control{% if category == 'PAPA' %} papa-sal-field{% endif %}" id="edit_aceite_base_frita"
+                                        name="aceite_base_frita"
+                                        {% if category == 'PAPA' %}data-tipo="aceite_base" data-rango="31-35 (ideal) / 30-36 (aceptable)"{% endif %}>
+                                    <span class="input-group-text">
+                                        {% if category == 'PAPA' %}
+                                        31 - 35
+                                        {% elif category=='TORTILLA' %}
+                                        20 - 23
+                                        {% else %}
+                                        21.7 - 27.7
+                                        {% endif %}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        {% if category == 'PAPA' %}
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="edit_cloruros_base" class="form-label">Cloruros en la base (%)</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control papa-sal-field" id="edit_cloruros_base"
+                                        name="cloruros_base"
+                                        data-tipo="cloruros_base" data-rango="0-1 (verde) / fuera=rojo">
+                                    <span class="input-group-text">
+                                        0 - 1
+                                    </span>
+                                </div>
+                                <small class="text-muted">Este valor se restará del Sal Titulador de cada tambor para calcular Sal PT</small>
+                            </div>
+                        </div>
+                        {% endif %}
+                        <div class="form-section-title mt-4">Tambores</div>
+                        <div class="row mb-3 d-flex justify-content-around">
+                            {% if category == 'EXTRUIDOS' or category == 'PAPA' %}
+                            {% set num_tambores = 2 %}
+                            {% else %}
+                            {% set num_tambores = 3 %}
+                            {% endif %}
+                            {% for i in range(1, num_tambores + 1) %}
+                            <div class="col-md-4">
+                                <h6 class="mb-3">Tambor {{ i }}</h6>
+                                <div class="mb-3">
+                                    <label for="edit_tanque{{i}}_aceite_pt" class="form-label">Aceite PT</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="edit_tanque{{i}}_aceite_pt"
+                                            name="tanque{{i}}_aceite_pt">
+                                        <span class="input-group-text">
+                                            {% if category == 'PAPA' %}
+                                            N/A
+                                            {% elif category == 'TORTILLA' %}
+                                            22-26
+                                            {% else %}
+                                            29-38
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="edit_tanque{{i}}_humedad_pt" class="form-label">Humedad PT</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control{% if category == 'PAPA' %} papa-sal-field{% endif %}" id="edit_tanque{{i}}_humedad_pt"
+                                            name="tanque{{i}}_humedad_pt"
+                                            {% if category == 'PAPA' %}data-tipo="humedad_pt" data-rango="1.35-1.8 (ideal) / 1.20-2.0 (aceptable)"{% endif %}>
+                                        <span class="input-group-text">
+                                            {% if category == 'PAPA' %}
+                                            1.35 - 1.8
+                                            {% elif category == 'TORTILLA' %}
+                                            0.78 - 1.58
+                                            {% else %}
+                                            0.5 - 1.9
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                {% if category == 'PAPA' %}
+                                <div class="mb-3">
+                                    <label for="edit_tanque{{i}}_sal_titulador" class="form-label">Sal Titulador (%)</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control papa-sal-field" id="edit_tanque{{i}}_sal_titulador"
+                                            name="tanque{{i}}_sal_titulador" placeholder="Ingrese valor"
+                                            data-tanque="{{i}}">
+                                        <span class="input-group-text">
+                                            Entrada
+                                        </span>
+                                    </div>
+                                    <small class="text-muted">Se restará Cloruros para calcular Sal PT</small>
+                                </div>
+                                {% endif %}
+                                <div class="mb-3">
+                                    <label for="edit_tanque{{i}}_sal_pt" class="form-label">Sal PT {% if category == 'PAPA' %}(Calculado){% endif %}</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control{% if category == 'PAPA' %} papa-sal-field{% endif %}" id="edit_tanque{{i}}_sal_pt"
+                                            name="tanque{{i}}_sal_pt" placeholder="{% if category == 'PAPA' %}Calculado automáticamente{% else %}Ingrese valor{% endif %}"
+                                            {% if category == 'PAPA' %}readonly data-tipo="sal_pt" data-rango="0.55-0.85 (ideal) / 0.45-0.95 (aceptable)" data-calculado="true"{% endif %}>
+                                        <span class="input-group-text">
+                                            {% if category == 'PAPA' %}
+                                            0.55 - 0.85
+                                            {% elif category == 'TORTILLA' %}
+                                            0.9 - 1.5
+                                            {% else %}
+                                            0.95 - 1.55
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                    {% if category == 'PAPA' %}
+                                    <small class="text-muted">Fórmula: Sal Titulador - Cloruros Base</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <div class="form-section-title mt-4">Producto Terminado</div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label for="edit_aceite_pt_producto_terminado" class="form-label">Producto Aceite {% if category == 'PAPA' %}<span class="text-muted">(Deshabilitado)</span>{% endif %}</label>
+                                <input type="text" class="form-control" id="edit_aceite_pt_producto_terminado"
+                                    name="aceite_pt_producto_terminado" placeholder="{% if category == 'PAPA' %}No aplica para PAPA{% else %}Ingrese valor{% endif %}"
+                                    {% if category == 'PAPA' %}readonly disabled{% endif %}>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="edit_humedad_pt_producto_terminado" class="form-label">Producto Humedad {% if category == 'PAPA' %}<span class="text-muted">(Deshabilitado)</span>{% endif %}</label>
+                                <input type="text" class="form-control" id="edit_humedad_pt_producto_terminado"
+                                    name="humedad_pt_producto_terminado" placeholder="{% if category == 'PAPA' %}No aplica para PAPA{% else %}Ingrese valor{% endif %}"
+                                    {% if category == 'PAPA' %}readonly disabled{% endif %}>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="edit_sal_pt_producto_terminado" class="form-label">Producto Sal</label>
+                                <input type="text" class="form-control" id="edit_sal_pt_producto_terminado"
+                                    name="sal_pt_producto_terminado" placeholder="Ingrese valor">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label for="edit_observaciones" class="form-label">Observaciones</label>
+                                <textarea class="form-control" id="edit_observaciones" name="observaciones"
+                                    rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning" name="submit_edit_analisis"
+                        value="submit_edit_analisis">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Eliminado script duplicado de lógica de edición para evitar conflictos y asegurar que solo uno maneje el llenado del modal de edición. -->
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+    // Función para confirmar eliminación
+    function confirmDelete(url) {
+        if (confirm('¿Está seguro de que desea eliminar este registro? Esta acción no se puede deshacer.')) {
+            // Crear un formulario dinámicamente
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = url;
+
+            // Agregar token CSRF
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = 'csrf_token';
+            csrf.value = "{{ csrf_token() }}";
+            form.appendChild(csrf);
+
+            // Agregar el formulario al documento y enviarlo
+            document.body.appendChild(form);
+            form.submit();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Llenar el modal de edición con los datos del registro
+        var editModal = document.getElementById('editAnalisisModal');
+        editModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            // Llenar campos básicos
+            document.getElementById('edit_id').value = button.getAttribute('data-id');
+            document.getElementById('edit_folio').value = button.getAttribute('data-folio');
+            document.getElementById('edit_fecha').value = button.getAttribute('data-fecha');
+            document.getElementById('edit_turno').value = button.getAttribute('data-turno');
+            document.getElementById('edit_producto').value = button.getAttribute('data-producto');
+            document.getElementById('edit_humedad_base_frita').value = button.getAttribute('data-humedad_base_frita') || '';
+            document.getElementById('edit_aceite_base_frita').value = button.getAttribute('data-aceite_base_frita') || '';
+
+            // Llenar campo Cloruros Base (PAPA)
+            var clorurosBase = document.getElementById('edit_cloruros_base');
+            if (clorurosBase) clorurosBase.value = button.getAttribute('data-cloruros_base') || '';
+
+            for (let i = 1; i <= 3; i++) {
+                var aceite = document.getElementById('edit_tanque' + i + '_aceite_pt');
+                var humedad = document.getElementById('edit_tanque' + i + '_humedad_pt');
+                var salTitulador = document.getElementById('edit_tanque' + i + '_sal_titulador');
+                var sal = document.getElementById('edit_tanque' + i + '_sal_pt');
+                if (aceite) aceite.value = button.getAttribute('data-tanque' + i + '_aceite_pt') || '';
+                if (humedad) humedad.value = button.getAttribute('data-tanque' + i + '_humedad_pt') || '';
+                if (salTitulador) salTitulador.value = button.getAttribute('data-tanque' + i + '_sal_titulador') || '';
+                if (sal) sal.value = button.getAttribute('data-tanque' + i + '_sal_pt') || '';
+            }
+            document.getElementById('edit_observaciones').value = button.getAttribute('data-observaciones') || '';
+
+            // Llenar campos PT Producto Terminado
+            var aceiteProductoInput = document.getElementById('edit_aceite_pt_producto_terminado');
+            var humedadProductoInput = document.getElementById('edit_humedad_pt_producto_terminado');
+
+            // Solo llenar si no están deshabilitados (no aplica para PAPA)
+            if (aceiteProductoInput && !aceiteProductoInput.disabled) {
+                aceiteProductoInput.value = button.getAttribute('data-aceite_pt_producto_terminado') || '';
+            }
+            if (humedadProductoInput && !humedadProductoInput.disabled) {
+                humedadProductoInput.value = button.getAttribute('data-humedad_pt_producto_terminado') || '';
+            }
+
+            document.getElementById('edit_sal_pt_producto_terminado').value = button.getAttribute('data-sal_pt_producto_terminado') || '';
+
+            // Lógica para hora y minutos
+            var horario = button.getAttribute('data-horario') || '';
+            var editTurno = document.getElementById('edit_turno');
+            var editHoraSelect = document.getElementById('edit_hora-select');
+            var editMinutosSelect = document.getElementById('edit_minutos-select');
+            var editHorarioCompleto = document.getElementById('edit_horario-completo');
+
+            // Llenar selects de hora/minutos según turno
+            function llenarHorasMinutosPorTurnoEdit(turno) {
+                if (editHoraSelect) editHoraSelect.innerHTML = '';
+                if (editMinutosSelect) editMinutosSelect.innerHTML = '';
+                let horas = [];
+                if (turno === 'A') {
+                    for (let h = 6; h <= 18; h++) {
+                        horas.push(h.toString().padStart(2, '0'));
+                    }
+                } else if (turno === 'B') {
+                    for (let h = 18; h <= 23; h++) {
+                        horas.push(h.toString().padStart(2, '0'));
+                    }
+                    for (let h = 0; h <= 6; h++) {
+                        horas.push(h.toString().padStart(2, '0'));
+                    }
+                }
+                if (editHoraSelect) {
+                    horas.forEach(h => {
+                        const option = document.createElement('option');
+                        option.value = h;
+                        option.text = h;
+                        editHoraSelect.appendChild(option);
+                    });
+                }
+                // Llenar minutos según la hora y turno
+                function actualizarMinutosEdit() {
+                    if (!editMinutosSelect) return;
+                    editMinutosSelect.innerHTML = '';
+                    let minStart = 0, minEnd = 59;
+                    const hora = editHoraSelect ? parseInt(editHoraSelect.value, 10) : 0;
+                    if (turno === 'A') {
+                        if (hora === 6) {
+                            minStart = 30; minEnd = 59;
+                        } else if (hora === 18) {
+                            minStart = 0; minEnd = 29;
+                        }
+                    } else if (turno === 'B') {
+                        if (hora === 18) {
+                            minStart = 30; minEnd = 59;
+                        } else if (hora === 6) {
+                            minStart = 0; minEnd = 29;
+                        }
+                    }
+                    for (let m = minStart; m <= minEnd; m++) {
+                        const option = document.createElement('option');
+                        option.value = m.toString().padStart(2, '0');
+                        option.text = m.toString().padStart(2, '0');
+                        editMinutosSelect.appendChild(option);
+                    }
+                }
+                if (editHoraSelect && editMinutosSelect) {
+                    editHoraSelect.removeEventListener('change', actualizarMinutosEdit);
+                    editHoraSelect.addEventListener('change', actualizarMinutosEdit);
+                    actualizarMinutosEdit();
+                }
+            }
+
+            // Inicializar selects según turno
+            if (editTurno && editHoraSelect && editMinutosSelect) {
+                llenarHorasMinutosPorTurnoEdit(editTurno.value);
+
+                // Si cambia el turno en el modal de edición, actualizar selects
+                editTurno.addEventListener('change', function () {
+                    llenarHorasMinutosPorTurnoEdit(this.value);
+                    setTimeout(seleccionarHoraMinuto, 0);
+                });
+            }
+
+            // Seleccionar la hora y minutos correctos si hay horario
+            function seleccionarHoraMinuto() {
+                if (!horario) return;
+                var partes = horario.split(':');
+                if (partes.length === 2) {
+                    var hora = partes[0].padStart(2, '0');
+                    var minuto = partes[1].padStart(2, '0');
+                    if (editHoraSelect) editHoraSelect.value = hora;
+                    // Actualizar minutos según la hora seleccionada
+                    var event = new Event('change');
+                    if (editHoraSelect) editHoraSelect.dispatchEvent(event);
+                    if (editMinutosSelect) editMinutosSelect.value = minuto;
+                    if (editHorarioCompleto) editHorarioCompleto.value = hora + ':' + minuto;
+                }
+            }
+            seleccionarHoraMinuto();
+
+            // Guardar el horario completo en el input oculto al cambiar hora o minutos
+            function actualizarHorarioEdit() {
+                if (editHoraSelect && editMinutosSelect && editHorarioCompleto) {
+                    const horario = `${editHoraSelect.value}:${editMinutosSelect.value}`;
+                    editHorarioCompleto.value = horario;
+                }
+            }
+            if (editHoraSelect && editMinutosSelect) {
+                editHoraSelect.addEventListener('change', actualizarHorarioEdit);
+                editMinutosSelect.addEventListener('change', actualizarHorarioEdit);
+            }
+        });
+
+        // Llenar select de horas (00 a 23)
+        const horaSelect = document.getElementById('hora-select');
+        if (horaSelect) {
+            for (let h = 0; h < 24; h++) {
+                const option = document.createElement('option');
+                option.value = h.toString().padStart(2, '0');
+                option.text = h.toString().padStart(2, '0');
+                horaSelect.appendChild(option);
+            }
+        }
+
+        // Llenar select de minutos (00 a 59)
+        const minutosSelect = document.getElementById('minutos-select');
+        if (minutosSelect) {
+            for (let m = 0; m < 60; m++) {
+                const option = document.createElement('option');
+                option.value = m.toString().padStart(2, '0');
+                option.text = m.toString().padStart(2, '0');
+                minutosSelect.appendChild(option);
+            }
+        }
+
+        // Guardar el horario completo en el input oculto al cambiar hora o minutos
+        function actualizarHorario() {
+            if (horaSelect && minutosSelect) {
+                const horario = `${horaSelect.value}:${minutosSelect.value}`;
+                const inputHorario = document.getElementById('horario-completo');
+                if (inputHorario) inputHorario.value = horario;
+            }
+        }
+        if (horaSelect && minutosSelect) {
+            horaSelect.addEventListener('change', actualizarHorario);
+            minutosSelect.addEventListener('change', actualizarHorario);
+        }
+    });
+</script>
+
+<!-- Scripts para análisis fisicoquímicos -->
+<script src="{{ url_for('static', filename='js/custom/rangos_fisicoquimicos_unificado_final.js') }}"></script>
+<script src="{{ url_for('static', filename='js/custom/graficas_base_frita.js') }}"></script>
+
+{% if category == 'PAPA' %}
+<!-- Los rangos y validación de PAPA ahora se manejan completamente en rangos_fisicoquimicos_unificado_final.js -->
+<!-- El cálculo automático de Sal PT se maneja en el script específico más abajo -->
+{% endif %}
+
+<script>
+// Gestión del modal de descarga Excel
+document.addEventListener('DOMContentLoaded', function() {
+    // PAGINACIÓN DE TABLA
+    let currentPage = 1;
+    let recordsPerPage = 20;
+    let totalRecords = 0;
+    let allRows = [];
+    
+    function initPagination() {
+        const tbody = document.querySelector('.table tbody');
+        if (!tbody) return;
+        
+        allRows = Array.from(tbody.querySelectorAll('tr'));
+        totalRecords = allRows.length;
+        
+        document.getElementById('totalRecords').textContent = totalRecords;
+        
+        // Event listeners
+        document.getElementById('recordsPerPage').addEventListener('change', function() {
+            recordsPerPage = parseInt(this.value);
+            currentPage = 1;
+            showPage();
+        });
+        
+        document.getElementById('prevPage').addEventListener('click', function(e) {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                showPage();
+            }
+        });
+        
+        document.getElementById('nextPage').addEventListener('click', function(e) {
+            e.preventDefault();
+            const totalPages = Math.ceil(totalRecords / recordsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                showPage();
+            }
+        });
+        
+        showPage();
+    }
+    
+    function showPage() {
+        const startIndex = (currentPage - 1) * recordsPerPage;
+        const endIndex = startIndex + recordsPerPage;
+        
+        allRows.forEach((row, index) => {
+            row.style.display = (index >= startIndex && index < endIndex) ? '' : 'none';
+        });
+        
+        // Recolorear filas visibles
+        setTimeout(() => {
+            if (typeof aplicarColoresTabla !== 'undefined') {
+                aplicarColoresTabla();
+            }
+        }, 50);
+        
+        updatePaginationInfo();
+    }
+    
+    function updatePaginationInfo() {
+        const startIndex = (currentPage - 1) * recordsPerPage + 1;
+        const endIndex = Math.min(currentPage * recordsPerPage, totalRecords);
+        const totalPages = Math.ceil(totalRecords / recordsPerPage);
+        
+        document.getElementById('showingFrom').textContent = totalRecords === 0 ? 0 : startIndex;
+        document.getElementById('showingTo').textContent = endIndex;
+        
+        // Habilitar/deshabilitar botones
+        document.getElementById('prevPage').classList.toggle('disabled', currentPage === 1);
+        document.getElementById('nextPage').classList.toggle('disabled', currentPage === totalPages || totalRecords === 0);
+    }
+    
+    // Inicializar paginación
+    initPagination();
+    
+    // MODAL DESCARGA EXCEL
+    const btnDescargar = document.getElementById('btn-descargar-excel-fisico');
+    const btnConfirmar = document.getElementById('btn-confirmar-descarga-fisico');
+    
+    if (btnDescargar) {
+        btnDescargar.addEventListener('click', function(e) {
+            e.preventDefault();
+            const modal = new bootstrap.Modal(document.getElementById('modalDescargaExcelFisico'));
+            modal.show();
+            
+            // Configurar fechas por defecto
+            const hoy = new Date();
+            const hace30Dias = new Date();
+            hace30Dias.setDate(hoy.getDate() - 30);
+            
+            document.getElementById('fecha-inicio-fisico').value = hace30Dias.toISOString().split('T')[0];
+            document.getElementById('fecha-fin-fisico').value = hoy.toISOString().split('T')[0];
+        });
+    }
+    
+    if (btnConfirmar) {
+        btnConfirmar.addEventListener('click', function() {
+            const categoria = '{{ category }}';
+            const fechaInicio = document.getElementById('fecha-inicio-fisico').value;
+            const fechaFin = document.getElementById('fecha-fin-fisico').value;
+            const turno = document.getElementById('turno-excel-fisico').value;
+            const producto = document.getElementById('producto-excel-fisico').value;
+            const incluirRangos = document.getElementById('incluir-rangos-fisico').checked;
+            
+            if (!fechaInicio || !fechaFin) {
+                alert('Por favor seleccione ambas fechas');
+                return;
+            }
+            
+            // Deshabilitar botón durante descarga
+            this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Descargando...';
+            this.disabled = true;
+            
+            const params = new URLSearchParams({
+                categoria: categoria,
+                fecha_inicio: fechaInicio,
+                fecha_fin: fechaFin,
+                turno: turno,
+                producto: producto,
+                incluir_rangos: incluirRangos
+            });
+            
+            const url = `/analisis_fisicoquimicos/descargar-excel?${params.toString()}`;
+            
+            // Crear link de descarga
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `analisis_fisicoquimicos_${categoria.toLowerCase()}_${fechaInicio}_${fechaFin}.xlsx`;
+            link.style.display = 'none';
+            
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Restaurar botón y cerrar modal
+            setTimeout(() => {
+                this.innerHTML = '<i class="fas fa-download me-2"></i>Descargar Excel';
+                this.disabled = false;
+                bootstrap.Modal.getInstance(document.getElementById('modalDescargaExcelFisico')).hide();
+            }, 2000);
+        });
+    }
+});
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Llenar el modal de edición con los datos del registro
+        var editModal = document.getElementById('editAnalisisModal');
+        editModal.addEventListener('show.bs.modal', function (event) {
+            var button = event.relatedTarget;
+            // Llenar campos
+            document.getElementById('edit_id').value = button.getAttribute('data-id');
+            document.getElementById('edit_folio').value = button.getAttribute('data-folio');
+            document.getElementById('edit_fecha').value = button.getAttribute('data-fecha');
+            document.getElementById('edit_turno').value = button.getAttribute('data-turno');
+            document.getElementById('edit_producto').value = button.getAttribute('data-producto');
+            document.getElementById('edit_horario').value = button.getAttribute('data-horario');
+            document.getElementById('edit_humedad_base_frita').value = button.getAttribute('data-humedad_base_frita') || '';
+            document.getElementById('edit_aceite_base_frita').value = button.getAttribute('data-aceite_base_frita') || '';
+            for (let i = 1; i <= 3; i++) {
+                document.getElementById('edit_tanque' + i + '_aceite_pt').value = button.getAttribute('data-tanque' + i + '_aceite_pt') || '';
+                document.getElementById('edit_tanque' + i + '_humedad_pt').value = button.getAttribute('data-tanque' + i + '_humedad_pt') || '';
+                document.getElementById('edit_tanque' + i + '_sal_pt').value = button.getAttribute('data-tanque' + i + '_sal_pt') || '';
+            }
+            document.getElementById('edit_observaciones').value = button.getAttribute('data-observaciones') || '';
+        });
+
+        // Llenar select de horas y minutos según el turno seleccionado
+        const horaSelect = document.getElementById('hora-select');
+        const minutosSelect = document.getElementById('minutos-select');
+        const turnoSelect = document.getElementById('turno');
+
+        function llenarHorasMinutosPorTurno(turno) {
+            // Limpiar selects
+            if (horaSelect) horaSelect.innerHTML = '';
+            if (minutosSelect) minutosSelect.innerHTML = '';
+
+            let horas = [];
+            let minutos = [];
+
+            if (turno === 'A') {
+            // 06:30 a 18:29
+            for (let h = 6; h <= 18; h++) {
+                horas.push(h.toString().padStart(2, '0'));
+            }
+            } else if (turno === 'B') {
+            // 18:30 a 23:59 y 00:00 a 06:29
+            for (let h = 18; h <= 23; h++) {
+                horas.push(h.toString().padStart(2, '0'));
+            }
+            for (let h = 0; h <= 6; h++) {
+                horas.push(h.toString().padStart(2, '0'));
+            }
+            }
+
+            // Llenar horas
+            if (horaSelect) {
+            horas.forEach(h => {
+                const option = document.createElement('option');
+                option.value = h;
+                option.text = h;
+                horaSelect.appendChild(option);
+            });
+            }
+
+            // Llenar minutos según la hora y turno
+            function actualizarMinutos() {
+            if (!minutosSelect) return;
+            minutosSelect.innerHTML = '';
+            let minStart = 0, minEnd = 59;
+            const hora = horaSelect ? parseInt(horaSelect.value, 10) : 0;
+
+            if (turno === 'A') {
+                if (hora === 6) {
+                minStart = 30; minEnd = 59;
+                } else if (hora === 18) {
+                minStart = 0; minEnd = 29;
+                }
+            } else if (turno === 'B') {
+                if (hora === 18) {
+                minStart = 30; minEnd = 59;
+                } else if (hora === 6) {
+                minStart = 0; minEnd = 29;
+                }
+            }
+            for (let m = minStart; m <= minEnd; m++) {
+                const option = document.createElement('option');
+                option.value = m.toString().padStart(2, '0');
+                option.text = m.toString().padStart(2, '0');
+                minutosSelect.appendChild(option);
+            }
+            }
+
+            if (horaSelect && minutosSelect) {
+            horaSelect.removeEventListener('change', actualizarMinutos);
+            horaSelect.addEventListener('change', actualizarMinutos);
+            actualizarMinutos();
+            }
+        }
+
+        // Inicializar selects al cargar
+        if (turnoSelect) {
+            llenarHorasMinutosPorTurno(turnoSelect.value);
+            turnoSelect.addEventListener('change', function () {
+            llenarHorasMinutosPorTurno(this.value);
+            });
+        }
+
+        // Guardar el horario completo en el input oculto al cambiar hora o minutos
+        function actualizarHorario() {
+            if (horaSelect && minutosSelect) {
+                const horario = `${horaSelect.value}:${minutosSelect.value}`;
+                const inputHorario = document.getElementById('horario-completo');
+                if (inputHorario) inputHorario.value = horario;
+            }
+        }
+        if (horaSelect && minutosSelect) {
+            horaSelect.addEventListener('change', actualizarHorario);
+            minutosSelect.addEventListener('change', actualizarHorario);
+        }
+    });
+</script>
+
+<script>
+// Script para actualizar rangos dinámicamente según producto seleccionado
+document.addEventListener('DOMContentLoaded', function() {
+    const categoria = '{{ category }}';
+
+    // Rangos por producto PAPA
+    const RANGOS_PRODUCTOS_PAPA = {
+        'PAPA SAL': {
+            humedad_base: '1.35 - 1.65',
+            aceite_base: '31 - 35',
+            humedad_pt: '1.35 - 1.8',
+            sal_pt: '0.55 - 0.85'
+        },
+        'RUFFLES QUESO': {
+            humedad_base: '1.20 - 1.5',
+            aceite_base: '31 - 35',
+            humedad_pt: '1.35 - 1.8',
+            sal_pt: '1.24 - 1.54'
+        },
+
+        'SABRITAS XTRA FH': {
+            humedad_base: '1.35 - 1.65',
+            aceite_base: '31 - 35',
+            humedad_pt: '1.41 - 1.71',
+            sal_pt: '1.58 - 1.88'
+        }
+    };
+
+    function actualizarRangosPorProducto(modalSelector, producto) {
+        if (categoria !== 'PAPA') return;
+
+        const modal = document.querySelector(modalSelector);
+        if (!modal) return;
+
+        const rangos = RANGOS_PRODUCTOS_PAPA[producto] || RANGOS_PRODUCTOS_PAPA['PAPA SAL'];
+        const isEdit = modalSelector.includes('edit');
+        const prefix = isEdit ? 'edit_' : '';
+
+        console.log(`🔄 Actualizando rangos para: ${producto}`, rangos);
+
+        // Actualizar Humedad Base
+        const humedadBase = modal.querySelector(`#${prefix}humedad_base_frita`);
+        if (humedadBase) {
+            const spanHumedad = humedadBase.closest('.input-group')?.querySelector('.input-group-text');
+            if (spanHumedad) {
+                spanHumedad.textContent = rangos.humedad_base;
+                console.log(`  ✓ Humedad Base: ${rangos.humedad_base}`);
+            }
+        }
+
+        // Actualizar Aceite Base
+        const aceiteBase = modal.querySelector(`#${prefix}aceite_base_frita`);
+        if (aceiteBase) {
+            const spanAceite = aceiteBase.closest('.input-group')?.querySelector('.input-group-text');
+            if (spanAceite) {
+                spanAceite.textContent = rangos.aceite_base;
+                console.log(`  ✓ Aceite Base: ${rangos.aceite_base}`);
+            }
+        }
+
+        // Actualizar Humedad PT (tanques)
+        for (let i = 1; i <= 3; i++) {
+            const humedadPT = modal.querySelector(`#${prefix}tanque${i}_humedad_pt`);
+            if (humedadPT) {
+                const spanHumedadPT = humedadPT.closest('.input-group')?.querySelector('.input-group-text');
+                if (spanHumedadPT) {
+                    spanHumedadPT.textContent = rangos.humedad_pt;
+                }
+            }
+        }
+
+        // Actualizar Sal PT (tanques) - ¡EL MÁS IMPORTANTE!
+        for (let i = 1; i <= 3; i++) {
+            const salPT = modal.querySelector(`#${prefix}tanque${i}_sal_pt`);
+            if (salPT) {
+                const spanSalPT = salPT.closest('.input-group')?.querySelector('.input-group-text');
+                if (spanSalPT) {
+                    spanSalPT.textContent = rangos.sal_pt;
+                    console.log(`  ✓ Sal PT T${i}: ${rangos.sal_pt}`);
+                }
+
+                // Actualizar también el atributo data-rango
+                if (producto === 'RUFFLES QUESO') {
+                    salPT.setAttribute('data-rango', '1.24-1.54 (ideal) / 1.19-1.23, 1.55-1.59 (aceptable)');
+                } else {
+                    salPT.setAttribute('data-rango', '0.55-0.85 (ideal) / 0.45-0.95 (aceptable)');
+                }
+            }
+        }
+    }
+
+    // Event listener para modal de CREACIÓN
+    const createModal = document.getElementById('createAnalisisModal');
+    if (createModal) {
+        // Actualizar cuando se abre el modal
+        createModal.addEventListener('shown.bs.modal', function() {
+            const productoSelect = document.getElementById('producto');
+            if (productoSelect) {
+                actualizarRangosPorProducto('#createAnalisisModal', productoSelect.value);
+            }
+        });
+
+        // Actualizar cuando cambia el producto
+        const productoSelect = document.getElementById('producto');
+        if (productoSelect) {
+            productoSelect.addEventListener('change', function() {
+                console.log(`📦 Producto cambiado a: ${this.value}`);
+                actualizarRangosPorProducto('#createAnalisisModal', this.value);
+            });
+        }
+    }
+
+    // Event listener para modal de EDICIÓN
+    const editModal = document.getElementById('editAnalisisModal');
+    if (editModal) {
+        // Actualizar cuando se abre el modal
+        editModal.addEventListener('shown.bs.modal', function() {
+            const productoSelect = document.getElementById('edit_producto');
+            if (productoSelect) {
+                actualizarRangosPorProducto('#editAnalisisModal', productoSelect.value);
+            }
+        });
+
+        // Actualizar cuando cambia el producto
+        const editProductoSelect = document.getElementById('edit_producto');
+        if (editProductoSelect) {
+            editProductoSelect.addEventListener('change', function() {
+                console.log(`📦 Producto cambiado a: ${this.value}`);
+                actualizarRangosPorProducto('#editAnalisisModal', this.value);
+            });
+        }
+    }
+
+    console.log('✅ Script de actualización de rangos por producto cargado');
+});
+</script>
+
+<script>
+// Script para cálculo automático de Sal PT = Sal Titulador - Cloruros Base
+document.addEventListener('DOMContentLoaded', function() {
+    const categoria = '{{ category }}';
+
+    if (categoria !== 'PAPA') {
+        console.log('⏭️  Cálculo automático de Sal PT no aplica para', categoria);
+        return;
+    }
+
+    console.log('🧮 Inicializando cálculo automático de Sal PT para PAPA...');
+
+    /**
+     * Calcula Sal PT para un tanque específico
+     */
+    function calcularSalPT(modalSelector, tanqueNumero) {
+        const isEdit = modalSelector.includes('edit');
+        const prefix = isEdit ? 'edit_' : '';
+
+        // Obtener el modal y el producto seleccionado
+        const modal = document.querySelector(modalSelector);
+        if (!modal) {
+            console.warn(`⚠️ Modal no encontrado: ${modalSelector}`);
+            return;
+        }
+
+        const productoSelect = modal.querySelector('select[name="producto"]');
+        const producto = productoSelect ? productoSelect.value : 'PAPA SAL';
+
+        // Obtener valores
+        const clorurosInput = document.getElementById(`${prefix}cloruros_base`.replace('edit_edit_', 'edit_'));
+        const salTituladorInput = document.getElementById(`${prefix}tanque${tanqueNumero}_sal_titulador`);
+        const salPTInput = document.getElementById(`${prefix}tanque${tanqueNumero}_sal_pt`);
+
+        if (!clorurosInput || !salTituladorInput || !salPTInput) {
+            console.warn(`⚠️ No se encontraron inputs para tanque ${tanqueNumero} en ${modalSelector}`);
+            return;
+        }
+
+        const cloruros = parseFloat(clorurosInput.value);
+        const salTitulador = parseFloat(salTituladorInput.value);
+
+        // Si ambos valores son válidos, calcular
+        if (!isNaN(cloruros) && !isNaN(salTitulador)) {
+            const salPT = salTitulador - cloruros;
+            salPTInput.value = salPT.toFixed(2);
+
+            console.log(`✅ Producto: ${producto} | Tanque ${tanqueNumero}: ${salTitulador} - ${cloruros} = ${salPT.toFixed(2)}`);
+
+            // Trigger cambio para que se apliquen colores de validación
+            salPTInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+            // Forzar aplicación de color si la función global está disponible
+            if (window.SistemaColoresFisicoquimicosUnificado) {
+                window.SistemaColoresFisicoquimicosUnificado.aplicarColor(
+                    salPTInput,
+                    salPT.toFixed(2),
+                    'sal_pt',
+                    'PAPA',
+                    producto
+                );
+            }
+        } else {
+            // Limpiar si no hay valores válidos
+            salPTInput.value = '';
+        }
+    }
+
+    /**
+     * Configura listeners para un modal específico
+     */
+    function configurarCalculoParaModal(modalSelector) {
+        const modal = document.querySelector(modalSelector);
+        if (!modal) return;
+
+        const isEdit = modalSelector.includes('edit');
+        const prefix = isEdit ? 'edit_' : '';
+        const numTanques = 2; // PAPA tiene 2 tambores
+
+        console.log(`🔧 Configurando cálculo para ${modalSelector}...`);
+
+        // Listener para Cloruros Base
+        const clorurosInput = document.getElementById(`${prefix}cloruros_base`.replace('edit_edit_', 'edit_'));
+        if (clorurosInput) {
+            clorurosInput.addEventListener('input', function() {
+                console.log(`📊 Cloruros cambiado a: ${this.value}`);
+                // Recalcular todos los tanques
+                for (let i = 1; i <= numTanques; i++) {
+                    calcularSalPT(modalSelector, i);
+                }
+            });
+        }
+
+        // Listeners para Sal Titulador de cada tanque
+        for (let i = 1; i <= numTanques; i++) {
+            const salTituladorInput = document.getElementById(`${prefix}tanque${i}_sal_titulador`);
+            if (salTituladorInput) {
+                salTituladorInput.addEventListener('input', function() {
+                    console.log(`📊 Sal Titulador T${i} cambiado a: ${this.value}`);
+                    calcularSalPT(modalSelector, i);
+                });
+            }
+        }
+
+        console.log(`✅ Cálculo configurado para ${modalSelector}`);
+    }
+
+    // Configurar para modal de creación
+    const createModal = document.getElementById('createAnalisisModal');
+    if (createModal) {
+        // Configurar cuando se abre el modal
+        createModal.addEventListener('shown.bs.modal', function() {
+            configurarCalculoParaModal('#createAnalisisModal');
+        });
+    }
+
+    // Configurar para modal de edición
+    const editModal = document.getElementById('editAnalisisModal');
+    if (editModal) {
+        // Configurar cuando se abre el modal
+        editModal.addEventListener('shown.bs.modal', function() {
+            configurarCalculoParaModal('#editAnalisisModal');
+
+            // Calcular valores iniciales si existen
+            setTimeout(() => {
+                for (let i = 1; i <= 2; i++) {
+                    calcularSalPT('#editAnalisisModal', i);
+                }
+            }, 100);
+        });
+    }
+
+    console.log('✅ Sistema de cálculo automático de Sal PT listo');
+});
+</script>
+
+<script>
+// Script para autocompletar Cloruros Base con el último valor registrado
+document.addEventListener('DOMContentLoaded', function() {
+    const categoria = '{{ category }}';
+
+    // Solo aplica para PAPA
+    if (categoria !== 'PAPA') {
+        console.log('⏭️  Autocomplete Cloruros Base: No aplica para', categoria);
+        return;
+    }
+
+    const createModal = document.getElementById('createAnalisisModal');
+    if (!createModal) {
+        console.log('⏭️  Modal de creación no encontrado');
+        return;
+    }
+
+    console.log('✅ Autocomplete de Cloruros Base configurado para PAPA');
+
+    // Función para cargar el último valor de Cloruros Base
+    function cargarUltimoClorurosBase() {
+        const clorurosInput = document.getElementById('cloruros_base');
+        const productoSelect = document.getElementById('producto');
+
+        if (!clorurosInput || !productoSelect) {
+            console.log('⏭️  Campos no encontrados (cloruros o producto)');
+            return;
+        }
+
+        const productoSeleccionado = productoSelect.value;
+
+        // Verificar que haya un producto seleccionado
+        if (!productoSeleccionado || productoSeleccionado.trim() === '') {
+            console.log('⏭️  No hay producto seleccionado aún');
+            return;
+        }
+
+        // Solo autocompletar si el campo está vacío
+        if (clorurosInput.value && clorurosInput.value.trim() !== '') {
+            console.log('📝 Cloruros Base ya tiene un valor:', clorurosInput.value);
+            return;
+        }
+
+        console.log('🔍 Obteniendo último Cloruros Base para producto:', productoSeleccionado);
+
+        // Llamar al API para obtener el último valor del producto seleccionado
+        fetch(`/api/ultimo_cloruros_base/${categoria}?producto=${encodeURIComponent(productoSeleccionado)}`)
+            .then(response => response.json())
+            .then(data => {
+                console.log('📡 Respuesta del API:', data);
+
+                if (data.success && data.valor) {
+                    console.log('✅ Último Cloruros Base encontrado:', data.valor);
+                    console.log('   Fecha:', data.fecha, '| Producto:', data.producto);
+
+                    // Autocompletar el campo
+                    clorurosInput.value = data.valor;
+                    console.log('✏️ Campo cloruros_base actualizado a:', clorurosInput.value);
+
+                    // Aplicar validación de color
+                    if (window.SistemaColoresFisicoquimicosUnificado) {
+                        window.SistemaColoresFisicoquimicosUnificado.aplicarColor(
+                            clorurosInput,
+                            data.valor,
+                            'cloruros_base',
+                            categoria,
+                            productoSeleccionado
+                        );
+                    }
+
+                    // Mostrar mensaje informativo al usuario
+                    const contenedor = clorurosInput.closest('.col-md-12');
+                    if (contenedor) {
+                        const pequenoTexto = contenedor.querySelector('.text-muted');
+                        if (pequenoTexto) {
+                            const mensajeOriginal = pequenoTexto.textContent;
+                            pequenoTexto.innerHTML = `<span class="text-success fw-bold">✓ Autocompletado: ${data.valor} (último de ${data.fecha})</span>`;
+
+                            // Restaurar mensaje después de 8 segundos
+                            setTimeout(() => {
+                                pequenoTexto.textContent = mensajeOriginal;
+                            }, 8000);
+                        }
+                    }
+
+                    // Trigger cálculo de Sal PT si es necesario
+                    clorurosInput.dispatchEvent(new Event('input', { bubbles: true }));
+
+                } else {
+                    console.log('ℹ️ No se encontró valor previo:', data.mensaje || 'Sin mensaje');
+                }
+            })
+            .catch(error => {
+                console.error('❌ Error obteniendo último Cloruros Base:', error);
+            });
+    }
+
+    // Listener cuando se abre el modal
+    createModal.addEventListener('shown.bs.modal', function() {
+        console.log('📂 Modal de creación abierto');
+
+        // Esperar un momento para que el modal esté completamente renderizado
+        setTimeout(() => {
+            cargarUltimoClorurosBase();
+        }, 300);
+    });
+
+    // Listener cuando cambia el producto
+    const productoSelect = document.getElementById('producto');
+    if (productoSelect) {
+        productoSelect.addEventListener('change', function() {
+            console.log('🔄 Producto cambiado a:', this.value);
+            cargarUltimoClorurosBase();
+        });
+    }
+});
+</script>
+
+<!-- Script de lógica de colores removido - ahora se maneja en rangos_fisicoquimicos_especificaciones.js -->
+{% endblock %}

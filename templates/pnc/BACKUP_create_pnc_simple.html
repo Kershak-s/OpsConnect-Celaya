@@ -1,0 +1,376 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para el formulario horizontal tipo Excel */
+    body {
+        background-color: #f8f9fa;
+    }
+    
+    .excel-form-container {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .excel-form-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: #343a40;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 1rem;
+    }
+    
+    .excel-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+    }
+    
+    .excel-table th {
+        background-color: #0d6efd;
+        color: white;
+        text-align: center;
+        padding: 1rem;
+        font-weight: 600;
+        border: 1px solid #dee2e6;
+    }
+    
+    .excel-table td {
+        padding: 0;
+        border: 1px solid #dee2e6;
+    }
+    
+    .excel-input {
+        width: 100%;
+        border: none;
+        padding: 0.75rem;
+        text-align: center;
+        background-color: #f8f9fa;
+    }
+    
+    .excel-input:focus {
+        outline: none;
+        background-color: #e9ecef;
+    }
+    
+    .excel-select {
+        width: 100%;
+        border: none;
+        padding: 0.75rem;
+        text-align: center;
+        background-color: #f8f9fa;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23212529' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+    }
+    
+    .excel-select:focus {
+        outline: none;
+        background-color: #e9ecef;
+    }
+    
+    .excel-invalid {
+        border: 2px solid #dc3545;
+    }
+    
+    .form-buttons {
+        margin-top: 2rem;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .add-row-btn {
+        margin-top: 1rem;
+        width: 100%;
+        padding: 0.5rem;
+        background-color: #f8f9fa;
+        border: 1px dashed #dee2e6;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .add-row-btn:hover {
+        background-color: #e9ecef;
+    }
+    
+    .add-row-btn i {
+        margin-right: 0.5rem;
+    }
+    
+    /* Animaciones */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .excel-form-container {
+        animation: fadeIn 0.5s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="excel-form-container">
+                <h1 class="excel-form-title">
+                    <i class="fas fa-times-circle me-2"></i>{{ title }}
+                </h1>
+                
+                <p class="mb-4">Ingrese los datos en la tabla a continuación (formato similar a Excel):</p>
+                
+                <form method="POST" action="{{ url_for('create_pnc_simple', category=category) }}" id="excel-form" class="needs-validation" novalidate>
+                    {{ form.csrf_token }}
+                    
+                    <div class="table-responsive">
+                        <table class="excel-table">
+                            <thead>
+                                <tr>
+                                    <th>FOLIO</th>
+                                    <th>FECHA</th>
+                                    <th>TURNO</th>
+                                    <th>NOMBRE DEL PRODUCTO</th>
+                                    <th>HORARIOS</th>
+                                </tr>
+                            </thead>
+                            <tbody id="excel-tbody">
+                                <tr>
+                                    <td>
+                                        {{ form.folio(class="excel-input", placeholder="Ej: PNC-001") }}
+                                        {% if form.folio.errors %}
+                                            <div class="text-danger small px-2 text-center">
+                                                {% for error in form.folio.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ form.fecha(class="excel-input", type="date") }}
+                                        {% if form.fecha.errors %}
+                                            <div class="text-danger small px-2 text-center">
+                                                {% for error in form.fecha.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ form.turno(class="excel-select") }}
+                                        {% if form.turno.errors %}
+                                            <div class="text-danger small px-2 text-center">
+                                                {% for error in form.turno.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {{ form.producto(class="excel-select") }}
+                                        {% if form.producto.errors %}
+                                            <div class="text-danger small px-2 text-center">
+                                                {% for error in form.producto.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="d-flex">
+                                            <select name="hora_inicio" class="excel-select me-1" required>
+                                                {% for h in range(0, 24) %}
+                                                    <option value="{{ '%02d' % h }}">{{ '%02d' % h }}:00</option>
+                                                {% endfor %}
+                                            </select>
+                                            <span class="align-self-center mx-1">a</span>
+                                            <select name="hora_fin" class="excel-select ms-1" required>
+                                                {% for h in range(0, 24) %}
+                                                    <option value="{{ '%02d' % h }}" {% if h == 8 %}selected{% endif %}>{{ '%02d' % h }}:00</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <input type="hidden" name="horario" id="horarioCombinado">
+                                        {% if form.horario.errors %}
+                                            <div class="text-danger small px-2 text-center">
+                                                {% for error in form.horario.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="form-buttons">
+                        <a href="{{ url_for('list_pnc_simple', category=category) }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Guardar Registro
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Formatear fecha actual por defecto si el campo está vacío
+    document.addEventListener('DOMContentLoaded', function() {
+        var fechaInput = document.getElementById('fecha');
+        if (fechaInput && !fechaInput.value) {
+            var today = new Date();
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+            var yyyy = today.getFullYear();
+            
+            today = yyyy + '-' + mm + '-' + dd;
+            fechaInput.value = today;
+        }
+        
+        // Inicializar el selector de horas según el turno
+        updateHoraOptions();
+        
+        // Agregar evento al cambio de turno
+        var turnoSelect = document.querySelector('select[name="turno"]');
+        if (turnoSelect) {
+            turnoSelect.addEventListener('change', updateHoraOptions);
+        }
+        
+        // Navegación entre celdas con Tab y Enter
+        const inputs = document.querySelectorAll('.excel-input:not([type="hidden"]), .excel-select');
+        
+        inputs.forEach((input, index) => {
+            input.addEventListener('keydown', function(e) {
+                // Al presionar Enter, moverse al siguiente campo
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const nextIndex = index + 1;
+                    if (nextIndex < inputs.length) {
+                        inputs[nextIndex].focus();
+                    } else {
+                        // Si es el último campo, enviar el formulario
+                        document.getElementById('excel-form').submit();
+                    }
+                }
+            });
+        });
+        
+        // Manejar envío del formulario para combinar horarios
+        document.getElementById('excel-form').addEventListener('submit', function(event) {
+            // Combinar hora inicio y fin en el formato "HH:00 - HH:00"
+            const horaInicio = document.querySelector('select[name="hora_inicio"]').value;
+            const horaFin = document.querySelector('select[name="hora_fin"]').value;
+            document.getElementById('horarioCombinado').value = `${horaInicio}:00 - ${horaFin}:00`;
+        });
+    });
+    
+    // Función para actualizar las opciones de hora según el turno seleccionado
+    function updateHoraOptions() {
+        const turnoSeleccionado = document.querySelector('select[name="turno"]').value;
+        const horaInicioSelect = document.querySelector('select[name="hora_inicio"]');
+        const horaFinSelect = document.querySelector('select[name="hora_fin"]');
+        
+        if (!horaInicioSelect || !horaFinSelect) return;
+        
+        // Limpiar opciones actuales
+        horaInicioSelect.innerHTML = '';
+        horaFinSelect.innerHTML = '';
+        
+        // Definir rangos de horas según el turno
+        let horasPermitidas = [];
+        
+        if (turnoSeleccionado === 'A') {
+            // Turno A: 7:00 AM - 6:00 PM (07:00 - 18:00)
+            for (let h = 7; h <= 18; h++) {
+                horasPermitidas.push(String(h).padStart(2, '0'));
+            }
+        } else { // Turno B
+            // Turno B: 6:01 PM - 6:59 AM (18:01 - 06:59)
+            // Primero agregamos las horas de la tarde/noche
+            for (let h = 19; h <= 23; h++) {
+                horasPermitidas.push(String(h).padStart(2, '0'));
+            }
+            // Luego agregamos las horas de la madrugada/mañana
+            for (let h = 0; h <= 6; h++) {
+                horasPermitidas.push(String(h).padStart(2, '0'));
+            }
+        }
+        
+        // Agregar opciones filtradas al selector de hora inicio
+        horasPermitidas.forEach(hora => {
+            const option = document.createElement('option');
+            option.value = hora;
+            option.textContent = `${hora}:00`;
+            horaInicioSelect.appendChild(option);
+        });
+        
+        // Agregar opciones filtradas al selector de hora fin
+        horasPermitidas.forEach(hora => {
+            const option = document.createElement('option');
+            option.value = hora;
+            option.textContent = `${hora}:00`;
+            horaFinSelect.appendChild(option);
+        });
+        
+        // Establecer valores predeterminados según el turno
+        if (turnoSeleccionado === 'A') {
+            horaInicioSelect.value = '07'; // 7:00 AM
+            horaFinSelect.value = '18';    // 6:00 PM
+        } else {
+            horaInicioSelect.value = '19'; // 7:00 PM
+            horaFinSelect.value = '06';    // 6:00 AM
+        }
+    }
+    
+    // Validación básica del formulario
+    (function() {
+        'use strict';
+        
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation');
+        
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                let isValid = true;
+                
+                // Validar cada campo manualmente
+                const inputs = form.querySelectorAll('.excel-input, .excel-select');
+                inputs.forEach(input => {
+                    if (input.hasAttribute('required') && !input.value.trim()) {
+                        input.classList.add('excel-invalid');
+                        isValid = false;
+                    } else {
+                        input.classList.remove('excel-invalid');
+                    }
+                });
+                
+                if (!isValid) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    // Mostrar mensaje de error
+                    alert('Por favor complete todos los campos requeridos.');
+                }
+            }, false);
+        });
+    })();
+</script>
+{% endblock %}

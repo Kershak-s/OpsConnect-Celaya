@@ -1,0 +1,34 @@
+<!-- 
+PATCH PARA AGREGAR COLUMNAS DE PT PRODUCTO TERMINADO A LA TABLA
+Agregar estas columnas al <thead> de la tabla después de las columnas de Sal PT T3
+-->
+
+<!-- NUEVAS COLUMNAS EN EL HEADER DE LA TABLA -->
+<th>Aceite PT General</th>
+<th>Humedad PT General</th>
+<th>Sal PT General</th>
+
+<!-- 
+TAMBIÉN AGREGAR EN EL <tbody> DE LA TABLA (dentro del loop {% for analisis in analisis_records %}):
+Agregar estas celdas después de las celdas de sal_pt T3
+-->
+
+<!-- NUEVAS CELDAS EN EL CUERPO DE LA TABLA -->
+<td class="{{ get_color_class(analisis.aceite_pt_producto_terminado, 'aceite_pt', analisis.producto) }}">
+    {{ analisis.aceite_pt_producto_terminado or '' }}
+</td>
+<td class="{{ get_color_class(analisis.humedad_pt_producto_terminado, 'humedad_pt', analisis.producto) }}">
+    {{ analisis.humedad_pt_producto_terminado or '' }}
+</td>
+<td class="{{ get_color_class(analisis.sal_pt_producto_terminado, 'sal_pt', analisis.producto) }}">
+    {{ analisis.sal_pt_producto_terminado or '' }}
+</td>
+
+<!--
+AGREGAR TAMBIÉN A LOS ATRIBUTOS data- DEL BOTÓN DE EDICIÓN:
+En el botón de edición, agregar estos data attributes:
+
+data-aceite_pt_producto_terminado="{{ analisis.aceite_pt_producto_terminado }}"
+data-humedad_pt_producto_terminado="{{ analisis.humedad_pt_producto_terminado }}"
+data-sal_pt_producto_terminado="{{ analisis.sal_pt_producto_terminado }}"
+-->

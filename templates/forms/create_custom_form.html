@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para crear formulario personalizado */
+    body {
+        background-color: #f8f9fa;
+        background-image: linear-gradient(135deg, #f5f7fa 0%, #e4eaec 100%);
+    }
+    
+    .breadcrumb-section {
+        padding: 1rem 0;
+        background-color: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(5px);
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .breadcrumb {
+        margin-bottom: 0;
+        padding: 0.5rem 1rem;
+    }
+    
+    .form-container {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        color: #343a40;
+        display: flex;
+        align-items: center;
+    }
+    
+    .form-title i {
+        margin-right: 0.8rem;
+        font-size: 1.6rem;
+        color: #0d6efd;
+    }
+    
+    .nav-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .nav-button {
+        border-radius: 50px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 500;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        background-color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+    }
+    
+    .nav-button:hover {
+        transform: translateX(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+    
+    .nav-button i {
+        margin-right: 0.5rem;
+    }
+    
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: #343a40;
+    }
+    
+    .form-group .form-text {
+        color: #6c757d;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .form-check-input:checked {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    
+    .btn-submit {
+        padding: 0.75rem 2rem;
+        font-weight: 500;
+        border-radius: 8px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+    
+    .btn-cancel {
+        padding: 0.75rem 2rem;
+        font-weight: 500;
+        border-radius: 8px;
+        background-color: #f8f9fa;
+        color: #6c757d;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-cancel:hover {
+        background-color: #e9ecef;
+        color: #343a40;
+    }
+    
+    /* Animaciones */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .form-container {
+        animation: fadeIn 0.5s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="nav-buttons">
+    <a href="{{ url_for('index') }}" class="nav-button">
+        <i class="fas fa-home"></i>Inicio
+    </a>
+    <a href="{{ url_for('line_sections', category=category) }}" class="nav-button">
+        <i class="fas fa-layer-group"></i>Secciones
+    </a>
+    <a href="{{ url_for('section_exercises', category=category, section='calidad') }}" class="nav-button">
+        <i class="fas fa-award"></i>Calidad
+    </a>
+    <a href="{{ url_for('custom_forms', category=category) }}" class="nav-button">
+        <i class="fas fa-clipboard-list"></i>Formularios Personalizados
+    </a>
+</div>
+
+<div class="breadcrumb-section">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('line_sections', category=category) }}">{{ category }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('section_exercises', category=category, section='calidad') }}">Calidad</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('custom_forms', category=category) }}">Formularios Personalizados</a></li>
+            <li class="breadcrumb-item active">Crear Formulario</li>
+        </ol>
+    </nav>
+</div>
+
+<div class="container">
+    <div class="form-container">
+        <h1 class="form-title">
+            <i class="fas fa-file-alt"></i>Crear Nuevo Formulario Personalizado
+        </h1>
+        
+        <form method="POST" action="{{ url_for('create_custom_form', category=category) }}">
+            {{ form.hidden_tag() }}
+            
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <div class="form-group mb-3">
+                        <label for="title">{{ form.title.label }}</label>
+                        {{ form.title(class="form-control", placeholder="Ej: Evaluación de Calidad del Producto") }}
+                        <div class="form-text">Ingrese un título descriptivo para el formulario.</div>
+                        {% for error in form.title.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group mb-3">
+                        <label for="is_active">Estado</label>
+                        <div class="form-check form-switch mt-2">
+                            {{ form.is_active(class="form-check-input") }}
+                            <label class="form-check-label" for="is_active">{{ form.is_active.label }}</label>
+                        </div>
+                        <div class="form-text">Los formularios inactivos no son visibles para los usuarios.</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group mb-4">
+                <label for="description">{{ form.description.label }}</label>
+                {{ form.description(class="form-control", rows=4, placeholder="Descripción detallada del propósito del formulario...") }}
+                <div class="form-text">Una descripción clara ayudará a los usuarios a entender el propósito del formulario.</div>
+                {% for error in form.description.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="form-group mb-3">
+                        <label for="category">{{ form.category.label }}</label>
+                        {{ form.category(class="form-select") }}
+                        {% for error in form.category.errors %}
+                            <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
+                <!-- No mostramos el selector de sección ya que se establece automáticamente -->
+                <input type="hidden" name="section" value="nuevo_formulario">
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <a href="{{ url_for('custom_forms', category=category) }}" class="btn btn-cancel">
+                    <i class="fas fa-times me-2"></i>Cancelar
+                </a>
+                {{ form.submit(class="btn btn-primary btn-submit") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para el formulario */
+    .form-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .card-header {
+        margin-bottom: 1.5rem;
+    }
+    
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #343a40;
+        margin-bottom: 0.5rem;
+    }
+    
+    .card-subtitle {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #343a40;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        border: 1px solid #ced4da;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+    
+    .btn-form {
+        padding: 0.75rem 2rem;
+        font-size: 1rem;
+        font-weight: 500;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-form:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .form-footer {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid #e9ecef;
+    }
+    
+    @media (max-width: 767.98px) {
+        .form-card {
+            padding: 1.5rem;
+        }
+        
+        .form-footer {
+            flex-direction: column-reverse;
+            gap: 1rem;
+        }
+        
+        .btn-form {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('line_sections', category=category) }}">{{ category }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('section_exercises', category=category, section='calidad') }}">Calidad</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('list_pnc', category=category) }}">Registros PNC</a></li>
+            <li class="breadcrumb-item active">Nuevo Registro</li>
+        </ol>
+    </nav>
+    
+    <div class="form-card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-plus-circle me-2"></i>Nuevo Registro de Calidad - TORTILLA
+            </h2>
+            <p class="card-subtitle">Complete todos los campos para crear un nuevo registro.</p>
+        </div>
+        
+        <form method="POST" action="{{ url_for('create_calidad_tortilla') }}">
+            {{ form.hidden_tag() }}
+            
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.folio.label(class="form-label") }}
+                        {{ form.folio(class="form-control", placeholder="Ingrese el folio") }}
+                        {% if form.folio.errors %}
+                            <div class="text-danger">
+                                {% for error in form.folio.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.fecha.label(class="form-label") }}
+                        {{ form.fecha(class="form-control", type="date") }}
+                        {% if form.fecha.errors %}
+                            <div class="text-danger">
+                                {% for error in form.fecha.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.turno.label(class="form-label") }}
+                        {{ form.turno(class="form-select") }}
+                        {% if form.turno.errors %}
+                            <div class="text-danger">
+                                {% for error in form.turno.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.producto.label(class="form-label") }}
+                        {{ form.producto(class="form-select") }}
+                        {% if form.producto.errors %}
+                            <div class="text-danger">
+                                {% for error in form.producto.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="col-12">
+                    <div class="mb-3">
+                        {{ form.horario.label(class="form-label") }}
+                        {{ form.horario(class="form-control", placeholder="Ingrese los horarios") }}
+                        {% if form.horario.errors %}
+                            <div class="text-danger">
+                                {% for error in form.horario.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-footer">
+                <a href="{{ url_for('list_pnc', category=category) }}" class="btn btn-secondary btn-form">
+                    <i class="fas fa-arrow-left me-1"></i>Volver
+                </a>
+                {{ form.submit(class="btn btn-primary btn-form") }}
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

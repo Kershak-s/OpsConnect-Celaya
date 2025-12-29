@@ -1,0 +1,143 @@
+/**
+ * Estilos para el slider de productos en PNC Simple - TORTILLA
+ */
+.productos-slider {
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.productos-slider .card-header {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.productos-slider .card-header .slider-controls {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.productos-slider .card-header .slider-controls .btn {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.productos-slider .card-header .slider-controls .btn:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+}
+
+.productos-slider .card-header .slider-controls .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.productos-slider .card-body {
+    padding: 1.5rem;
+}
+
+.productos-slider .slider-container {
+    overflow: hidden;
+    position: relative;
+}
+
+.productos-slider .slider-track {
+    display: flex;
+    transition: transform 0.5s ease;
+}
+
+.productos-slider .slider-slide {
+    min-width: 100%;
+    display: flex;
+    gap: 1.5rem;
+}
+
+/* Tarjetas de producto */
+.producto-card {
+    flex: 1;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    text-align: center;
+    color: white;
+    min-height: 200px;
+}
+
+.producto-card.total {
+    background: linear-gradient(135deg, #0d6efd, #0a58ca);
+}
+
+.producto-card.rechazados {
+    background: linear-gradient(135deg, #dc3545, #b02a37);
+}
+
+.producto-card.detenidos {
+    background: linear-gradient(135deg, #ffc107, #ffb700);
+    color: #212529;
+}
+
+.producto-card .icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.producto-card .title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.producto-card .value {
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+}
+
+.producto-card .unit {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.productos-slider {
+    animation: fadeIn 0.8s ease;
+}
+
+/* Estilos responsivos */
+@media (max-width: 767.98px) {
+    .productos-slider .slider-slide {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .producto-card {
+        min-height: 150px;
+        padding: 1.5rem;
+    }
+    
+    .producto-card .value {
+        font-size: 2.5rem;
+    }
+}

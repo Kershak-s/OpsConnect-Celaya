@@ -1,0 +1,260 @@
+/* Versión alternativa con tema PepsiCo más pronunciado */
+
+/* Agregar estas clases al archivo login-modern.css existente o usarlas como alternativa */
+
+/* Versión con logo PepsiCo animado */
+.pepsi-logo-animated {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 20px;
+}
+
+.pepsi-circle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #C9302C 0%, #E74C3C 50%);
+    position: relative;
+    overflow: hidden;
+    animation: rotate-logo 20s linear infinite;
+}
+
+.pepsi-wave {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    background: white;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-20deg);
+    clip-path: polygon(0 40%, 100% 30%, 100% 70%, 0 60%);
+}
+
+.pepsi-wave::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #005891;
+    clip-path: polygon(0 0, 100% 0, 100% 50%, 0 50%);
+}
+
+@keyframes rotate-logo {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Versión con patrón de onda PepsiCo */
+.login-header-pepsi {
+    background: #005891;
+    position: relative;
+    overflow: hidden;
+}
+
+.login-header-pepsi::before {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    left: -50%;
+    width: 200%;
+    height: 200px;
+    background: white;
+    border-radius: 50%;
+    animation: wave-motion 10s ease-in-out infinite;
+}
+
+.login-header-pepsi::after {
+    content: '';
+    position: absolute;
+    bottom: -60px;
+    left: -50%;
+    width: 200%;
+    height: 200px;
+    background: #C9302C;
+    border-radius: 50%;
+    animation: wave-motion 10s ease-in-out infinite;
+    animation-delay: -5s;
+}
+
+@keyframes wave-motion {
+    0%, 100% { transform: translateX(0) translateY(0); }
+    50% { transform: translateX(50px) translateY(-20px); }
+}
+
+/* Botón estilo PepsiCo */
+.btn-pepsi {
+    background: #C9302C;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-pepsi::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%);
+    transform: rotate(45deg);
+    transition: all 0.6s;
+    opacity: 0;
+}
+
+.btn-pepsi:hover::before {
+    animation: shine 0.6s ease-in-out;
+}
+
+@keyframes shine {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
+}
+
+/* Variante con efecto de burbujas de refresco */
+.soda-bubbles {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.soda-bubble {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    animation: rise-bubble 3s ease-in-out infinite;
+}
+
+.soda-bubble:nth-child(1) {
+    width: 10px;
+    height: 10px;
+    left: 20%;
+    animation-delay: 0s;
+}
+
+.soda-bubble:nth-child(2) {
+    width: 6px;
+    height: 6px;
+    left: 40%;
+    animation-delay: 0.5s;
+}
+
+.soda-bubble:nth-child(3) {
+    width: 8px;
+    height: 8px;
+    left: 60%;
+    animation-delay: 1s;
+}
+
+.soda-bubble:nth-child(4) {
+    width: 12px;
+    height: 12px;
+    left: 80%;
+    animation-delay: 1.5s;
+}
+
+@keyframes rise-bubble {
+    0% {
+        bottom: 0;
+        opacity: 0;
+        transform: scale(0);
+    }
+    10% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        bottom: 100%;
+        opacity: 0;
+        transform: scale(0.3);
+    }
+}
+
+/* Tema festivo PepsiCo */
+.login-festive {
+    position: relative;
+}
+
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #C9302C;
+    animation: confetti-fall 3s linear infinite;
+}
+
+.confetti:nth-child(even) {
+    background: #005891;
+    animation-delay: -0.5s;
+}
+
+.confetti:nth-child(3n) {
+    background: white;
+    animation-delay: -1s;
+}
+
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
+}
+
+/* Efecto de texto 3D para el subtítulo (opcional) */
+.login-subtitle-3d {
+    font-size: 22px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: white;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 
+        2px 2px 4px rgba(0, 0, 0, 0.2),
+        4px 4px 8px rgba(0, 0, 0, 0.1);
+    animation: text-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes text-glow {
+    from {
+        filter: drop-shadow(0 0 10px rgba(0, 119, 190, 0.5));
+    }
+    to {
+        filter: drop-shadow(0 0 20px rgba(201, 48, 44, 0.5));
+    }
+}
+
+/* Modo oscuro alternativo */
+@media (prefers-color-scheme: dark) {
+    .login-card {
+        background: rgba(30, 30, 30, 0.95);
+        color: white;
+    }
+    
+    .form-control {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+    
+    .form-control:focus {
+        background-color: rgba(255, 255, 255, 0.15);
+        border-color: var(--pepsi-light-blue);
+    }
+    
+    .form-label {
+        color: rgba(255, 255, 255, 0.9);
+    }
+}

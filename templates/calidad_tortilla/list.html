@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para la tabla responsiva */
+    .data-card {
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+        overflow: hidden;
+    }
+    
+    .card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #343a40;
+        margin-bottom: 0;
+    }
+    
+    .table-responsive {
+        margin-bottom: 1rem;
+    }
+    
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+    
+    .data-table th {
+        background-color: #f8f9fa;
+        color: #343a40;
+        font-weight: 600;
+        text-align: center;
+        padding: 1rem;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .data-table td {
+        padding: 1rem;
+        text-align: center;
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: middle;
+    }
+    
+    .data-table tr:hover td {
+        background-color: #f8f9fa;
+    }
+    
+    .action-btn {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.875rem;
+        border-radius: 0.25rem;
+        margin-right: 0.25rem;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+    }
+    
+    .empty-state i {
+        font-size: 3rem;
+        color: #dee2e6;
+        margin-bottom: 1rem;
+    }
+    
+    .empty-state h3 {
+        font-size: 1.5rem;
+        color: #343a40;
+        margin-bottom: 0.5rem;
+    }
+    
+    .empty-state p {
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+    
+    @media (max-width: 767.98px) {
+        .data-table {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+        }
+        
+        .data-card {
+            padding: 1rem;
+        }
+        
+        .card-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .card-title {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('line_sections', category=category) }}">{{ category }}</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('section_exercises', category=category, section='calidad') }}">Calidad</a></li>
+            <li class="breadcrumb-item active">Registros de Calidad - Tortilla</li>
+        </ol>
+    </nav>
+    
+    <div class="data-card">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-table me-2"></i>Registros de Calidad - TORTILLA
+            </h2>
+            <div>
+                <a href="{{ url_for('create_calidad_tortilla') }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Nuevo Registro
+                </a>
+            </div>
+        </div>
+        
+        {% if registros %}
+        <div class="table-responsive">
+            <table class="data-table table table-hover">
+                <thead>
+                    <tr>
+                        <th>FOLIO</th>
+                        <th>FECHA</th>
+                        <th>TURNO</th>
+                        <th>NOMBRE DEL PRODUCTO</th>
+                        <th>HORARIOS</th>
+                        <th>ACCIONES</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for registro in registros %}
+                    <tr>
+                        <td>{{ registro.folio }}</td>
+                        <td>{{ registro.fecha.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ registro.turno }}</td>
+                        <td>{{ registro.producto }}</td>
+                        <td>{{ registro.horario }}</td>
+                        <td>
+                            <a href="{{ url_for('edit_calidad_tortilla', registro_id=registro.id) }}" class="btn btn-sm btn-warning action-btn">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <button type="button" class="btn btn-sm btn-danger action-btn" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#deleteModal" 
+                                    data-registro-id="{{ registro.id }}"
+                                    data-registro-folio="{{ registro.folio }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fas fa-clipboard-list"></i>
+            <h3>No hay registros disponibles</h3>
+            <p>Aún no se han creado registros de calidad para tortillas.</p>
+            <a href="{{ url_for('create_calidad_tortilla') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Crear Primer Registro
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Modal para eliminar -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmar Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Estás seguro de que deseas eliminar el registro con folio <span id="registroFolio"></span>?
+                Esta acción no se puede deshacer.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form id="deleteForm" action="" method="POST">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configurar el modal de eliminación
+        const deleteModal = document.getElementById('deleteModal');
+        if (deleteModal) {
+            deleteModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const registroId = button.getAttribute('data-registro-id');
+                const registroFolio = button.getAttribute('data-registro-folio');
+                
+                document.getElementById('registroFolio').textContent = registroFolio;
+                document.getElementById('deleteForm').action = "{{ url_for('delete_calidad_tortilla', registro_id=0) }}".replace('0', registroId);
+            });
+        }
+    });
+</script>
+{% endblock %}

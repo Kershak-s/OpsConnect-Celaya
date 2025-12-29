@@ -1,0 +1,397 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section_name }} - {{ category }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para la página de ejercicios */
+    body {
+        background-color: #f8f9fa;
+        background-image: linear-gradient(135deg, #f5f7fa 0%, #e4eaec 100%);
+    }
+
+    .breadcrumb-section {
+        padding: 1rem 0;
+        background-color: rgba(255, 255, 255, 0.5);
+        backdrop-filter: blur(5px);
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .breadcrumb {
+        margin-bottom: 0;
+        padding: 0.5rem 1rem;
+    }
+
+    .page-header {
+        position: relative;
+        margin-bottom: 2.5rem;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-header-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url("{{ url_for('static', filename=(menu_item.image_path if menu_item is not mapping else menu_item['image_path']).replace('\\\\', '/')) }}");
+        background-size: cover;
+        background-position: center;
+        filter: blur(0px);
+        transform: scale(1.1);
+        z-index: -1;
+    }
+
+    .page-header-overlay {
+        background: linear-gradient(90deg,
+                rgba(var(--section-color-rgb), 0.95) 0%,
+                rgba(var(--section-color-rgb), 0.7) 100%);
+        padding: 2.5rem 0;
+    }
+
+    .page-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: white;
+        display: flex;
+        align-items: center;
+    }
+
+    .page-title i {
+        margin-right: 0.8rem;
+        font-size: 2rem;
+    }
+
+    .page-description {
+        font-size: 1.1rem;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 0;
+    }
+
+    .exercise-cards-container {
+        position: relative;
+        margin-top: -20px;
+        z-index: 10;
+    }
+
+    .exercise-card {
+        position: relative;
+        height: 180px;
+        border-radius: 15px;
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        overflow: hidden;
+        cursor: pointer;
+        border: none;
+        margin-bottom: 30px;
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        transform: translateY(0);
+    }
+
+    .exercise-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+
+    .exercise-card:before {
+        content: "";
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0) 50%);
+        z-index: 1;
+    }
+
+    .exercise-card.bg-danger {
+        background: linear-gradient(135deg, #dc3545 0%, #a71d2a 100%);
+    }
+
+    .exercise-card.bg-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+    }
+
+    .exercise-card.bg-warning {
+        background: linear-gradient(135deg, #ffc107 0%, #d39e00 100%);
+    }
+
+    .exercise-card.bg-info {
+        background: linear-gradient(135deg, #0dcaf0 0%, #0aa2c0 100%);
+    }
+
+    .exercise-card.bg-success {
+        background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+    }
+
+    .exercise-card.bg-secondary {
+        background: linear-gradient(135deg, #6c757d 0%, #565e64 100%);
+    }
+
+    .exercise-card .card-body {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: white;
+        text-align: center;
+        padding: 1.5rem;
+        z-index: 2;
+    }
+
+    .exercise-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.9;
+        transition: all 0.3s ease;
+    }
+
+    .exercise-card:hover .exercise-icon {
+        transform: scale(1.1);
+        opacity: 1;
+    }
+
+    .exercise-name {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .exercise-card:hover .exercise-name {
+        transform: translateY(-5px);
+    }
+
+    .exercise-desc {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        max-width: 100%;
+        margin: 0 auto;
+        height: 0;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .exercise-card:hover .exercise-desc {
+        height: auto;
+        margin-top: 0.8rem;
+        opacity: 1;
+        overflow: visible;
+        min-height: 40px;
+    }
+
+    .nav-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .nav-button {
+        border-radius: 50px;
+        padding: 0.6rem 1.2rem;
+        font-weight: 500;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        background-color: white;
+        border: none;
+        display: flex;
+        align-items: center;
+    }
+
+    .nav-button:hover {
+        transform: translateX(-5px);
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .nav-button i {
+        margin-right: 0.5rem;
+    }
+
+    /* Animaciones de entrada */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translate3d(0, 30px, 0);
+        }
+
+        to {
+            opacity: 1;
+            transform: translate3d(0, 0, 0);
+        }
+    }
+
+    .exercise-card {
+        animation: fadeInUp 0.5s both;
+    }
+
+    .exercise-card:nth-child(1) {
+        animation-delay: 0.1s;
+    }
+
+    .exercise-card:nth-child(2) {
+        animation-delay: 0.15s;
+    }
+
+    .exercise-card:nth-child(3) {
+        animation-delay: 0.2s;
+    }
+
+    .exercise-card:nth-child(4) {
+        animation-delay: 0.25s;
+    }
+
+    .exercise-card:nth-child(5) {
+        animation-delay: 0.3s;
+    }
+
+    .exercise-card:nth-child(6) {
+        animation-delay: 0.35s;
+    }
+
+    /* Variables específicas de sección */
+    .section-calidad {
+        --section-color-rgb: 13, 110, 253;
+    }
+
+    .section-produccion {
+        --section-color-rgb: 25, 135, 84;
+    }
+
+    .section-mantenimiento {
+        --section-color-rgb: 255, 193, 7;
+    }
+
+    .section-inocuidad {
+        --section-color-rgb: 13, 202, 240;
+    }
+
+    .section-formularios {
+        --section-color-rgb: 108, 117, 125;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="section-{{ section }}">
+    <div class="nav-buttons">
+        <a href="{{ url_for('index') }}" class="nav-button">
+            <i class="fas fa-home"></i>Inicio
+        </a>
+        <a href="{{ url_for('line_sections', category=category) }}" class="nav-button">
+            <i class="fas fa-arrow-left"></i>Volver a Secciones
+        </a>
+    </div>
+
+    <div class="breadcrumb-section">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('line_sections', category=category) }}">{{ category
+                        }}</a></li>
+                <li class="breadcrumb-item active">{{ section_name }}</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="page-header">
+        <div class="page-header-bg"></div>
+        <div class="page-header-overlay">
+            <div class="container py-3">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h1 class="page-title">
+                            <i class="fas {{ section_icon }}"></i>
+                            {{ section_name|capitalize }} - {{ category|capitalize }} - {% if subsection != 'kpi' %}{{ subsection|capitalize }}{% else %}KPIs{% endif %}
+                        </h1>
+                        <p class="page-description">
+                            Seleccione un ejercicio o herramienta de {{ section_name }} para la línea {{ category }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container exercise-cards-container">
+        {% if exercises %}
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            {% for exercise in exercises %}
+            <div class="col">
+                <div class="card exercise-card bg-{{ exercise.color }}" id="{{ exercise.id }}">
+                    <div class="card-body">
+                        <i class="fas {{ exercise.icon }} exercise-icon"></i>
+                        <h3 class="exercise-name">{{ exercise.name | upper}}</h3>
+                        <p class="exercise-desc">{{ exercise.description }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            No hay ejercicios disponibles para esta sección. Próximamente se agregarán nuevas funcionalidades.
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- No Modal para Registro de Aceite - Removido ya que ahora el formulario está integrado en la tarjeta -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Hacer que las tarjetas de ejercicios sean clicables
+        const exerciseCards = document.querySelectorAll('.exercise-card');
+
+        exerciseCards.forEach(card => {
+            card.addEventListener('click', function () {
+                const exerciseName = this.querySelector('.exercise-name').textContent;
+                const exerciseId = this.id;
+
+                // Efecto visual al hacer clic
+                this.style.transform = 'scale(0.98) translateY(-5px)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+
+                // Redirigir a la herramienta correspondiente
+                setTimeout(() => {
+                    // Redirigir a la herramienta de Nuevo Formulario
+                    if (exerciseId === 'nuevo_formulario') {
+                        window.location.href = `{{ url_for('section_exercises', category=category, section=section) }}?exercise=${exerciseId}`;
+                    }
+                    // Redirigir a la herramienta de PNC
+                    else if (exerciseId === 'pnc') {
+                        window.location.href = `{{ url_for('list_pnc_simple', category=category) }}`;
+                    }
+                    // Redirigir a la herramienta de PAE
+                    else if (exerciseId === 'pae') {
+                        window.location.href = `{{ url_for('pae_dashboard', category=category) }}`;
+                    }
+                    // Redirigir a la herramienta de WEAK LINK
+                    else if (exerciseId === 'weaklink') {
+                        window.location.href = `{{ url_for('weaklink_dashboard', category=category) }}`;
+                    }
+                    // Redirigir a la herramienta de Análisis Fisicoquímicos
+                    else if (exerciseId === 'laboratorio') {
+                        window.location.href = `{{ url_for('laboratorio', category=category) }}`;
+                    }
+                    else {
+                        // Por ahora mostrar un mensaje para otras opciones
+                        alert(`Has seleccionado el ejercicio: ${exerciseName}\nEsta funcionalidad será implementada próximamente.`);
+                    }
+                }, 200);
+            });
+        });
+
+        // No es necesario el código para el formulario dentro del botón, ya que ahora redirige a otra página
+    });
+</script>
+{% endblock %}

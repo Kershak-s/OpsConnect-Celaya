@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pnc.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-eye me-2"></i> Detalles PNC - {{ pnc.folio }}
+                    </h5>
+                    <div>
+                        <a href="{{ url_for('edit_pnc', category=category, pnc_id=pnc.id) }}" class="btn btn-light btn-sm">
+                            <i class="fas fa-edit"></i> Editar
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Información principal en formato tabla horizontal -->
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered pnc-table pnc-detail-table">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>FOLIO</th>
+                                    <th>FECHA</th>
+                                    <th>TURNO</th>
+                                    <th>NOMBRE DEL PRODUCTO</th>
+                                    <th>HORARIOS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>{{ pnc.folio }}</td>
+                                    <td>{{ pnc.fecha.strftime('%d/%m/%Y') }}</td>
+                                    <td>{{ pnc.turno }}</td>
+                                    <td>{{ pnc.producto }}</td>
+                                    <td>{{ pnc.horario }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Información adicional -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <strong>Cantidad</strong>
+                                </div>
+                                <div class="card-body">
+                                    {{ pnc.cantidad }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <strong>Origen</strong>
+                                </div>
+                                <div class="card-body">
+                                    {{ pnc.origen }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <strong>No Conformidad</strong>
+                                </div>
+                                <div class="card-body">
+                                    {{ pnc.no_conformidad }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <strong>Status</strong>
+                                </div>
+                                <div class="card-body">
+                                    <span class="badge {% if pnc.status == 'Rechazado' %}bg-danger{% else %}bg-warning{% endif %} fs-6">
+                                        {{ pnc.status }}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <strong>Detector</strong>
+                                </div>
+                                <div class="card-body">
+                                    {{ pnc.detector }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <strong>Rechazo</strong>
+                                </div>
+                                <div class="card-body">
+                                    {% if pnc.rechazo %}
+                                    <span class="badge bg-danger">Sí</span>
+                                    {% else %}
+                                    <span class="badge bg-secondary">No</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Información de metadatos -->
+                    <div class="row mt-3">
+                        <div class="col-md-12">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <small>
+                                        <i class="fas fa-user me-1"></i> Creado por: {{ pnc.creator.username }} &nbsp;|&nbsp;
+                                        <i class="fas fa-calendar-alt me-1"></i> Fecha de creación: {{ pnc.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                        {% if pnc.updated_at %}
+                                        &nbsp;|&nbsp; <i class="fas fa-edit me-1"></i> Última actualización: {{ pnc.updated_at.strftime('%d/%m/%Y %H:%M') }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <a href="{{ url_for('list_pnc', category=category) }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Volver a la lista
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm:*)",
+      "Bash(python:*)",
+      "Bash(python3:*)",
+      "Bash(source:*)",
+      "Bash(venv/Scripts/python.exe:*)",
+      "Bash(/mnt/c/Windows/py.exe:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(sqlite3:*)",
+      "Bash(find:*)",
+      "Bash(grep:*)",
+      "Bash(node -c:*)",
+      "Bash(node --check:*)",
+      "Bash(chmod:*)",
+      "Bash(./test_graficas.sh:*)",
+      "Bash(bash test_graficas.sh:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

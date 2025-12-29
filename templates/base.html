@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}OpsConnect{% endblock %}</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='img/icons/favicon.ico') }}">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <!-- Estilos para selectores de hora -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/hora-restrictiva.css') }}?v={{ now.timestamp() }}">
+    <!-- Estilos para validación personalizada -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom-validation.css') }}?v={{ now.timestamp() }}">
+    <!-- Estilos para mensajes de horario -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom/horario-info.css') }}?v={{ now.timestamp() }}">
+    <!-- Estilos para campo FOLIO en PNC Simple -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom/pnc-simple-folio.css') }}?v={{ now.timestamp() }}">
+    <!-- Estilos para selector de tiempo en PNC Simple -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom/pnc-simple-timepicker.css') }}?v={{ now.timestamp() }}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    {% if current_user.is_authenticated %}
+    <!-- Navbar superior -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container-fluid">
+            <!-- Logo a la izquierda -->
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-tasks me-2"></i>OpsConnect
+            </a>
+            <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"></button>
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        <!-- Elementos a la derecha -->
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                            data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>{{ current_user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('change_password') }}">
+                                    <i class="fas fa-key me-2"></i>Cambiar Contraseña
+                                </a>
+                            </li>
+                            {% if current_user.is_admin %}
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('admin_users') }}">
+                                    <i class="fas fa-users-cog me-2"></i>Gestión de Usuarios
+                                </a>
+                            </li>
+                            {% endif %}
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="{{ url_for('logout') }}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+
+    <!-- Contenido principal -->
+    <main class="container py-5 mt-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer bg-light py-3 mt-5">
+        <div class="container text-center">
+            <span class="text-muted">© 2025 Sistema de Gestión. Todos los derechos reservados.</span>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery (para algunas operaciones ajax) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- Script personalizado -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <!-- Script para selectores de hora en PNC Simple -->
+    <script src="{{ url_for('static', filename='js/pnc-hora-selector.js') }}?v={{ now.timestamp() }}"></script>
+    <!-- Script para validación personalizada de inputs -->
+    <script src="{{ url_for('static', filename='js/custom/input-validator.js') }}?v={{ now.timestamp() }}"></script>
+    <!-- Script para mensajes de horario personalizados -->
+    <script src="{{ url_for('static', filename='js/custom/horario-mensaje.js') }}?v={{ now.timestamp() }}"></script>
+    <!-- Script para remover mensajes en PNC Simple -->
+    <script src="{{ url_for('static', filename='js/custom/pnc-simple-message-remover.js') }}?v={{ now.timestamp() }}"></script>
+    <!-- Script para detectar páginas PNC Simple -->
+    <script src="{{ url_for('static', filename='js/custom/pnc-simple-detector.js') }}?v={{ now.timestamp() }}"></script>
+    <!-- Script para mejorar campos de tiempo en PNC Simple -->
+    <script src="{{ url_for('static', filename='js/custom/pnc-simple-timefields.js') }}?v={{ now.timestamp() }}"></script>
+    <!-- Script para añadir iconos de reloj en PNC Simple -->
+    <script src="{{ url_for('static', filename='js/custom/pnc-simple-clock-icons.js') }}?v={{ now.timestamp() }}"></script>
+    <!-- Script para mejorar el campo FOLIO en PNC Simple -->
+    <script src="{{ url_for('static', filename='js/custom/pnc-simple-folio-enhancer.js') }}?v={{ now.timestamp() }}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

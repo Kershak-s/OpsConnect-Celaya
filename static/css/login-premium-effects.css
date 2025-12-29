@@ -1,0 +1,256 @@
+/* Efectos especiales opcionales para el login de Ops Connect */
+/* Para activar, agregar class="premium-effects" al body */
+
+/* Efecto de partículas flotantes */
+.premium-effects::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(255, 255, 255, 0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Efecto de brillo en el logo */
+.premium-effects .login-logo::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.3) 50%,
+        transparent 70%
+    );
+    transform: rotate(45deg) translate(-100%, -100%);
+    transition: transform 0.6s;
+}
+
+.premium-effects .login-logo:hover::after {
+    transform: rotate(45deg) translate(100%, 100%);
+}
+
+/* Efecto de neón en el título */
+.premium-effects .login-title {
+    text-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.5),
+        0 0 20px rgba(255, 255, 255, 0.3),
+        0 0 30px rgba(0, 119, 190, 0.3),
+        0 0 40px rgba(0, 119, 190, 0.2);
+}
+
+/* Efecto de cristal en el card */
+.premium-effects .login-card {
+    background: 
+        linear-gradient(135deg, 
+            rgba(255, 255, 255, 0.95) 0%, 
+            rgba(255, 255, 255, 0.85) 50%, 
+            rgba(255, 255, 255, 0.95) 100%);
+    backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+/* Efecto de aurora en el fondo */
+.premium-effects .bg-animation::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: 
+        radial-gradient(ellipse at center, 
+            rgba(0, 119, 190, 0.1) 0%, 
+            transparent 40%),
+        radial-gradient(ellipse at bottom, 
+            rgba(0, 88, 145, 0.1) 0%, 
+            transparent 50%);
+    animation: aurora 20s ease-in-out infinite;
+}
+
+@keyframes aurora {
+    0%, 100% {
+        transform: rotate(0deg) scale(1);
+        opacity: 0.5;
+    }
+    50% {
+        transform: rotate(180deg) scale(1.2);
+        opacity: 0.8;
+    }
+}
+
+/* Efecto de hover 3D en inputs */
+.premium-effects .form-control {
+    transform-style: preserve-3d;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.premium-effects .form-control:hover {
+    transform: translateZ(5px);
+    box-shadow: 
+        0 10px 20px rgba(0, 88, 145, 0.1),
+        0 5px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Efecto de hover magnético en el botón */
+.premium-effects .btn-login {
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.premium-effects .btn-login::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        transparent 30%, 
+        rgba(255, 255, 255, 0.2) 50%, 
+        transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 0.6s;
+}
+
+.premium-effects .btn-login:hover::after {
+    transform: translateX(100%);
+}
+
+/* Efecto de typing en el título */
+@keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+}
+
+@keyframes blink {
+    50% { border-color: transparent }
+}
+
+.premium-effects .login-title {
+    overflow: hidden;
+    white-space: nowrap;
+    border-right: 3px solid white;
+    animation: 
+        typing 2s steps(11) 0.5s both,
+        blink 1s infinite;
+}
+
+/* Efecto de parallax en las burbujas */
+.premium-effects .bubble {
+    will-change: transform;
+}
+
+.premium-effects .bubble:nth-child(odd) {
+    animation: rise-parallax 20s infinite ease-in-out;
+}
+
+@keyframes rise-parallax {
+    0% {
+        bottom: -150px;
+        transform: translateX(0) translateZ(0);
+    }
+    25% {
+        transform: translateX(50px) translateZ(50px);
+    }
+    50% {
+        transform: translateX(-30px) translateZ(100px);
+    }
+    75% {
+        transform: translateX(70px) translateZ(50px);
+    }
+    100% {
+        bottom: 120vh;
+        transform: translateX(-50px) translateZ(0);
+    }
+}
+
+/* Efecto de luz que sigue el mouse */
+.premium-effects .login-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.premium-effects .login-card::before {
+    content: '';
+    position: absolute;
+    top: var(--mouse-y, 50%);
+    left: var(--mouse-x, 50%);
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, 
+        rgba(0, 119, 190, 0.1) 0%, 
+        transparent 70%);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    transition: opacity 0.3s;
+    opacity: 0;
+}
+
+.premium-effects .login-card:hover::before {
+    opacity: 1;
+}
+
+/* Modo oscuro automático */
+@media (prefers-color-scheme: dark) {
+    .premium-effects .login-card {
+        background: 
+            linear-gradient(135deg, 
+                rgba(30, 30, 40, 0.95) 0%, 
+                rgba(30, 30, 40, 0.85) 50%, 
+                rgba(30, 30, 40, 0.95) 100%);
+        color: #E5E7EB;
+    }
+    
+    .premium-effects .form-control {
+        background-color: rgba(50, 50, 60, 0.8);
+        color: #F3F4F6;
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .premium-effects .form-label {
+        color: #D1D5DB;
+    }
+}
+
+/* Animación de entrada escalonada */
+.premium-effects .login-card > * {
+    animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.premium-effects .login-header {
+    animation-delay: 0.1s;
+}
+
+.premium-effects .login-body {
+    animation-delay: 0.2s;
+}
+
+.premium-effects .login-footer {
+    animation-delay: 0.3s;
+}
+
+/* Efecto de zoom suave al cargar */
+.premium-effects {
+    animation: zoomIn 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(1.1);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}

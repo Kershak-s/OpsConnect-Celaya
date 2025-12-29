@@ -1,0 +1,72 @@
+/**
+ * Custom styles for PNC Simple time pickers
+ */
+
+/* Center align headers for time inputs */
+.pnc-simple-page .form-group label[for^="hora_"] {
+    text-align: center;
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+/* Fix for container width and alignment */
+.pnc-simple-page .time-picker {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Container for the whole time section */
+.pnc-simple-page .time-section {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+/* Styling for hora inicio/fin rows */
+.pnc-simple-page .hora-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* Explicitly set the fixed width for the selectors */
+.pnc-simple-page .pnc-hora-select.hora-select {
+    width: 60px;
+}
+
+.pnc-simple-page .pnc-hora-select.min-select {
+    width: 60px;
+}
+
+/* Add "a" text for better spacing */
+.pnc-simple-page .time-spacer {
+    margin: 0 8px;
+    font-weight: 500;
+}
+
+/* Make the header centered */
+.pnc-simple-page .time-header {
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #0d6efd;
+    text-transform: uppercase;
+    font-size: 1.1rem;
+}
+
+/* For each time container */
+.pnc-simple-page .time-field-container {
+    text-align: center;
+}
+
+.pnc-simple-page .time-field-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}

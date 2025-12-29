@@ -1,0 +1,1604 @@
+{% extends "base.html" %}
+
+{% block title %}Control de Pesos - {{ category }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .page-header {
+        background: white;
+        color: #333;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.08);
+        border-left: 8px solid #198754; /* Línea verde en el lado izquierdo */
+    }
+    
+    .page-title {
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        color: #333;
+    }
+    
+    .page-title i {
+        margin-right: 0.8rem;
+        color: #198754; /* Icono en color verde */
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .btn-with-icon {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .table-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        overflow-x: auto;
+    }
+    
+    .table th {
+        background-color: #f8f9fa;
+    }
+    
+    .empty-message {
+        text-align: center;
+        padding: 2rem;
+        color: #6c757d;
+    }
+    
+    .filter-row {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .badge-custom {
+        font-size: 0.85rem;
+    }
+    
+    #createPesoModal .modal-dialog {
+        max-width: 700px;
+    }
+    
+    .nav-buttons {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 1rem;
+    }
+    
+    .nav-button {
+        border-radius: 50px;
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+    }
+    
+    .nav-button i {
+        margin-right: 0.5rem;
+    }
+    
+    .required-field::after {
+        content: "*";
+        color: red;
+        margin-left: 4px;
+    }
+    
+    /* Responsive ajustments */
+    @media (max-width: 768px) {
+        .action-buttons {
+            flex-direction: column;
+        }
+        
+        .filter-row .row {
+            margin-bottom: 1rem;
+        }
+    }
+    
+    /* Estilo para los gráficos */
+    .chart-container {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        height: 400px;
+    }
+    
+    .chart-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    
+    /* Stats cards */
+    .stats-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        padding: 1.2rem;
+        margin-bottom: 1.5rem;
+        transition: all 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+    
+    .stats-title {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 0;
+        color: #198754;
+    }
+    
+    .stats-icon {
+        font-size: 2rem;
+        color: rgba(25, 135, 84, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="nav-buttons">
+        <a href="{{ url_for('index') }}" class="nav-button btn btn-light">
+            <i class="fas fa-home"></i>Inicio
+        </a>
+        <a href="{{ url_for('line_sections', category=category) }}" class="nav-button btn btn-light">
+            <i class="fas fa-th-large"></i>Secciones
+        </a>
+        <a href="{{ url_for('section_exercises', category=category, section='calidad') }}" class="nav-button btn btn-light">
+            <i class="fas fa-arrow-left"></i>Volver a Calidad
+        </a>
+    </div>
+
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-balance-scale"></i>
+            Control de Pesos - {{ category }}
+        </h1>
+        <p class="text-muted mb-0">Registro y seguimiento de pesos en los procesos productivos</p>
+    </div>
+
+
+
+    <!-- Pestañas de navegación -->
+    <ul class="nav nav-tabs mb-4" id="pesoTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="peso-crudo-tab" data-bs-toggle="tab" data-bs-target="#peso-crudo-tab-pane" type="button" role="tab" aria-controls="peso-crudo-tab-pane" aria-selected="true">
+                <i class="fas fa-weight me-2"></i>Peso de 10 Crudo
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="peso-frita-tab" data-bs-toggle="tab" data-bs-target="#peso-frita-tab-pane" type="button" role="tab" aria-controls="peso-frita-tab-pane" aria-selected="false">
+                <i class="fas fa-fire me-2"></i>Peso de 10 Base Frita
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="resultados-tab" data-bs-toggle="tab" data-bs-target="#resultados-tab-pane" type="button" role="tab" aria-controls="resultados-tab-pane" aria-selected="false">
+                <i class="fas fa-chart-line me-2"></i>Resultados
+            </button>
+        </li>
+    </ul>
+
+    <!-- Contenido de las pestañas -->
+    <div class="tab-content" id="pesoTabsContent">
+        <!-- Pestaña de Peso de 10 Crudo -->
+        <div class="tab-pane fade show active" id="peso-crudo-tab-pane" role="tabpanel" aria-labelledby="peso-crudo-tab" tabindex="0">
+            <!-- Tabla de registros -->
+            <div class="table-container">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="mb-0">Registros de Peso de 10 Crudo</h3>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPesoModal">
+                        Nuevo Registro
+                    </button>
+                </div>
+                
+                {% if registros %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Folio</th>
+                                <th>Fecha</th>
+                                <th>Turno</th>
+                                <th>Producto</th>
+                                <th>Peso Base Frita Lado A</th>
+                                <th>Peso Base Frita Lado B</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for registro in registros %}
+                            <tr>
+                                <td>{{ registro.folio }}</td>
+                                <td>{{ registro.fecha }}</td>
+                                <td>{{ registro.turno }}</td>
+                                <td>{{ registro.producto }}</td>
+                                <td>{{ registro.peso_lado_a|default(registro.peso, true) }} g</td>
+                                <td>{{ registro.peso_lado_b|default(registro.peso, true) }} g</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-primary btn-edit" 
+                                                data-id="{{ registro.id }}"
+                                                data-folio="{{ registro.folio }}"
+                                                data-fecha="{{ registro.fecha_iso }}"
+                                                data-turno="{{ registro.turno }}"
+                                                data-producto="{{ registro.producto }}"
+                                                data-horario="{{ registro.horario }}"
+                                                data-peso="{{ registro.peso }}"
+                                                data-especificacion="{{ 'true' if registro.dentro_especificacion else 'false' }}"
+                                                data-observaciones="{{ registro.observaciones }}"
+                                                data-bs-toggle="modal" data-bs-target="#editPesoModal">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-delete" 
+                                                data-id="{{ registro.id }}" 
+                                                data-folio="{{ registro.folio }}"
+                                                data-bs-toggle="modal" data-bs-target="#deletePesoModal">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-message">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay registros de pesos disponibles. Utilice el botón "Nuevo Registro" para agregar uno.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pestaña de Peso de 10 Base Frita -->
+        <div class="tab-pane fade" id="peso-frita-tab-pane" role="tabpanel" aria-labelledby="peso-frita-tab" tabindex="0">
+            <!-- Tabla de registros de base frita -->
+            <div class="table-container">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h3 class="mb-0">Registros de Peso de 10 Base Frita</h3>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createPesoFritaModal">
+                        Nuevo Registro
+                    </button>
+                </div>
+                
+                {% if registros_base_frita %}
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Folio</th>
+                                <th>Fecha</th>
+                                <th>Turno</th>
+                                <th>Producto</th>
+                                <th>Peso Crudo Lado A</th>
+                                <th>Peso Crudo Lado B</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for registro in registros_base_frita %}
+                            <tr>
+                                <td>{{ registro.folio }}</td>
+                                <td>{{ registro.fecha_formateada }}</td>
+                                <td>{{ registro.turno }}</td>
+                                <td>{{ registro.producto }}</td>
+                                <td>{{ registro.peso_lado_a|default(registro.peso, true) }} g</td>
+                                <td>{{ registro.peso_lado_b|default(registro.peso, true) }} g</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-outline-primary btn-edit" 
+                                                data-id="{{ registro.id }}"
+                                                data-folio="{{ registro.folio }}"
+                                                data-fecha="{{ registro.fecha.strftime('%Y-%m-%d') }}"
+                                                data-turno="{{ registro.turno }}"
+                                                data-producto="{{ registro.producto }}"
+                                                data-horario="{{ registro.horario }}"
+                                                data-peso="{{ registro.peso }}"
+                                                data-especificacion="{{ 'true' if registro.dentro_especificacion else 'false' }}"
+                                                data-observaciones="{{ registro.observaciones }}"
+                                                data-bs-toggle="modal" data-bs-target="#editPesoModal">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-outline-danger btn-delete" 
+                                                data-id="{{ registro.id }}" 
+                                                data-folio="{{ registro.folio }}"
+                                                data-bs-toggle="modal" data-bs-target="#deletePesoModal">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="empty-message">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay registros de pesos de base frita disponibles. Utilice el botón "Nuevo Registro" para agregar uno.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pestaña de Resultados -->
+        <div class="tab-pane fade" id="resultados-tab-pane" role="tabpanel" aria-labelledby="resultados-tab" tabindex="0">
+            <!-- Filtros para los resultados -->
+            <div class="filter-row mt-4 mb-4">
+                <h4 class="mb-3">Filtros de Resultados</h4>
+                <form id="resultadosFilterForm" class="mb-3">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="filtro-producto" class="form-label">Producto</label>
+                            <select class="form-select" id="filtro-producto">
+                                <option value="todos" selected>Todos los productos</option>
+                                <option value="DORITOS">DORITOS</option>
+                                <option value="TSV">TSV</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filtro-periodo" class="form-label">Periodo</label>
+                            <select class="form-select" id="filtro-periodo">
+                                <option value="semana" selected>Última semana</option>
+                                <option value="mes">Último mes</option>
+                                <option value="trimestre">Último trimestre</option>
+                                <option value="todo">Todo el historial</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filtro-tipo" class="form-label">Tipo de Registro</label>
+                            <select class="form-select" id="filtro-tipo">
+                                <option value="todos" selected>Todos</option>
+                                <option value="crudo">Peso Crudo</option>
+                                <option value="base_frita">Base Frita</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="button" id="btn-aplicar-filtros" class="btn btn-primary w-100">
+                                <i class="fas fa-filter me-2"></i> Aplicar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Pestañas de resultados según tipo -->
+            <ul class="nav nav-pills mb-4" id="resultadosTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="peso-crudo-res-tab" data-bs-toggle="pill" data-bs-target="#peso-crudo-res" type="button" role="tab" aria-controls="peso-crudo-res" aria-selected="true">
+                        <i class="fas fa-weight me-2"></i>Peso Crudo
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="peso-frita-res-tab" data-bs-toggle="pill" data-bs-target="#peso-frita-res" type="button" role="tab" aria-controls="peso-frita-res" aria-selected="false">
+                        <i class="fas fa-fire me-2"></i>Base Frita
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="resultadosTabsContent">
+                <!-- Resultados Peso Crudo -->
+                <div class="tab-pane fade show active" id="peso-crudo-res" role="tabpanel" aria-labelledby="peso-crudo-res-tab" tabindex="0">
+                    <!-- Tarjetas de estadísticas para Peso Crudo -->
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">Peso Promedio</div>
+                                        <h5 class="stats-value" id="peso-crudo-promedio">--</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-weight"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">Peso Mínimo</div>
+                                        <h5 class="stats-value" id="peso-crudo-minimo">--</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">Peso Máximo</div>
+                                        <h5 class="stats-value" id="peso-crudo-maximo">--</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">Total Registros</div>
+                                        <h5 class="stats-value" id="total-registros-crudo">--</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-clipboard-list"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">Peso Total</div>
+                                        <h5 class="stats-value" id="peso-crudo-total">--</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-calculator"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">Desviación Estándar</div>
+                                        <h5 class="stats-value" id="peso-crudo-desviacion">--</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de Tendencia de Pesos Crudo -->
+                    <div class="chart-container mt-4">
+                        <h3 class="chart-title">Tendencia de Pesos Crudo</h3>
+                        <canvas id="pesosChartCrudo"></canvas>
+                    </div>
+                </div>
+
+                <!-- Resultados Base Frita -->
+                <div class="tab-pane fade" id="peso-frita-res" role="tabpanel" aria-labelledby="peso-frita-res-tab" tabindex="0">
+                    <!-- Tarjetas de estadísticas para Base Frita -->
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">Peso Promedio</div>
+                                        <h5 class="stats-value" id="peso-frita-promedio">--</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-weight"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">Peso Mínimo</div>
+                                        <h5 class="stats-value" id="peso-frita-minimo">--</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-arrow-down"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">Peso Máximo</div>
+                                        <h5 class="stats-value" id="peso-frita-maximo">--</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-arrow-up"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">Total Registros</div>
+                                        <h5 class="stats-value" id="total-registros-frita">--</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-clipboard-list"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">Peso Total</div>
+                                        <h5 class="stats-value" id="peso-frita-total">--</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-calculator"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="stats-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div class="stats-title">Desviación Estándar</div>
+                                        <h5 class="stats-value" id="peso-frita-desviacion">--</h5>
+                                    </div>
+                                    <div class="stats-icon">
+                                        <i class="fas fa-chart-line"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gráfico de Tendencia de Pesos Base Frita -->
+                    <div class="chart-container mt-4">
+                        <h3 class="chart-title">Tendencia de Pesos Base Frita</h3>
+                        <canvas id="pesosChartFrita"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Crear Registro de Peso de 10 Base Frita -->
+<div class="modal fade" id="createPesoFritaModal" tabindex="-1" aria-labelledby="createPesoFritaModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="createPesoFritaModalLabel"><i class="fas fa-plus-circle me-2"></i>Nuevo Registro de Peso de 10 Base Frita</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createPesoFritaForm" method="POST" action="{{ url_for('pesos_create', category=category) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="tipo" value="base_frita">
+                    <input type="hidden" id="horario_frita" name="horario">
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="fecha_frita" class="form-label required-field">Fecha</label>
+                            <input type="date" class="form-control text-center" id="fecha_frita" name="fecha" value="{{ now.strftime('%Y-%m-%d') }}" required readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="turno_frita" class="form-label required-field">Turno</label>
+                            <select class="form-select text-center" id="turno_frita" name="turno" required>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label for="horario_hora_frita" class="form-label required-field">Hora</label>
+                            <div class="input-group">
+                                <select class="form-control text-center" id="horario_hora_frita" name="horario_hora" required>
+                                    <!-- Las opciones se generarán dinámicamente con JavaScript -->
+                                </select>
+                                <span class="input-group-text">:</span>
+                                <input type="text" class="form-control text-center" id="horario_minutos_frita" name="horario_minutos" placeholder="Minutos" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="producto_frita" class="form-label required-field">Producto</label>
+                        <select class="form-select text-center" id="producto_frita" name="producto" required>
+                            <option value="">Seleccione un producto</option>
+                            <option value="DORITO">DORITO</option>
+                            <option value="TSV">TSV</option>
+                        </select>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="peso_frita_a" class="form-label required-field">Peso Base Frita Lado A</label>
+                            <input type="number" class="form-control" id="peso_frita_a" name="peso_frita_a" step="0.01" min="0" required>
+                            <small id="peso_frita_a_feedback" class="form-text mt-1"></small>
+                        </div>
+                        <div class="col">
+                            <label for="peso_frita" class="form-label required-field">Peso Base Frita Lado B</label>
+                            <input type="number" class="form-control" id="peso_frita" name="peso" step="0.01" min="0" required>
+                            <small id="peso_frita_feedback" class="form-text mt-1"></small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observaciones_frita" class="form-label">Observaciones</label>
+                        <textarea class="form-control" id="observaciones_frita" name="observaciones" rows="3" placeholder="Ingrese observaciones adicionales"></textarea>
+                    </div>
+                    
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="createPesoModal" tabindex="-1" aria-labelledby="createPesoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="createPesoModalLabel"><i class="fas fa-plus-circle me-2"></i>Nuevo Registro de Peso de 10 Crudo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createPesoForm" method="POST" action="{{ url_for('pesos_create', category=category) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" name="tipo" value="crudo">
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="fecha" class="form-label required-field">Fecha</label>
+                            <input type="date" class="form-control text-center" id="fecha" name="fecha" value="{{ now.strftime('%Y-%m-%d') }}" required readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="turno" class="form-label required-field">Turno</label>
+                            <select class="form-select text-center" id="turno" name="turno" required>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label for="horario" class="form-label required-field">Hora</label>
+                            <div class="input-group">
+                                <select class="form-control text-center" id="horario_hora" name="horario_hora" required>
+                                    <!-- Las opciones se generarán dinámicamente con JavaScript -->
+                                </select>
+                                <span class="input-group-text">:</span>
+                                <input type="text" class="form-control text-center" id="horario_minutos" name="horario_minutos" placeholder="Minutos" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="producto" class="form-label required-field">Producto</label>
+                        <select class="form-select text-center" id="create_producto" name="producto" required>
+                            <option value="">Seleccione un producto</option>
+                            <option value="DORITOS">DORITOS</option>
+                            <option value="TSV">TSV</option>
+                        </select>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="peso_lado_a" class="form-label required-field">Peso Crudo Lado A</label>
+                            <input type="number" class="form-control" id="peso_lado_a" name="peso_lado_a" step="0.01" min="0" required>
+                            <small id="peso_lado_a_feedback" class="form-text mt-1"></small>
+                        </div>
+                        <div class="col">
+                            <label for="peso_lado_b" class="form-label required-field">Peso Crudo Lado B</label>
+                            <input type="number" class="form-control" id="peso_lado_b" name="peso_lado_b" step="0.01" min="0" required>
+                            <small id="peso_lado_b_feedback" class="form-text mt-1"></small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="observaciones" class="form-label">Observaciones</label>
+                        <textarea class="form-control" id="observaciones" name="observaciones" rows="3" placeholder="Ingrese observaciones adicionales"></textarea>
+                    </div>
+                    
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Editar Registro de Peso -->
+<div class="modal fade" id="editPesoModal" tabindex="-1" aria-labelledby="editPesoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editPesoModalLabel"><i class="fas fa-edit me-2"></i>Editar Registro de Peso</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editPesoForm" method="POST" action="{{ url_for('pesos_edit', category=category, registro_id=0) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" id="edit_id" name="id" value="">
+                    
+                    <div class="mb-3">
+                        <label for="edit_folio" class="form-label">Folio</label>
+                        <input type="text" class="form-control" id="edit_folio" name="folio" readonly>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="edit_fecha" class="form-label required-field">Fecha</label>
+                            <input type="date" class="form-control text-center" id="edit_fecha" name="fecha" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="edit_turno" class="form-label required-field">Turno</label>
+                            <select class="form-select text-center" id="edit_turno" name="turno" required>
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <label for="edit_horario" class="form-label required-field">Hora</label>
+                            <div class="input-group">
+                                <select class="form-control text-center" id="edit_horario_hora" name="horario_hora" required>
+                                    <!-- Las opciones se generarán dinámicamente con JavaScript -->
+                                </select>
+                                <span class="input-group-text">:</span>
+                                <input type="text" class="form-control text-center" id="edit_horario_minutos" name="horario_minutos" placeholder="Minutos" required>
+                            </div>
+                            <input type="hidden" id="edit_horario" name="horario">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="edit_producto" class="form-label required-field">Producto</label>
+                        <select class="form-select text-center" id="edit_producto" name="producto" required>
+                            <option value="">Seleccione un producto</option>
+                            <option value="DORITOS">DORITOS</option>
+                            <option value="TSV">TSV</option>
+                        </select>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label for="edit_peso_lado_a" class="form-label required-field">Peso Crudo Lado A</label>
+                            <input type="number" class="form-control" id="edit_peso_lado_a" name="peso_lado_a" step="0.01" min="0" required>
+                            <small id="edit_peso_lado_a_feedback" class="form-text mt-1"></small>
+                        </div>
+                        <div class="col">
+                            <label for="edit_peso_lado_b" class="form-label required-field">Peso Crudo Lado B</label>
+                            <input type="number" class="form-control" id="edit_peso_lado_b" name="peso_lado_b" step="0.01" min="0" required>
+                            <small id="edit_peso_lado_b_feedback" class="form-text mt-1"></small>
+                        </div>
+                    </div>
+                    <input type="hidden" id="edit_peso" name="peso">
+                    
+                    <div class="mb-3">
+                        <label for="edit_observaciones" class="form-label">Observaciones</label>
+                        <textarea class="form-control" id="edit_observaciones" name="observaciones" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Actualizar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Eliminar Registro de Peso -->
+<div class="modal fade" id="deletePesoModal" tabindex="-1" aria-labelledby="deletePesoModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deletePesoModalLabel"><i class="fas fa-trash-alt me-2"></i>Eliminar Registro</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>¿Está seguro que desea eliminar el registro con folio <strong id="delete_folio"></strong>?</p>
+                <p class="text-danger"><i class="fas fa-exclamation-triangle me-2"></i>Esta acción no se puede deshacer.</p>
+                
+                <form id="deletePesoForm" method="POST" action="{{ url_for('pesos_delete', category=category, registro_id=0) }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <input type="hidden" id="delete_id" name="id" value="">
+                    
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-danger">Eliminar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+<script src="{{ url_for('static', filename='js/peso_validacion.js') }}"></script>
+<script src="{{ url_for('static', filename='js/peso_base_frita_validacion.js') }}"></script>
+<script src="{{ url_for('static', filename='js/peso_frita_config.js') }}"></script>
+<script src="{{ url_for('static', filename='js/peso_frita_tab_activator.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Obtener la fecha y hora actual
+        const fechaHoy = new Date().toISOString().split('T')[0];
+        const horaActual = new Date().getHours();
+        const minutosActuales = new Date().getMinutes();
+        
+        // Configurar fecha actual automáticamente
+        document.getElementById('fecha').value = fechaHoy;
+        
+        // Función para determinar el turno según la hora
+        function determinarTurno(hora, minutos) {
+            const tiempoTotal = hora * 60 + minutos; // Convertir a minutos
+            const limiteA = 6 * 60 + 30;  // 6:30 am
+            const limiteB = 18 * 60 + 30; // 18:30 pm
+            
+            if (tiempoTotal >= limiteA && tiempoTotal < limiteB) {
+                return 'A'; // Turno A: 6:30 am - 18:29 pm
+            } else {
+                return 'B'; // Turno B: 18:30 pm - 6:29 am
+            }
+        }
+        
+        // Función para poblar las horas según el turno
+        function poblarHorasSegunTurno(turno) {
+            const horaSelect = document.getElementById('horario_hora');
+            horaSelect.innerHTML = ''; // Limpiar opciones existentes
+            
+            let horasPermitidas = [];
+            if (turno === 'A') {
+                // Turno A: horas de 6 a 16
+                horasPermitidas = Array.from({length: 11}, (_, i) => i + 6);
+            } else {
+                // Turno B: horas de 16 a 6 (las 12 am sería 00)
+                // Primero 16-23
+                for (let i = 16; i <= 23; i++) {
+                    horasPermitidas.push(i);
+                }
+                // Luego 0-6
+                for (let i = 0; i <= 6; i++) {
+                    horasPermitidas.push(i);
+                }
+            }
+            
+            // Crear las opciones para el select
+            horasPermitidas.forEach(hora => {
+                const option = document.createElement('option');
+                option.value = hora < 10 ? '0' + hora : hora;
+                option.textContent = hora < 10 ? '0' + hora : hora;
+                horaSelect.appendChild(option);
+            });
+            
+            // Seleccionar la hora actual si está en el rango, o la primera disponible
+            if (horasPermitidas.includes(horaActual)) {
+                horaSelect.value = horaActual < 10 ? '0' + horaActual : horaActual;
+            } else {
+                horaSelect.selectedIndex = 0;
+            }
+        }
+        
+        // Configurar turno automáticamente según la hora
+        const turnoSelect = document.getElementById('turno');
+        if (turnoSelect) {
+            const turnoActual = determinarTurno(horaActual, minutosActuales);
+            turnoSelect.value = turnoActual;
+            
+            // Poblar las horas disponibles según el turno
+            poblarHorasSegunTurno(turnoActual);
+            
+            // Configurar evento de cambio para actualizar las horas disponibles
+            turnoSelect.addEventListener('change', function() {
+                poblarHorasSegunTurno(this.value);
+            });
+        }
+        
+        // Validar que los minutos sean numéricos y estén entre 0-59
+        const minutosInput = document.getElementById('horario_minutos');
+        if (minutosInput) {
+            // Establecer los minutos actuales
+            minutosInput.value = minutosActuales < 10 ? '0' + minutosActuales : minutosActuales;
+            
+            minutosInput.addEventListener('input', function() {
+                const value = this.value;
+                // Permitir solo números
+                this.value = value.replace(/[^0-9]/g, '');
+                // Limitar a 2 dígitos
+                if (this.value.length > 2) {
+                    this.value = this.value.slice(0, 2);
+                }
+                // Asegurar rango 0-59
+                if (parseInt(this.value) > 59) {
+                    this.value = '59';
+                }
+            });
+        }
+        
+        // Procesar el formulario de creación antes de enviarlo
+        const createForm = document.getElementById('createPesoForm');
+        if (createForm) {
+            createForm.addEventListener('submit', function(e) {
+                // Crear un campo oculto para el horario completo
+                if (!document.getElementById('horario')) {
+                    const horarioInput = document.createElement('input');
+                    horarioInput.type = 'hidden';
+                    horarioInput.name = 'horario';
+                    horarioInput.id = 'horario';
+                    this.appendChild(horarioInput);
+                }
+                
+                // Crear un campo oculto para el peso promedio
+                if (!document.getElementById('peso')) {
+                    const pesoInput = document.createElement('input');
+                    pesoInput.type = 'hidden';
+                    pesoInput.name = 'peso';
+                    pesoInput.id = 'peso';
+                    this.appendChild(pesoInput);
+                }
+                
+                // Actualizar el campo horario con el formato HH:MM
+                const horaValue = document.getElementById('horario_hora').value || '00';
+                const minutosValue = document.getElementById('horario_minutos').value || '00';
+                document.getElementById('horario').value = `${horaValue}:${minutosValue}`;
+                
+                // Calcular el promedio de los pesos y actualizarlo
+                const pesoLadoA = parseFloat(document.getElementById('peso_lado_a').value) || 0;
+                const pesoLadoB = parseFloat(document.getElementById('peso_lado_b').value) || 0;
+                if (pesoLadoA > 0 && pesoLadoB > 0) {
+                    document.getElementById('peso').value = ((pesoLadoA + pesoLadoB) / 2).toFixed(2);
+                }
+            });
+        }
+        
+        // Activar pestañas al hacer clic
+        const pesoFritaTab = document.getElementById('peso-frita-tab');
+        const resultadosTab = document.getElementById('resultados-tab');
+        
+        if (pesoFritaTab) {
+            pesoFritaTab.addEventListener('click', function() {
+                // Aquí puedes añadir lógica específica para la pestaña de Peso de 10 Base Frita si es necesario
+            });
+        }
+        
+        if (resultadosTab) {
+            resultadosTab.addEventListener('click', function() {
+                inicializarResultados();
+            });
+        }
+        
+        // Configurar botones de edición
+        const btnEdit = document.querySelectorAll('.btn-edit');
+        btnEdit.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const folio = this.getAttribute('data-folio');
+                const fecha = this.getAttribute('data-fecha');
+                const turno = this.getAttribute('data-turno');
+                const producto = this.getAttribute('data-producto');
+                const horario = this.getAttribute('data-horario');
+                const peso = this.getAttribute('data-peso');
+                const observaciones = this.getAttribute('data-observaciones');
+                
+                // Establecer la acción del formulario con el ID correcto
+                document.getElementById('editPesoForm').action = "{{ url_for('pesos_edit', category=category, registro_id=0) }}".replace("/0", "/" + id);
+                
+                // Actualizar los campos del formulario
+                document.getElementById('edit_id').value = id;
+                document.getElementById('edit_folio').value = folio;
+                document.getElementById('edit_fecha').value = fecha;
+                document.getElementById('edit_turno').value = turno;
+                document.getElementById('edit_producto').value = producto;
+                
+                // Poblar las horas disponibles según el turno
+                poblarHorasEdicion(turno);
+                
+                // Procesar el horario para separar hora y minutos
+                if (horario && horario.includes(':')) {
+                    const [hora, minutos] = horario.split(':');
+                    
+                    // Intentar encontrar la opción correspondiente a la hora
+                    let horaOption = null;
+                    for (let i = 0; i < editHoraSelect.options.length; i++) {
+                        if (editHoraSelect.options[i].value === hora) {
+                            horaOption = editHoraSelect.options[i];
+                            break;
+                        }
+                    }
+                    
+                    // Seleccionar la hora si está disponible
+                    if (horaOption) {
+                        editHoraSelect.value = hora;
+                    } else {
+                        // Si la hora no está disponible, seleccionar la primera opción
+                        editHoraSelect.selectedIndex = 0;
+                    }
+                    
+                    // Establecer los minutos
+                    editMinutosInput.value = minutos;
+                } else {
+                    // Si no tiene formato HH:MM, seleccionar valores predeterminados
+                    editHoraSelect.selectedIndex = 0;
+                    editMinutosInput.value = '00';
+                }
+                
+                // Procesar los pesos - extraer de observaciones si existe el formato "Lado A: XXg, Lado B: XXg"
+                let pesoLadoA = peso;
+                let pesoLadoB = peso;
+                
+                if (observaciones && observaciones.includes('Lado A:') && observaciones.includes('Lado B:')) {
+                    const match = observaciones.match(/Lado A: ([\d\.]+)g, Lado B: ([\d\.]+)g/);
+                    if (match && match.length === 3) {
+                        pesoLadoA = match[1];
+                        pesoLadoB = match[2];
+                    }
+                }
+                
+                document.getElementById('edit_peso').value = peso;
+                document.getElementById('edit_peso_lado_a').value = pesoLadoA;
+                document.getElementById('edit_peso_lado_b').value = pesoLadoB;
+                
+                // Limpiar las observaciones de los datos de peso para mostrar solo comentarios adicionales
+                let obsTexto = observaciones;
+                if (obsTexto && obsTexto.includes('Lado A:') && obsTexto.includes('Lado B:')) {
+                    obsTexto = obsTexto.replace(/Lado A: [\d\.]+g, Lado B: [\d\.]+g\. /, '');
+                }
+                document.getElementById('edit_observaciones').value = obsTexto;
+                
+                // Aplicar validación de pesos
+                validarRangosPesoEdicion();
+            });
+        });
+        
+        // Validar los campos de horario en el formulario de edición
+        const editHoraSelect = document.getElementById('edit_horario_hora');
+        const editMinutosInput = document.getElementById('edit_horario_minutos');
+        const editTurnoSelect = document.getElementById('edit_turno');
+        
+        if (editHoraSelect && editMinutosInput && editTurnoSelect) {
+            // Función para poblar horas en el formulario de edición
+            function poblarHorasEdicion(turno) {
+                editHoraSelect.innerHTML = ''; // Limpiar opciones existentes
+                
+                let horasPermitidas = [];
+                if (turno === 'A') {
+                    // Turno A: horas de 6 a 16
+                    horasPermitidas = Array.from({length: 11}, (_, i) => i + 6);
+                } else {
+                    // Turno B: horas de 16 a 6 (las 12 am sería 00)
+                    // Primero 16-23
+                    for (let i = 16; i <= 23; i++) {
+                        horasPermitidas.push(i);
+                    }
+                    // Luego 0-6
+                    for (let i = 0; i <= 6; i++) {
+                        horasPermitidas.push(i);
+                    }
+                }
+                
+                // Crear las opciones para el select
+                horasPermitidas.forEach(hora => {
+                    const option = document.createElement('option');
+                    option.value = hora < 10 ? '0' + hora : hora;
+                    option.textContent = hora < 10 ? '0' + hora : hora;
+                    editHoraSelect.appendChild(option);
+                });
+            }
+            
+            // Configurar evento de cambio de turno para actualizar horas en edición
+            editTurnoSelect.addEventListener('change', function() {
+                poblarHorasEdicion(this.value);
+            });
+            
+            // Validar que los minutos sean numéricos y estén entre 0-59
+            editMinutosInput.addEventListener('input', function() {
+                const value = this.value;
+                // Permitir solo números
+                this.value = value.replace(/[^0-9]/g, '');
+                // Limitar a 2 dígitos
+                if (this.value.length > 2) {
+                    this.value = this.value.slice(0, 2);
+                }
+                // Asegurar rango 0-59
+                if (parseInt(this.value) > 59) {
+                    this.value = '59';
+                }
+            });
+        }
+        
+        // Procesar el formulario de edición antes de enviarlo
+        const editForm = document.getElementById('editPesoForm');
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                // Actualizar el campo horario con el formato HH:MM
+                const horaEdit = document.getElementById('edit_horario_hora').value || '00';
+                const minutosEdit = document.getElementById('edit_horario_minutos').value || '00';
+                document.getElementById('edit_horario').value = `${horaEdit}:${minutosEdit}`;
+                
+                // Calcular el promedio de los pesos y actualizarlo
+                const pesoLadoA = parseFloat(document.getElementById('edit_peso_lado_a').value) || 0;
+                const pesoLadoB = parseFloat(document.getElementById('edit_peso_lado_b').value) || 0;
+                if (pesoLadoA > 0 && pesoLadoB > 0) {
+                    document.getElementById('edit_peso').value = ((pesoLadoA + pesoLadoB) / 2).toFixed(2);
+                }
+            });
+        }
+        
+        // Configurar botones de eliminación
+        const btnDelete = document.querySelectorAll('.btn-delete');
+        btnDelete.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-id');
+                const folio = this.getAttribute('data-folio');
+                
+                // Actualizar el texto del modal
+                document.getElementById('delete_folio').textContent = folio;
+                
+                // Establecer la acción del formulario con el ID correcto
+                document.getElementById('deletePesoForm').action = "{{ url_for('pesos_delete', category=category, registro_id=0) }}".replace("/0", "/" + id);
+                
+                // Actualizar el ID a eliminar
+                document.getElementById('delete_id').value = id;
+            });
+        });
+
+        // Función para calcular la desviación estándar
+        function calcularDesviacionEstandar(valores) {
+            const n = valores.length;
+            if (n < 2) return 0;
+            
+            const media = valores.reduce((a, b) => a + b, 0) / n;
+            const varianza = valores.reduce((a, b) => a + Math.pow(b - media, 2), 0) / n;
+            return Math.sqrt(varianza).toFixed(2);
+        }
+        
+        // Función para inicializar todos los resultados
+        function inicializarResultados() {
+            // Primero inicializamos los datos filtrados
+            aplicarFiltros();
+        }
+        
+        // Función para aplicar filtros a los datos
+        function aplicarFiltros() {
+            {% if registros or registros_base_frita %}
+            // Obtener todos los registros
+            const registrosCrudo = {{ registros|tojson }};
+            const registrosBaseFrita = {{ registros_base_frita|tojson }};
+            
+            // Filtrar según los criterios seleccionados
+            const filtroProducto = document.getElementById('filtro-producto').value;
+            const filtroPeriodo = document.getElementById('filtro-periodo').value;
+            const filtroTipo = document.getElementById('filtro-tipo').value;
+            
+            // Aplicar filtro de producto
+            let registrosCrudoFiltrados = [...registrosCrudo];
+            let registrosBaseFritaFiltrados = [...registrosBaseFrita];
+            
+            if (filtroProducto !== 'todos') {
+                registrosCrudoFiltrados = registrosCrudoFiltrados.filter(r => r.producto === filtroProducto);
+                registrosBaseFritaFiltrados = registrosBaseFritaFiltrados.filter(r => r.producto === filtroProducto);
+            }
+            
+            // Aplicar filtro de periodo
+            if (filtroPeriodo !== 'todo') {
+                const hoy = new Date();
+                let fechaLimite = new Date();
+                
+                if (filtroPeriodo === 'semana') {
+                    fechaLimite.setDate(hoy.getDate() - 7);
+                } else if (filtroPeriodo === 'mes') {
+                    fechaLimite.setMonth(hoy.getMonth() - 1);
+                } else if (filtroPeriodo === 'trimestre') {
+                    fechaLimite.setMonth(hoy.getMonth() - 3);
+                }
+                
+                registrosCrudoFiltrados = registrosCrudoFiltrados.filter(r => {
+                    const fechaRegistro = new Date(r.fecha);
+                    return fechaRegistro >= fechaLimite;
+                });
+                
+                registrosBaseFritaFiltrados = registrosBaseFritaFiltrados.filter(r => {
+                    const fechaRegistro = new Date(r.fecha);
+                    return fechaRegistro >= fechaLimite;
+                });
+            }
+            
+            // Aplicar filtro de tipo
+            if (filtroTipo === 'crudo') {
+                registrosBaseFritaFiltrados = [];
+            } else if (filtroTipo === 'base_frita') {
+                registrosCrudoFiltrados = [];
+            }
+            
+            // Actualizar gráficos y estadísticas con los datos filtrados
+            actualizarEstadisticasCrudo(registrosCrudoFiltrados);
+            actualizarEstadisticasBaseFrita(registrosBaseFritaFiltrados);
+            inicializarGraficoCrudo(registrosCrudoFiltrados);
+            inicializarGraficoBaseFrita(registrosBaseFritaFiltrados);
+            {% endif %}
+        }
+        
+        // Función para actualizar estadísticas de peso crudo
+        function actualizarEstadisticasCrudo(registros) {
+            if (registros.length > 0) {
+                // Obtener los pesos del lado A y B
+                const pesosA = registros.map(r => parseFloat(r.peso_lado_a || r.peso || 0));
+                const pesosB = registros.map(r => parseFloat(r.peso_lado_b || r.peso || 0));
+                
+                // Calcular estadísticas para lado A
+                const promedioA = pesosA.reduce((a, b) => a + b, 0) / pesosA.length;
+                const minA = Math.min(...pesosA);
+                const maxA = Math.max(...pesosA);
+                const totalA = pesosA.reduce((a, b) => a + b, 0);
+                const desviacionA = calcularDesviacionEstandar(pesosA);
+                
+                // Calcular estadísticas para lado B
+                const promedioB = pesosB.reduce((a, b) => a + b, 0) / pesosB.length;
+                const minB = Math.min(...pesosB);
+                const maxB = Math.max(...pesosB);
+                const totalB = pesosB.reduce((a, b) => a + b, 0);
+                const desviacionB = calcularDesviacionEstandar(pesosB);
+                
+                // Calcular estadísticas promedio de ambos lados
+                const promedio = ((promedioA + promedioB) / 2).toFixed(2);
+                const min = Math.min(minA, minB).toFixed(2);
+                const max = Math.max(maxA, maxB).toFixed(2);
+                const total = (totalA + totalB).toFixed(2);
+                const desviacion = ((parseFloat(desviacionA) + parseFloat(desviacionB)) / 2).toFixed(2);
+                
+                // Actualizar los elementos HTML
+                document.getElementById('peso-crudo-promedio').textContent = `${promedio} g`;
+                document.getElementById('peso-crudo-minimo').textContent = `${min} g`;
+                document.getElementById('peso-crudo-maximo').textContent = `${max} g`;
+                document.getElementById('total-registros-crudo').textContent = registros.length;
+                document.getElementById('peso-crudo-total').textContent = `${total} g`;
+                document.getElementById('peso-crudo-desviacion').textContent = `${desviacion} g`;
+            } else {
+                // No hay registros, mostrar valores por defecto
+                document.getElementById('peso-crudo-promedio').textContent = '--';
+                document.getElementById('peso-crudo-minimo').textContent = '--';
+                document.getElementById('peso-crudo-maximo').textContent = '--';
+                document.getElementById('total-registros-crudo').textContent = '0';
+                document.getElementById('peso-crudo-total').textContent = '--';
+                document.getElementById('peso-crudo-desviacion').textContent = '--';
+            }
+        }
+        
+        // Función para actualizar estadísticas de base frita
+        function actualizarEstadisticasBaseFrita(registros) {
+            if (registros.length > 0) {
+                // Obtener los pesos del lado A y B
+                const pesosA = registros.map(r => parseFloat(r.peso_lado_a || r.peso || 0));
+                const pesosB = registros.map(r => parseFloat(r.peso_lado_b || r.peso || 0));
+                
+                // Calcular estadísticas para lado A
+                const promedioA = pesosA.reduce((a, b) => a + b, 0) / pesosA.length;
+                const minA = Math.min(...pesosA);
+                const maxA = Math.max(...pesosA);
+                const totalA = pesosA.reduce((a, b) => a + b, 0);
+                const desviacionA = calcularDesviacionEstandar(pesosA);
+                
+                // Calcular estadísticas para lado B
+                const promedioB = pesosB.reduce((a, b) => a + b, 0) / pesosB.length;
+                const minB = Math.min(...pesosB);
+                const maxB = Math.max(...pesosB);
+                const totalB = pesosB.reduce((a, b) => a + b, 0);
+                const desviacionB = calcularDesviacionEstandar(pesosB);
+                
+                // Calcular estadísticas promedio de ambos lados
+                const promedio = ((promedioA + promedioB) / 2).toFixed(2);
+                const min = Math.min(minA, minB).toFixed(2);
+                const max = Math.max(maxA, maxB).toFixed(2);
+                const total = (totalA + totalB).toFixed(2);
+                const desviacion = ((parseFloat(desviacionA) + parseFloat(desviacionB)) / 2).toFixed(2);
+                
+                // Actualizar los elementos HTML
+                document.getElementById('peso-frita-promedio').textContent = `${promedio} g`;
+                document.getElementById('peso-frita-minimo').textContent = `${min} g`;
+                document.getElementById('peso-frita-maximo').textContent = `${max} g`;
+                document.getElementById('total-registros-frita').textContent = registros.length;
+                document.getElementById('peso-frita-total').textContent = `${total} g`;
+                document.getElementById('peso-frita-desviacion').textContent = `${desviacion} g`;
+            } else {
+                // No hay registros, mostrar valores por defecto
+                document.getElementById('peso-frita-promedio').textContent = '--';
+                document.getElementById('peso-frita-minimo').textContent = '--';
+                document.getElementById('peso-frita-maximo').textContent = '--';
+                document.getElementById('total-registros-frita').textContent = '0';
+                document.getElementById('peso-frita-total').textContent = '--';
+                document.getElementById('peso-frita-desviacion').textContent = '--';
+            }
+        }
+        
+        // Variables para los gráficos
+        let chartCrudo;
+        let chartFrita;
+        
+        // Función para inicializar el gráfico de peso crudo
+        function inicializarGraficoCrudo(registros) {
+            // Si no hay registros, mostrar gráfico vacío
+            if (!registros || registros.length === 0) {
+                const ctx = document.getElementById('pesosChartCrudo').getContext('2d');
+                if (chartCrudo) {
+                    chartCrudo.destroy();
+                }
+                chartCrudo = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Peso Lado A (g)',
+                            data: [],
+                            borderColor: '#198754',
+                            backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                            tension: 0.1
+                        }, {
+                            label: 'Peso Lado B (g)',
+                            data: [],
+                            borderColor: '#0d6efd',
+                            backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+                return;
+            }
+            
+            // Ordenar registros por fecha (más antigua a más reciente)
+            registros.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+            
+            // Preparar datos para el gráfico
+            const fechas = registros.map(r => r.fecha_formateada || r.fecha);
+            const pesosLadoA = registros.map(r => parseFloat(r.peso_lado_a || r.peso || 0));
+            const pesosLadoB = registros.map(r => parseFloat(r.peso_lado_b || r.peso || 0));
+            
+            // Destruir gráfico existente si hay uno
+            if (chartCrudo) {
+                chartCrudo.destroy();
+            }
+            
+            // Crear gráfico
+            const ctx = document.getElementById('pesosChartCrudo').getContext('2d');
+            chartCrudo = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: fechas,
+                    datasets: [{
+                        label: 'Peso Lado A (g)',
+                        data: pesosLadoA,
+                        borderColor: '#198754',
+                        backgroundColor: 'rgba(25, 135, 84, 0.1)',
+                        tension: 0.1,
+                        fill: true
+                    }, {
+                        label: 'Peso Lado B (g)',
+                        data: pesosLadoB,
+                        borderColor: '#0d6efd',
+                        backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const index = context.dataIndex;
+                                    const registro = registros[index];
+                                    const datasetLabel = context.dataset.label;
+                                    const value = context.parsed.y;
+                                    
+                                    return `${datasetLabel}: ${value} g`;
+                                },
+                                afterLabel: function(context) {
+                                    const index = context.dataIndex;
+                                    const registro = registros[index];
+                                    return `Producto: ${registro.producto}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Peso (g)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Fecha'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Función para inicializar el gráfico de base frita
+        function inicializarGraficoBaseFrita(registros) {
+            // Si no hay registros, mostrar gráfico vacío
+            if (!registros || registros.length === 0) {
+                const ctx = document.getElementById('pesosChartFrita').getContext('2d');
+                if (chartFrita) {
+                    chartFrita.destroy();
+                }
+                chartFrita = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Peso Lado A (g)',
+                            data: [],
+                            borderColor: '#dc3545',
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                            tension: 0.1
+                        }, {
+                            label: 'Peso Lado B (g)',
+                            data: [],
+                            borderColor: '#fd7e14',
+                            backgroundColor: 'rgba(253, 126, 20, 0.1)',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: false
+                            }
+                        }
+                    }
+                });
+                return;
+            }
+            
+            // Ordenar registros por fecha (más antigua a más reciente)
+            registros.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+            
+            // Preparar datos para el gráfico
+            const fechas = registros.map(r => r.fecha_formateada || r.fecha);
+            const pesosLadoA = registros.map(r => parseFloat(r.peso_lado_a || r.peso || 0));
+            const pesosLadoB = registros.map(r => parseFloat(r.peso_lado_b || r.peso || 0));
+            
+            // Destruir gráfico existente si hay uno
+            if (chartFrita) {
+                chartFrita.destroy();
+            }
+            
+            // Crear gráfico
+            const ctx = document.getElementById('pesosChartFrita').getContext('2d');
+            chartFrita = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: fechas,
+                    datasets: [{
+                        label: 'Peso Lado A (g)',
+                        data: pesosLadoA,
+                        borderColor: '#dc3545',
+                        backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                        tension: 0.1,
+                        fill: true
+                    }, {
+                        label: 'Peso Lado B (g)',
+                        data: pesosLadoB,
+                        borderColor: '#fd7e14',
+                        backgroundColor: 'rgba(253, 126, 20, 0.1)',
+                        tension: 0.1,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const index = context.dataIndex;
+                                    const registro = registros[index];
+                                    const datasetLabel = context.dataset.label;
+                                    const value = context.parsed.y;
+                                    
+                                    return `${datasetLabel}: ${value} g`;
+                                },
+                                afterLabel: function(context) {
+                                    const index = context.dataIndex;
+                                    const registro = registros[index];
+                                    return `Producto: ${registro.producto}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Peso (g)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Fecha'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Inicializar validación cuando se abra el modal
+        $('#createPesoModal').on('shown.bs.modal', function() {
+            validarRangosPeso(); // Validar al abrir el modal
+        });
+        
+        // Inicializar validación cuando se abra el modal de edición
+        $('#editPesoModal').on('shown.bs.modal', function() {
+            validarRangosPesoEdicion(); // Validar al abrir el modal
+        });
+        
+        // Configurar botón de aplicar filtros en resultados
+        const btnAplicarFiltros = document.getElementById('btn-aplicar-filtros');
+        if (btnAplicarFiltros) {
+            btnAplicarFiltros.addEventListener('click', function() {
+                aplicarFiltros();
+            });
+        }
+        
+        // Inicializar resultados si estamos en esa pestaña al cargar
+        if (window.location.hash === '#resultados-tab-pane') {
+            inicializarResultados();
+        }
+    });
+</script>
+{% endblock %}

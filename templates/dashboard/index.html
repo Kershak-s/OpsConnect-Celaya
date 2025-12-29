@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}Panel Principal{% endblock %}
+
+{% block extra_css %}
+<style>
+    .menu-card {
+        transition: all 0.3s ease;
+        border-radius: 10px;
+        overflow: hidden;
+        height: 250px;
+        position: relative;
+        cursor: pointer;
+    }
+    
+    .menu-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    }
+    
+    .menu-image {
+        height: 100%;
+        width: 100%;
+        object-fit: cover;
+    }
+    
+    .menu-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.8));
+        padding: 20px;
+        color: white;
+    }
+    
+    .menu-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    
+    .menu-description {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+    
+    .col {
+        position: relative;
+    }
+    
+    .edit-button {
+        position: absolute;
+        top: 10px;
+        right: 25px;
+        background-color: rgba(255,255,255,0.8);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #333;
+        text-decoration: none;
+        opacity: 0.9;
+        transition: opacity 0.3s ease;
+        z-index: 100;
+    }
+    
+    .edit-button:hover {
+        background-color: white;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-4 text-primary"><i class="fas fa-th-large me-2"></i>Menú Principal</h2>
+        <p class="lead">Seleccione una categoría para ver más detalles.</p>
+    </div>
+</div>
+
+<div class="row row-cols-1 row-cols-md-3 g-4">
+    <!-- EXTRUIDOS -->
+    <div class="col">
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('edit_menu_item', category='EXTRUIDOS') }}" class="edit-button" title="Editar línea">
+            <i class="fas fa-edit"></i>
+        </a>
+        {% endif %}
+        <a href="{{ url_for('line_sections', category='EXTRUIDOS') }}" class="card menu-card shadow h-100">
+            <img src="{{ url_for('static', filename=(extruidos.image_path if extruidos is not mapping else extruidos['image_path']).replace('\\', '/')) }}" class="menu-image" alt="EXTRUIDOS">
+            <div class="menu-overlay">
+                <h3 class="menu-title">EXTRUIDOS</h3>
+                <p class="menu-description">
+                    {% if extruidos is mapping %}
+                        {{ extruidos['description'] }}
+                    {% else %}
+                        {{ extruidos.description or 'Administrar productos extruidos' }}
+                    {% endif %}
+                </p>
+            </div>
+        </a>
+    </div>
+    
+    <!-- TORTILLA -->
+    <div class="col">
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('edit_menu_item', category='TORTILLA') }}" class="edit-button" title="Editar línea">
+            <i class="fas fa-edit"></i>
+        </a>
+        {% endif %}
+        <a href="{{ url_for('line_sections', category='TORTILLA') }}" class="card menu-card shadow h-100">
+            <img src="{{ url_for('static', filename=(tortilla.image_path if tortilla is not mapping else tortilla['image_path']).replace('\\', '/')) }}" class="menu-image" alt="TORTILLA">
+            <div class="menu-overlay">
+                <h3 class="menu-title">TORTILLA</h3>
+                <p class="menu-description">
+                    {% if tortilla is mapping %}
+                        {{ tortilla['description'] }}
+                    {% else %}
+                        {{ tortilla.description or 'Administrar productos de tortilla' }}
+                    {% endif %}
+                </p>
+            </div>
+        </a>
+    </div>
+    
+    <!-- PAPA -->
+    <div class="col">
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('edit_menu_item', category='PAPA') }}" class="edit-button" title="Editar línea">
+            <i class="fas fa-edit"></i>
+        </a>
+        {% endif %}
+        <a href="{{ url_for('line_sections', category='PAPA') }}" class="card menu-card shadow h-100">
+            <img src="{{ url_for('static', filename=(papa.image_path if papa is not mapping else papa['image_path']).replace('\\', '/')) }}" class="menu-image" alt="PAPA">
+            <div class="menu-overlay">
+                <h3 class="menu-title">PAPA</h3>
+                <p class="menu-description">
+                    {% if papa is mapping %}
+                        {{ papa['description'] }}
+                    {% else %}
+                        {{ papa.description or 'Administrar productos de papa' }}
+                    {% endif %}
+                </p>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}{% endblock %}

@@ -1,0 +1,1597 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/custom/pnc-simple-custom.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/custom/pnc-summary-boxes.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/custom/pnc-productos-slider.css') }}">
+<style>
+    /* Estilos para la tabla de PNC Simple */
+    .pnc-simple-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 1rem;
+        overflow-x: auto;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .pnc-simple-table th {
+        background: #0d6efd;
+        color: white;
+        font-weight: 600;
+        text-align: center;
+        padding: 1.2rem 1rem;
+        border-bottom: 2px solid #dee2e6;
+        position: relative;
+    }
+
+    .pnc-simple-table th:first-child {
+        border-top-left-radius: 10px;
+    }
+
+    .pnc-simple-table th:last-child {
+        border-top-right-radius: 10px;
+    }
+
+    .pnc-simple-table td {
+        padding: 1.1rem 1rem;
+        text-align: center;
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: middle;
+        transition: all 0.2s ease;
+        white-space: normal;
+        word-wrap: break-word;
+        max-width: 150px;
+    }
+
+    .pnc-simple-table tr:last-child td:first-child {
+        border-bottom-left-radius: 10px;
+    }
+
+    .pnc-simple-table tr:last-child td:last-child {
+        border-bottom-right-radius: 10px;
+    }
+
+    .pnc-simple-table tr:hover td {
+        background-color: #f0f7ff;
+    }
+
+    .pnc-table-section {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        padding: 2rem;
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        overflow: hidden;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .pnc-table-section:hover {
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+    }
+
+    .pnc-section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .pnc-section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #343a40;
+        margin-bottom: 0;
+    }
+
+    /* Estilos para el selector de tiempo (reloj) */
+    .time-picker-container {
+        width: 100%;
+    }
+
+    .time-picker {
+        position: relative;
+        width: 120px;
+    }
+
+    .time-input {
+        padding: 0.5rem;
+        text-align: center;
+        border-radius: 50px;
+        border: 2px solid #0d6efd;
+        background-color: #f8f9fa;
+        font-weight: bold;
+        position: relative;
+        z-index: 1;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .time-input:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+        background-color: white;
+    }
+
+    .time-input::-webkit-calendar-picker-indicator {
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%230d6efd" class="bi bi-clock" viewBox="0 0 16 16"><path d="M8 3.5a.5.5 0 0 0-1 0V9a.5.5 0 0 0 .252.434l3.5 2a.5.5 0 0 0 .496-.868L8 8.71V3.5z"/><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm7-8A7 7 0 1 1 1 8a7 7 0 0 1 14 0z"/></svg>');
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        margin-left: 5px;
+    }
+
+    /* Estilos para tarjetas de información */
+    .info-card {
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        padding: 1.8rem;
+        margin-bottom: 1.5rem;
+        border-left: 5px solid #0d6efd;
+        transition: all 0.3s ease;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .info-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        background-color: #f0f7ff;
+    }
+
+    .info-card-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #343a40;
+    }
+
+    .info-card-text {
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    /* Estilos para las pestañas */
+    .nav-tabs {
+        display: flex;
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    .nav-tabs .nav-link {
+        border: none;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        color: #6c757d;
+        background-color: transparent;
+        transition: all 0.2s ease;
+        border-bottom: 2px solid transparent;
+    }
+
+    .nav-tabs .nav-link:hover {
+        color: #0d6efd;
+        background-color: rgba(13, 110, 253, 0.05);
+    }
+
+    .nav-tabs .nav-link.active {
+        color: #0d6efd;
+        background-color: white;
+        border-bottom: 2px solid #0d6efd;
+    }
+
+    .nav-tabs .nav-link i {
+        margin-right: 0.5rem;
+    }
+
+    /* Estilos para el modal de Excel */
+    .modal-xl {
+        max-width: 95%;
+    }
+
+    .excel-modal .modal-header {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .excel-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+    }
+
+    .excel-table th {
+        background-color: #0d6efd;
+        color: white;
+        text-align: center;
+        padding: 1rem;
+        font-weight: 600;
+        border: 1px solid #dee2e6;
+    }
+
+    .excel-table td {
+        padding: 0;
+        border: 1px solid #dee2e6;
+    }
+
+    .excel-input {
+        width: 100%;
+        border: none;
+        padding: 0.75rem;
+        text-align: left;
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+
+    .excel-input:focus {
+        outline: none;
+        background-color: #e9ecef;
+        box-shadow: inset 0 0 0 2px #0d6efd;
+    }
+
+    input[type="number"].excel-input {
+        font-weight: bold;
+        color: #0d6efd;
+    }
+
+    textarea.excel-input {
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .excel-input::placeholder {
+        color: #adb5bd;
+        font-style: italic;
+    }
+
+    .excel-select {
+        width: 100%;
+        border: none;
+        padding: 0.75rem;
+        text-align: center;
+        background-color: #f8f9fa;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23212529' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.75rem center;
+        background-size: 16px 12px;
+    }
+
+    .excel-select:focus {
+        outline: none;
+        background-color: #e9ecef;
+    }
+
+    .excel-invalid {
+        border: 2px solid #dc3545;
+    }
+
+    /* Estilos responsivos */
+    @media (max-width: 767.98px) {
+        .pnc-simple-table {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+        }
+    }
+
+    /* Animaciones */
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .pnc-table-section {
+        animation: fadeIn 0.5s ease;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .info-card {
+        animation: slideInUp 0.5s ease;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 mt-0">
+    <!-- Botones de navegación -->
+    <div class="row mb-4 mt-4">
+        <div class="col-12">
+            <div class="d-flex gap-2">
+                <a href="{{ url_for('index') }}" class="btn btn-light rounded-pill shadow-sm">
+                    <i class="fas fa-home me-2"></i>Inicio
+                </a>
+                <a href="{{ url_for('line_sections', category=category) }}"
+                    class="btn btn-light rounded-pill shadow-sm">
+                    <i class="fas fa-th-large me-2"></i>Secciones
+                </a>
+                <a href="{{ url_for('calidad_exercises', category=category, section='calidad', subsection='kpi') }}"
+                    class="btn btn-light rounded-pill shadow-sm">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a Calidad
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="pae-container" data-category="{{ category }}">
+        <!-- Fecha -->
+
+
+        <!-- Encabezado con línea roja en el lado izquierdo -->
+        <div
+            style="background: white; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.08); border-left: 8px solid #dc3545; padding: 2rem; margin-bottom: 1.5rem;">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1
+                        style="color: #333; font-weight: 700; margin-bottom: 0.5rem; display: flex; align-items: center;">
+                        <i class="fas fa-times-circle me-2" style="color: #dc3545;"></i>
+                        PNC - Producto No Conforme
+                    </h1>
+                    <p class="text-muted mb-0">Registro y análisis de Producto No Conforme para la línea de {{category}}</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="#createPNCModal">
+                        <i class="fas fa-plus-circle me-2"></i>Nuevo Registro
+                    </button>
+                    <button type="button" class="btn btn-success">
+                        <i class="fas fa-file-excel me-2"></i>Exportar Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navegación por pestañas -->
+        <div class="card shadow-sm mb-4" style="border-radius: 10px; border: none;">
+            <div class="card-body p-0">
+                <ul class="nav nav-tabs mb-0" id="pncTabs" role="tablist" style="border-bottom: none;">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="registros-tab" data-bs-toggle="tab"
+                            data-bs-target="#registros" type="button" role="tab" aria-controls="registros"
+                            aria-selected="true">
+                            <i class="fas fa-list me-2"></i>Registros
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="resultados-tab" data-bs-toggle="tab" data-bs-target="#resultados"
+                            type="button" role="tab" aria-controls="resultados" aria-selected="false">
+                            <i class="fas fa-chart-bar me-2"></i>Resultados
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Contenido de las pestañas -->
+        <div class="tab-content" id="pncTabsContent">
+            <!-- Pestaña de Registros -->
+            <div class="tab-pane fade show active" id="registros" role="tabpanel" aria-labelledby="registros-tab">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="pnc-table-section"
+                            style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); padding: 2rem; margin-bottom: 2rem;">
+                            <div class="pnc-section-header">
+                                <h3 class="pnc-section-title">
+                                    <i class="fas fa-times-circle me-2"></i>Registros PNC - {{ category }}
+                                </h3>
+                                <div class="d-flex gap-3 align-items-center">
+                                    <div class="form-group mb-0">
+                                        <input type="text" class="form-control" placeholder="Buscar..." id="searchInput"
+                                            style="border-radius: 20px; padding: 0.5rem 1rem;">
+                                    </div>
+                                    <button type="button" class="btn btn-outline-primary rounded-pill" id="btnFiltrar">
+                                        <i class="fas fa-filter me-1"></i>Filtrar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="table-responsive">
+                                <table class="pnc-simple-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 9%;">FOLIO</th>
+                                            <th style="width: 8%;">FECHA</th>
+                                            <th style="width: 5%;">TURNO</th>
+                                            <th style="width: 15%;">NOMBRE DEL PRODUCTO</th>
+                                            <th style="width: 12%;">HORARIOS</th>
+                                            <th style="width: 16%;">CANTIDAD</th>
+                                            <th style="width: 12%;">ORIGEN</th>
+                                            <th style="width: 10%;">STATUS</th>
+                                            <th style="width: 13%;">ACCIONES</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% if pnc_records %}
+                                        {% for record in pnc_records %}
+                                        <tr>
+                                            <td title="{{ record.folio }}">{{ record.folio.split('_')[2] }}_{{
+                                                record.folio.split('_')[3] }}</td>
+                                            <td>{{ record.fecha.strftime('%d/%m/%Y') }}</td>
+                                            <td>{{ record.turno }}</td>
+                                            <td>{{ record.producto }}</td>
+                                            <td>{{ record.horario }}</td>
+                                            <td>
+                                                {% if record.cantidad is not none %}
+                                                {{ '%.3f'|format(record.cantidad)|replace('.000', '')|replace('.00',
+                                                '')|replace('.0', '') }} {{ record.unidad_cantidad or '' }}
+                                                {% else %}
+                                                -
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ record.origen }}</td>
+                                            <td>{{ record.status }}</td>
+                                            <td class="text-right">
+                                                <div class="d-flex"
+                                                    style="gap: 10px; justify-content: flex-end; padding-right: 15px;">
+                                                    <button type="button" class="btn btn-primary edit-pnc-btn"
+                                                        data-bs-toggle="modal" data-bs-target="#editPNCModal"
+                                                        data-id="{{ record.id }}" data-folio="{{ record.folio }}"
+                                                        data-fecha="{{ record.fecha.strftime('%Y-%m-%d') }}"
+                                                        data-turno="{{ record.turno }}"
+                                                        data-producto="{{ record.producto }}"
+                                                        data-horario="{{ record.horario }}"
+                                                        data-cantidad="{{ record.cantidad }}"
+                                                        data-unidad-cantidad="{{ record.unidad_cantidad }}"
+                                                        data-origen="{{ record.origen }}"
+                                                        data-no-conformidad="{{ record.no_conformidad }}"
+                                                        data-status="{{ record.status }}"
+                                                        data-detector="{{ record.detector }}"
+                                                        data-rechazo="{{ record.rechazo }}">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-danger" data-bs-toggle="modal"
+                                                        data-bs-target="#deletePNCSimpleModal{{ record.id }}"
+                                                        title="Eliminar">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+
+                                                <!-- Modal de confirmación para eliminar -->
+                                                <div class="modal fade" id="deletePNCSimpleModal{{ record.id }}"
+                                                    tabindex="-1"
+                                                    aria-labelledby="deletePNCSimpleModalLabel{{ record.id }}"
+                                                    aria-hidden="true">
+                                                    <div class="modal-dialog">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header bg-danger text-white">
+                                                                <h5 class="modal-title"
+                                                                    id="deletePNCSimpleModalLabel{{ record.id }}">
+                                                                    Confirmar eliminación</h5>
+                                                                <button type="button" class="btn-close"
+                                                                    data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                ¿Estás seguro de que deseas eliminar el registro con
+                                                                folio <strong>{{ record.folio }}</strong>?
+                                                                <br>Esta acción no se puede deshacer.
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary"
+                                                                    data-bs-dismiss="modal">Cancelar</button>
+                                                                <form
+                                                                    action="{{ url_for('delete_pnc_simple', category=category, pnc_id=record.id) }}"
+                                                                    method="post">
+                                                                    {{ form.csrf_token }}
+                                                                    <button type="submit"
+                                                                        class="btn btn-danger">Eliminar</button>
+                                                                </form>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="9" class="text-center py-4">
+                                                <p class="text-muted mb-0">No hay registros de PNC disponibles.</p>
+                                            </td>
+                                        </tr>
+                                        {% endif %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pestaña de Resultados -->
+            <div class="tab-pane fade" id="resultados" role="tabpanel" aria-labelledby="resultados-tab">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="pnc-table-section">
+                            <div class="pnc-section-header">
+                                <h3 class="pnc-section-title">
+                                    <i class="fas fa-chart-bar me-2"></i>Análisis de Productos No Conforme
+                                </h3>
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <select id="filtroProductoTabla" class="form-select">
+                                            <!-- Opciones serán generadas por JavaScript -->
+                                        </select>
+                                    </div>
+                                    <button type="button" class="btn btn-primary" id="btnActualizarGraficos">
+                                        <i class="fas fa-sync-alt me-1"></i>Actualizar Gráficos
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Resumen de cantidades por producto - RECHAZADOS -->
+                            <div class="row mb-4" id="resumenRechazadosContainer">
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="card-title mb-0" id="resumenRechazadosTitulo"><i
+                                                    class="fas fa-ban me-2"></i>Resumen de Productos Rechazados</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- Contenedor para las cajas de resumen -->
+                                            <div class="summary-container" id="summaryRechazadosContainer">
+                                                <!-- Las cajas de resumen se generarán dinámicamente aquí -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Resumen de cantidades por producto - DETENIDOS -->
+                            <div class="row mb-4" id="resumenDetenidosContainer">
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="card-title mb-0" id="resumenDetenidosTitulo"><i
+                                                    class="fas fa-pause-circle me-2"></i>Resumen de Productos Detenidos
+                                            </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <!-- Contenedor para las cajas de resumen -->
+                                            <div class="summary-container" id="summaryDetenidosContainer">
+                                                <!-- Las cajas de resumen se generarán dinámicamente aquí -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Filtros para análisis -->
+                            <div class="row mb-4">
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="filterPeriodo" class="form-label">Periodo:</label>
+                                        <select id="filterPeriodo" class="form-select">
+                                            <!-- Opciones serán generadas por JavaScript -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="filterProducto" class="form-label">Producto:</label>
+                                        <select id="filterProducto" class="form-select">
+                                            <!-- Opciones serán generadas por JavaScript -->
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="filterStatus" class="form-label">Status:</label>
+                                        <select id="filterStatus" class="form-select">
+                                            <option value="todos">Todos</option>
+                                            <option value="RECHAZADO">RECHAZADO</option>
+                                            <option value="DETENIDO">DETENIDO</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        <label for="filterOrigen" class="form-label">Origen:</label>
+                                        <select id="filterOrigen" class="form-select">
+                                            <option value="todos">Todos</option>
+                                            {% if category == 'TORTILLA' %}
+                                            <option value="COCIMIENTO">COCIMIENTO</option>
+                                            <option value="FREIDOR">FREIDOR</option>
+                                            <option value="LIMPIEZA DE MAIZ">LIMPIEZA DE MAIZ</option>
+                                            <option value="MOLINO/LAMINADOR">MOLINO/LAMINADOR</option>
+                                            <option value="SAZONADO">SAZONADO</option>
+                                            <option value="EMPAQUE GENERAL">EMPAQUE GENERAL</option>
+                                            {% elif category == 'EXTRUIDOS' %}
+                                            <option value="EXTRUSIÓN">EXTRUSIÓN</option>
+                                            <option value="FREIDOR">FREIDOR</option>
+                                            <option value="SAZONADO">SAZONADO</option>
+                                            <option value="EMPAQUE">EMPAQUE</option>
+                                            <option value="ALMACÉN">ALMACÉN</option>
+                                            {% elif category == 'PAPA' %}
+                                            <option value="PELADO">PELADO</option>
+                                            <option value="REBANADO">REBANADO</option>
+                                            <option value="FREIDOR">FREIDOR</option>
+                                            <option value="SAZONADO">SAZONADO</option>
+                                            <option value="EMPAQUE">EMPAQUE</option>
+                                            {% endif %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sección de Productos con Slider eliminada -->
+
+                            <!-- Tarjetas de información eliminadas -->
+
+                            <!-- Gráficos de análisis -->
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div class="card border-0 shadow-sm rounded-3 h-100 overflow-hidden">
+                                        <div class="card-header bg-gradient-primary text-white"
+                                            style="background: linear-gradient(135deg, #0d6efd, #0a58ca);">
+                                            <h5 class="card-title mb-0"><i
+                                                    class="fas fa-chart-pie me-2"></i>Distribución por Status</h5>
+                                        </div>
+                                        <div class="card-body p-4">
+                                            <div style="position: relative; height: 300px;">
+                                                <canvas id="chartStatus"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="card border-0 shadow-sm rounded-3 h-100 overflow-hidden">
+                                        <div class="card-header bg-gradient-info text-white"
+                                            style="background: linear-gradient(135deg, #17a2b8, #138496);">
+                                            <h5 class="card-title mb-0"><i class="fas fa-sitemap me-2"></i>Distribución
+                                                por Origen</h5>
+                                        </div>
+                                        <div class="card-body p-4">
+                                            <div style="position: relative; height: 300px;">
+                                                <canvas id="chartOrigen"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 mb-4">
+                                    <div class="card border-0 shadow-sm rounded-3 overflow-hidden">
+                                        <div class="card-header bg-gradient-success text-white d-flex justify-content-between align-items-center"
+                                            style="background: linear-gradient(135deg, #28a745, #218838);">
+                                            <h5 class="card-title mb-0"><i class="fas fa-chart-line me-2"></i>Tendencias
+                                            </h5>
+                                            <div class="form-group mb-0">
+                                                <select id="filterTendencia"
+                                                    class="form-select form-select-sm bg-white border-0">
+                                                    <option value="mes">Por Mes</option>
+                                                    <option value="semana">Por Semana</option>
+                                                    <option value="dia">Por Día</option>
+                                                    <option value="turno">Por Turno</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="card-body p-4">
+                                            <div style="position: relative; height: 300px;">
+                                                <canvas id="chartTendencia"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Crear PNC -->
+<div class="modal fade excel-modal" id="createPNCModal" tabindex="-1" aria-labelledby="createPNCModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createPNCModalLabel">
+                    <i class="fas fa-plus-circle me-2"></i>Nuevo Registro PNC - {{ category }}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="createPNCForm" action="{{ url_for('create_pnc_simple', category=category) }}" method="POST">
+                    {{ form.csrf_token }}
+
+                    <div class="table-responsive">
+                        <table class="excel-table">
+                            <thead>
+                                <tr>
+                                    <th>FOLIO</th>
+                                    <th>FECHA</th>
+                                    <th>TURNO</th>
+                                    <th>NOMBRE DEL PRODUCTO</th>
+                                    <th>HORARIOS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <input type="text" name="folio" class="excel-input" id="createFolio" readonly>
+                                        <small class="text-muted d-block text-center">Generado automáticamente</small>
+                                    </td>
+                                    <td>
+                                        <input type="date" name="fecha" class="excel-input" required id="createFecha"
+                                            onchange="generateFolio()" style="text-align: center;">
+                                    </td>
+                                    <td>
+                                        <select name="turno" class="excel-select" required>
+                                            <option value="">-</option>
+                                            <option value="A">A</option>
+                                            <option value="B">B</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select name="producto" class="excel-select" required>
+                                            <option value="">-</option>
+                                            {% if category == 'TORTILLA' %}
+                                            <option value="DORITOS">DORITOS</option>
+                                            <option value="TOSTITOS SALSA VERDE">TOSTITOS SALSA VERDE</option>
+                                            <option value="TOSTITOS FH">TOSTITOS FH</option>
+                                            <option value="CHETOS">CHETOS</option>
+                                            {% elif category == 'EXTRUIDOS' %}
+                                            <option value="CHEETOS TORCIDITOS">CHEETOS TORCIDITOS</option>
+                                            <option value="CHEETOS EXTRA FH">CHEETOS XTRA FH NUEVO</option>
+                                            <option value="CHEETOS">CHEETOS XTRA FLAMIN HOT</option>
+                                            <option value="OTROS">OTROS</option>
+                                            {% elif category == 'PAPA' %}
+                                            <option value="PAPA SAL">PAPA SAL</option>
+                                            <option value="SABRITAS XTRA FH">SABRITAS XTRA FH</option>
+                                            <option value="OTROS">OTROS</option>
+                                            {% endif %}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column align-items-center">
+                                            <div class="time-picker-container justify-content-center">
+                                                <div class="row w-100">
+                                                    <div class="col-6">
+                                                        <div class="time-picker text-center">
+                                                            <label class="form-label text-center w-100">Hora inicio</label>
+                                                            <div class="d-flex justify-content-center align-items-center">
+                                                                <select name="hora_inicio_hora"
+                                                                    class="form-control time-select me-1" id="createHoraInicioH"
+                                                                    required>
+                                                                    <!-- Opciones llenadas por JS -->
+                                                                </select>
+                                                                <span class="align-self-center mx-1 fw-bold">:</span>
+                                                                <select name="hora_inicio_minuto"
+                                                                    class="form-control time-select ms-1" id="createHoraInicioM"
+                                                                    required>
+                                                                    <!-- Opciones llenadas por JS -->
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="time-picker text-center">
+                                                            <label class="form-label text-center w-100">Hora fin</label>
+                                                            <div class="d-flex justify-content-center align-items-center">
+                                                                <select name="hora_fin_hora"
+                                                                    class="form-control time-select me-1" id="createHoraFinH"
+                                                                    required>
+                                                                    <!-- Opciones llenadas por JS -->
+                                                                </select>
+                                                                <span class="align-self-center mx-1 fw-bold">:</span>
+                                                                <select name="hora_fin_minuto"
+                                                                    class="form-control time-select ms-1" id="createHoraFinM"
+                                                                    required>
+                                                                    <!-- Opciones llenadas por JS -->
+                                                                </select>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <span class="time-divider fw-bold mt-2"></span>
+                                            </div>
+                                        </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" name="horario" id="createHorario">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Segunda tabla para los campos adicionales -->
+                        <table class="excel-table mt-3">
+                            <thead>
+                                <tr>
+                                    <th>CANTIDAD</th>
+                                    <th>UNIDAD</th>
+                                    <th>ORIGEN</th>
+                                    <th>STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <input type="number" name="cantidad" class="excel-input" id="createCantidad"
+                                            placeholder="Ingresa la cantidad" step="0.001"
+                                            style="min-height: 50px; font-size: 16px; text-align: center;">
+                                    </td>
+                                    <td>
+                                        <select name="unidad_cantidad" class="excel-select" id="createUnidadCantidad"
+                                            onchange="mostrarCampoOtraUnidad(this, 'createOtraUnidadContainer', 'createOtraUnidad')">
+                                            <option value="">-</option>
+                                            <option value="KILOGRAMOS">KILOGRAMOS</option>
+                                            <option value="TONELADAS">TONELADAS</option>
+                                            <option value="TARIMAS">TARIMAS</option>
+                                            <option value="OTRO">OTRO</option>
+                                        </select>
+                                        <div id="createOtraUnidadContainer" class="mt-2" style="display: none;">
+                                            <input type="text" name="otra_unidad" id="createOtraUnidad"
+                                                class="excel-input" placeholder="Especifique la unidad">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <select name="origen" class="excel-select" id="createOrigen">
+                                            <option value="">-</option>
+                                            {% if category == 'TORTILLA' %}
+                                            <option value="COCIMIENTO">COCIMIENTO</option>
+                                            <option value="FREIDOR">FREIDOR</option>
+                                            <option value="LIMPIEZA DE MAIZ">LIMPIEZA DE MAIZ</option>
+                                            <option value="MOLINO/LAMINADOR">MOLINO/LAMINADOR</option>
+                                            <option value="SAZONADO">SAZONADO</option>
+                                            <option value="EMPAQUE GENERAL">EMPAQUE GENERAL</option>
+                                            {% elif category == 'EXTRUIDOS' %}
+                                            <option value="EXTRUSIÓN">EXTRUSIÓN</option>
+                                            <option value="FREIDOR">FREIDOR</option>
+                                            <option value="SAZONADO">SAZONADO</option>
+                                            <option value="EMPAQUE">EMPAQUE</option>
+                                            <option value="ALMACÉN">ALMACÉN</option>
+                                            {% elif category == 'PAPA' %}
+                                            <option value="PELADO">PELADO</option>
+                                            <option value="REBANADO">REBANADO</option>
+                                            <option value="FREIDOR">FREIDOR</option>
+                                            <option value="SAZONADO">SAZONADO</option>
+                                            <option value="EMPAQUE">EMPAQUE</option>
+                                            {% endif %}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select name="status" class="excel-select" id="createStatus">
+                                            <option value="">-</option>
+                                            <option value="RECHAZADO">RECHAZADO</option>
+                                            <option value="DETENIDO">DETENIDO</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Tercera tabla para la no conformidad, detector y rechazo -->
+                        <table class="excel-table mt-3">
+                            <thead>
+                                <tr>
+                                    <th>NO CONFORMIDAD</th>
+                                    <th>NOMBRE Y PUESTO DE QUIEN DETECTA</th>
+                                    <th>RECHAZO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <textarea name="no_conformidad" class="excel-input" id="createNoConformidad"
+                                            style="min-height: 100px; resize: vertical;"
+                                            placeholder="Especifica la no conformidad"></textarea>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="detector" class="excel-input" id="createDetector"
+                                            placeholder="Ingresa tu nombre y posteriormente tu puesto">
+                                    </td>
+                                    <td>
+                                        <select name="rechazo" class="excel-select" id="createRechazo">
+                                            <option value="">-</option>
+                                            <option value="false">No</option>
+                                            <option value="true">Sí</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-danger mt-3 d-none" id="createErrorMessage">
+                        Por favor complete todos los campos requeridos.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="saveCreateBtn">
+                    <i class="fas fa-save me-1"></i>Guardar Registro
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para Editar PNC -->
+<div class="modal fade excel-modal" id="editPNCModal" tabindex="-1" aria-labelledby="editPNCModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPNCModalLabel">
+                    <i class="fas fa-edit me-2"></i>Editar Registro PNC
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editPNCForm" method="POST">
+                    {{ form.csrf_token }}
+
+                    <div class="table-responsive">
+                        <table class="excel-table">
+                            <thead>
+                                <tr>
+                                    <th>FOLIO</th>
+                                    <th>FECHA</th>
+                                    <th>TURNO</th>
+                                    <th>NOMBRE DEL PRODUCTO</th>
+                                    <th>HORARIOS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <input type="text" name="folio" id="editFolio" class="excel-input" required>
+                                        <small class="text-muted d-block text-center">Formato: PNC_DDMM_XX_NNN</small>
+                                    </td>
+                                    <td>
+                                        <input type="date" name="fecha" id="editFecha" class="excel-input" required
+                                            onchange="updateEditFolio()" style="text-align: center;">
+                                    </td>
+                                    <td>
+                                        <select name="turno" id="editTurno" class="excel-select" required>
+                                            <option value="">-</option>
+                                            <option value="A">A</option>
+                                            <option value="B">B</option>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select name="producto" id="editProducto" class="excel-select" required>
+                                            <option value="">-</option>
+                                            {% if category == 'TORTILLA' %}
+                                            <option value="DORITOS">DORITOS</option>
+                                            <option value="TOSTITOS SALSA VERDE">TOSTITOS SALSA VERDE</option>
+                                            <option value="TOSTITOS FH">TOSTITOS FH</option>
+                                            <option value="CHETOS">CHETOS</option>
+                                            {% elif category == 'EXTRUIDOS' %}
+                                            <option value="CHEETOS TORCIDITOS">CHEETOS TORCIDITOS</option>
+                                            <option value="CHEETOS">CHEETOS XTRA FLAMIN HOT</option>
+                                            <option value="OTROS">OTROS</option>
+                                            {% elif category == 'PAPA' %}
+                                            <option value="PAPA SAL">PAPA SAL</option>
+                                            <option value="OTROS">OTROS</option>
+                                            {% endif %}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex flex-column align-items-center">
+                                            <div class="time-picker-container justify-content-center">
+                                                <div class="time-picker text-center">
+                                                    <label class="form-label text-center w-100">Hora inicio</label>
+                                                    <div class="d-flex justify-content-center">
+                                                        <select name="hora_inicio_hora"
+                                                            class="form-control time-select me-1" id="editHoraInicioH"
+                                                            required>
+                                                            <!-- Las opciones se llenarán con JavaScript -->
+                                                        </select>
+                                                        <span class="align-self-center mx-1 fw-bold">:</span>
+                                                        <select name="hora_inicio_minuto"
+                                                            class="form-control time-select ms-1" id="editHoraInicioM"
+                                                            required>
+                                                            <!-- Las opciones se llenarán con JavaScript -->
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <span class="time-divider fw-bold">a</span>
+
+                                                <div class="time-picker text-center">
+                                                    <label class="form-label text-center w-100">Hora fin</label>
+                                                    <div class="d-flex justify-content-center">
+                                                        <select name="hora_fin_hora"
+                                                            class="form-control time-select me-1" id="editHoraFinH"
+                                                            required>
+                                                            <!-- Las opciones se llenarán con JavaScript -->
+                                                        </select>
+                                                        <span class="align-self-center mx-1 fw-bold">:</span>
+                                                        <select name="hora_fin_minuto"
+                                                            class="form-control time-select ms-1" id="editHoraFinM"
+                                                            required>
+                                                            <!-- Las opciones se llenarán con JavaScript -->
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <input type="hidden" name="horario" id="editHorario">
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Segunda tabla para los campos adicionales -->
+                        <table class="excel-table mt-3">
+                            <thead>
+                                <tr>
+                                    <th>CANTIDAD</th>
+                                    <th>UNIDAD</th>
+                                    <th>ORIGEN</th>
+                                    <th>STATUS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <input type="number" name="cantidad" class="excel-input" id="editCantidad"
+                                            placeholder="Ingresa la cantidad" step="0.001"
+                                            style="min-height: 50px; font-size: 16px; text-align: center;">
+                                    </td>
+                                    <td>
+                                        <select name="unidad_cantidad" class="excel-select" id="editUnidadCantidad"
+                                            onchange="mostrarCampoOtraUnidad(this, 'editOtraUnidadContainer', 'editOtraUnidad')">
+                                            <option value="">-</option>
+                                            <option value="KILOGRAMOS">KILOGRAMOS</option>
+                                            <option value="TONELADAS">TONELADAS</option>
+                                            <option value="TARIMAS">TARIMAS</option>
+                                            <option value="OTRO">OTRO</option>
+                                        </select>
+                                        <div id="editOtraUnidadContainer" class="mt-2" style="display: none;">
+                                            <input type="text" name="otra_unidad" id="editOtraUnidad"
+                                                class="excel-input" placeholder="Especifique la unidad">
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <select name="origen" class="excel-select" id="editOrigen">
+                                            <option value="">-</option>
+                                            {% if category == 'TORTILLA' %}
+                                            <option value="COCIMIENTO">COCIMIENTO</option>
+                                            <option value="FREIDOR">FREIDOR</option>
+                                            <option value="LIMPIEZA DE MAIZ">LIMPIEZA DE MAIZ</option>
+                                            <option value="MOLINO/LAMINADOR">MOLINO/LAMINADOR</option>
+                                            <option value="SAZONADO">SAZONADO</option>
+                                            <option value="EMPAQUE GENERAL">EMPAQUE GENERAL</option>
+                                            {% elif category == 'EXTRUIDOS' %}
+                                            <option value="EXTRUSIÓN">EXTRUSIÓN</option>
+                                            <option value="FREIDOR">FREIDOR</option>
+                                            <option value="SAZONADO">SAZONADO</option>
+                                            <option value="EMPAQUE">EMPAQUE</option>
+                                            <option value="ALMACÉN">ALMACÉN</option>
+                                            {% elif category == 'PAPA' %}
+                                            <option value="PELADO">PELADO</option>
+                                            <option value="REBANADO">REBANADO</option>
+                                            <option value="FREIDOR">FREIDOR</option>
+                                            <option value="SAZONADO">SAZONADO</option>
+                                            <option value="EMPAQUE">EMPAQUE</option>
+                                            {% endif %}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select name="status" class="excel-select" id="editStatus">
+                                            <option value="">-</option>
+                                            <option value="RECHAZADO">RECHAZADO</option>
+                                            <option value="DETENIDO">DETENIDO</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Tercera tabla para la no conformidad, detector y rechazo -->
+                        <table class="excel-table mt-3">
+                            <thead>
+                                <tr>
+                                    <th>NO CONFORMIDAD</th>
+                                    <th>NOMBRE Y PUESTO DE QUIEN DETECTA</th>
+                                    <th>RECHAZO</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <textarea name="no_conformidad" class="excel-input" id="editNoConformidad"
+                                            style="min-height: 100px; resize: vertical;"
+                                            placeholder="Especifica la no conformidad"></textarea>
+                                    </td>
+                                    <td>
+                                        <input type="text" name="detector" class="excel-input" id="editDetector"
+                                            placeholder="Ingresa tu nombre y posteriormente tu puesto">
+                                    </td>
+                                    <td>
+                                        <select name="rechazo" class="excel-select" id="editRechazo">
+                                            <option value="">-</option>
+                                            <option value="false">No</option>
+                                            <option value="true">Sí</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-danger mt-3 d-none" id="editErrorMessage">
+                        Por favor complete todos los campos requeridos.
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" id="saveEditBtn">
+                    <i class="fas fa-save me-1"></i>Guardar Cambios
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js para las gráficas -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+
+<!-- Scripts principales de PNC -->
+<script src="{{ url_for('static', filename='js/custom/pnc-simple-tortilla.js') }}"></script>
+<script src="{{ url_for('static', filename='js/custom/pnc-simple-generic.js') }}"></script>
+
+<!-- Script mejorado para análisis y gráficas -->
+<script src="{{ url_for('static', filename='js/custom/pnc-analysis-enhanced.js') }}"></script>
+
+<!-- Scripts de soporte -->
+<script src="{{ url_for('static', filename='js/custom/pnc-simple-producto-filter.js') }}"></script>
+<script src="{{ url_for('static', filename='js/custom/pnc-summary-boxes-generic.js') }}"></script>
+<script src="{{ url_for('static', filename='js/custom/pnc-search-filter.js') }}"></script>
+<script>
+    // Pasar los datos del controlador al frontend
+    window.unidadesPorProducto = {{ unidades_por_producto | tojson | safe }};
+    window.productosUnicos = {{ productos_unicos | tojson | safe }};
+
+    // Obtener los registros de PNC para usarlos en el slider
+    window.pncRecords = [];
+
+    // Convertir los datos de la tabla a un formato utilizable por el script
+    document.addEventListener('DOMContentLoaded', function () {
+        const pncRows = document.querySelectorAll('#registros table tbody tr');
+
+        pncRows.forEach(row => {
+            // Verificar que no sea una fila vacía o de mensaje
+            if (row.cells.length < 6) return;
+
+            // Obtener los datos de las celdas
+            const folio = row.cells[0].textContent.trim();
+            const producto = row.cells[3].textContent.trim();
+
+            // Procesar la cantidad y unidad
+            let cantidad = 0;
+            let unidadCantidad = '';
+
+            const cantidadCelda = row.cells[5].textContent.trim();
+            if (cantidadCelda && cantidadCelda !== '-') {
+                // Extraer la cantidad y la unidad (formato: '10.00 TONELADAS')
+                const cantidadPartes = cantidadCelda.split(' ');
+                if (cantidadPartes.length > 0) {
+                    cantidad = parseFloat(cantidadPartes[0].replace(',', '.'));
+                    if (cantidadPartes.length > 1) {
+                        unidadCantidad = cantidadPartes.slice(1).join(' ').trim();
+                    }
+                }
+            }
+
+            // Obtener el origen y status
+            const origen = row.cells[6].textContent.trim();
+            const status = row.cells[7].textContent.trim();
+
+            // Añadir el registro si es válido
+            if (producto) {
+                window.pncRecords.push({
+                    folio: folio,
+                    producto: producto,
+                    cantidad: cantidad || 0,
+                    unidad_cantidad: unidadCantidad,
+                    origen: origen,
+                    status: status
+                });
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Establecer fecha actual por defecto en el modal de creación
+        // Usar la fecha del servidor que viene en el context processor 'now'
+        // Formato: {{ now.strftime('%Y-%m-%d') }}
+        const serverDate = "{{ now.strftime('%Y-%m-%d') }}";
+        const formattedDate = serverDate;
+        document.getElementById('createFecha').value = formattedDate;
+
+        // Generar folio automáticamente al cargar la página
+        generateFolio();
+
+        // Configurar navegación entre celdas con Tab y Enter para el formulario de creación
+        setupCellNavigation('createPNCModal');
+
+        // Configurar navegación entre celdas con Tab y Enter para el formulario de edición
+        setupCellNavigation('editPNCModal');
+
+        // Manejar envío del formulario de creación
+        document.getElementById('saveCreateBtn').addEventListener('click', function () {
+            const form = document.getElementById('createPNCForm');
+            const isValid = validateForm(form);
+
+            if (isValid) {
+                // Asegúrate de que el campo horario está actualizado correctamente
+                updateCreateHorario();
+
+                // Verificar si se ha seleccionado "OTRO" como unidad y procesar la unidad personalizada
+                const unidadSelect = document.getElementById('createUnidadCantidad');
+                if (unidadSelect.value === 'OTRO') {
+                    const otraUnidad = document.getElementById('createOtraUnidad').value.trim();
+                    if (otraUnidad) {
+                        // Crear un campo oculto para enviar el valor personalizado
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = 'unidad_cantidad';
+                        hiddenInput.value = otraUnidad.toUpperCase();
+                        form.appendChild(hiddenInput);
+
+                        // Deshabilitar el select original para evitar conflictos
+                        unidadSelect.disabled = true;
+                    }
+                }
+
+                // Enviar formulario y recargar la página para mostrar la lista actualizada
+                form.submit();
+            } else {
+                document.getElementById('createErrorMessage').classList.remove('d-none');
+            }
+        });
+
+        // Configurar el modal de edición para cargar los datos del registro
+        const editPNCModal = document.getElementById('editPNCModal');
+        editPNCModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const recordId = button.getAttribute('data-id');
+            const folio = button.getAttribute('data-folio');
+            const fecha = button.getAttribute('data-fecha');
+            const turno = button.getAttribute('data-turno');
+            const producto = button.getAttribute('data-producto');
+            const horario = button.getAttribute('data-horario');
+            const cantidad = button.getAttribute('data-cantidad');
+            const unidadCantidad = button.getAttribute('data-unidad-cantidad');
+            const origen = button.getAttribute('data-origen');
+            const noConformidad = button.getAttribute('data-no-conformidad');
+            const status = button.getAttribute('data-status');
+            const detector = button.getAttribute('data-detector');
+            const rechazo = button.getAttribute('data-rechazo');
+
+            // Añadir el atributo data-turno al botón para que esté disponible en el evento show.bs.modal
+            button.setAttribute('data-turno', turno);
+
+            // Actualizar formulario con los datos del registro
+            document.getElementById('editFolio').value = folio;
+            document.getElementById('editFecha').value = fecha;
+            document.getElementById('editTurno').value = turno;
+            document.getElementById('editProducto').value = producto;
+
+            // Procesar el horario para establecer las horas y minutos de inicio y fin
+            const horarioParts = parseHorario(horario);
+
+            if (document.getElementById('editHoraInicioH')) {
+                document.getElementById('editHoraInicioH').value = horarioParts.inicioHora || '';
+                document.getElementById('editHoraInicioM').value = horarioParts.inicioMinuto || '';
+                document.getElementById('editHoraFinH').value = horarioParts.finHora || '';
+                document.getElementById('editHoraFinM').value = horarioParts.finMinuto || '';
+            }
+
+            document.getElementById('editHorario').value = horario || '';
+
+            // Actualizar los campos nuevos
+            if (cantidad) document.getElementById('editCantidad').value = cantidad;
+
+            // Verificar si la unidad es una de las estándar o personalizada
+            const unidadSelect = document.getElementById('editUnidadCantidad');
+            if (unidadCantidad) {
+                // Verificar si es una unidad estándar
+                const unidadesEstandar = ['KILOGRAMOS', 'TONELADAS', 'TARIMAS', 'OTRO'];
+                if (unidadesEstandar.includes(unidadCantidad.toUpperCase())) {
+                    unidadSelect.value = unidadCantidad.toUpperCase();
+                } else {
+                    // Es una unidad personalizada
+                    unidadSelect.value = 'OTRO';
+                    document.getElementById('editOtraUnidadContainer').style.display = 'block';
+                    document.getElementById('editOtraUnidad').value = unidadCantidad;
+                }
+                mostrarCampoOtraUnidad(unidadSelect, 'editOtraUnidadContainer', 'editOtraUnidad');
+            }
+
+            if (origen) document.getElementById('editOrigen').value = origen;
+            if (noConformidad) document.getElementById('editNoConformidad').value = noConformidad;
+            if (status) document.getElementById('editStatus').value = status;
+            if (detector) document.getElementById('editDetector').value = detector;
+            if (rechazo) document.getElementById('editRechazo').value = rechazo === 'true' ? 'true' : 'false';
+
+            // Actualizar la acción del formulario
+            const form = document.getElementById('editPNCForm');
+            form.action = `{{ url_for('edit_pnc_simple', category=category, pnc_id=0) }}`.replace('0', recordId);
+        });
+
+        // Manejar envío del formulario de edición
+        document.getElementById('saveEditBtn').addEventListener('click', function () {
+            const form = document.getElementById('editPNCForm');
+            const isValid = validateForm(form);
+
+            if (isValid) {
+                // Asegúrate de que el campo horario está actualizado correctamente
+                updateEditHorario();
+
+                // Verificar si se ha seleccionado "OTRO" como unidad y procesar la unidad personalizada
+                const unidadSelect = document.getElementById('editUnidadCantidad');
+                if (unidadSelect.value === 'OTRO') {
+                    const otraUnidad = document.getElementById('editOtraUnidad').value.trim();
+                    if (otraUnidad) {
+                        // Crear un campo oculto para enviar el valor personalizado
+                        const hiddenInput = document.createElement('input');
+                        hiddenInput.type = 'hidden';
+                        hiddenInput.name = 'unidad_cantidad';
+                        hiddenInput.value = otraUnidad.toUpperCase();
+                        form.appendChild(hiddenInput);
+
+                        // Deshabilitar el select original para evitar conflictos
+                        unidadSelect.disabled = true;
+                    }
+                }
+
+                form.submit();
+            } else {
+                document.getElementById('editErrorMessage').classList.remove('d-none');
+            }
+        });
+
+        // Función para configurar navegación entre celdas
+        function setupCellNavigation(modalId) {
+            const modal = document.getElementById(modalId);
+            // Seleccionar todos los campos de entrada, incluyendo textareas
+            const inputs = modal.querySelectorAll('.excel-input:not([type="hidden"]), .excel-select, textarea, .time-select');
+
+            inputs.forEach((input, index) => {
+                input.addEventListener('keydown', function (e) {
+                    // Al presionar Enter, moverse al siguiente campo (excepto en textareas)
+                    if (e.key === 'Enter' && input.tagName.toLowerCase() !== 'textarea') {
+                        e.preventDefault();
+                        const nextIndex = index + 1;
+                        if (nextIndex < inputs.length) {
+                            inputs[nextIndex].focus();
+                        } else {
+                            // Si es el último campo, simular clic en botón guardar
+                            modal.querySelector('.btn-primary').click();
+                        }
+                    }
+                    // Para textareas, usar Ctrl+Enter para moverse al siguiente campo
+                    else if (e.key === 'Enter' && e.ctrlKey && input.tagName.toLowerCase() === 'textarea') {
+                        e.preventDefault();
+                        const nextIndex = index + 1;
+                        if (nextIndex < inputs.length) {
+                            inputs[nextIndex].focus();
+                        } else {
+                            // Si es el último campo, simular clic en botón guardar
+                            modal.querySelector('.btn-primary').click();
+                        }
+                    }
+                });
+            });
+        }
+
+        // Función para validar formulario
+        function validateForm(form) {
+            let isValid = true;
+            const requiredInputs = form.querySelectorAll('input[required], select[required]');
+
+            requiredInputs.forEach(input => {
+                if (!input.value.trim()) {
+                    input.classList.add('excel-invalid');
+                    isValid = false;
+                } else {
+                    input.classList.remove('excel-invalid');
+                }
+            });
+
+            // Validar unidad personalizada si se seleccionó "OTRO"
+            const unidadSelect = form.querySelector('[name="unidad_cantidad"]');
+            if (unidadSelect && unidadSelect.value === 'OTRO') {
+                const otraUnidadInput = form.querySelector('#createOtraUnidad, #editOtraUnidad');
+                if (!otraUnidadInput || !otraUnidadInput.value.trim()) {
+                    if (otraUnidadInput) otraUnidadInput.classList.add('excel-invalid');
+                    isValid = false;
+                    alert('Por favor especifique la unidad personalizada');
+                } else {
+                    if (otraUnidadInput) otraUnidadInput.classList.remove('excel-invalid');
+                }
+            }
+
+            return isValid;
+        }
+
+        // Inicializar opciones de hora y minuto
+        if (document.getElementById('createHoraInicioH')) {
+            initializeTimeSelects();
+        }
+    });
+
+    // Función para mostrar/ocultar el campo de otra unidad
+    function mostrarCampoOtraUnidad(selectElement, containerId, inputId) {
+        const container = document.getElementById(containerId);
+        if (selectElement.value === 'OTRO') {
+            container.style.display = 'block';
+            setTimeout(() => document.getElementById(inputId).focus(), 100);
+        } else {
+            container.style.display = 'none';
+        }
+    }
+
+    // Función para generar el folio automáticamente con el nuevo formato PNC_DDMM_XX_001
+    function generateFolio() {
+        const fechaInput = document.getElementById('createFecha');
+        if (!fechaInput.value) return;
+
+        // Crear fecha como UTC para evitar problemas de zona horaria
+        const fechaPartes = fechaInput.value.split('-'); // Formato esperado: YYYY-MM-DD
+        if (fechaPartes.length !== 3) return;
+
+        // Extraer día y mes directamente de la cadena de fecha para evitar problemas de zona horaria
+        const year = fechaPartes[0];
+        const month = fechaPartes[1]; // Ya está en formato MM
+        const day = fechaPartes[2];   // Ya está en formato DD
+        const fechaStr = `${day}${month}`;
+
+        // Obtener categoría
+        let categorySuffix;
+        const category = "{{ category }}";
+
+        if (category === 'PAPA') {
+            categorySuffix = 'PA';
+        } else if (category === 'EXTRUIDOS') {
+            categorySuffix = 'EX';
+        } else if (category === 'TORTILLA') {
+            categorySuffix = 'TO';
+        } else {
+            categorySuffix = 'XX';
+        }
+
+        // Crear el folio con el formato requerido - el número secuencial 001 se agregará en el backend
+        const folioBase = `PNC_${fechaStr}_${categorySuffix}`;
+        document.getElementById('createFolio').value = `${folioBase}_001`; // Mostramos 001 como referencia
+    }
+
+    // Función para actualizar el folio en el formulario de edición
+    function updateEditFolio() {
+        const fechaInput = document.getElementById('editFecha');
+        const folioInput = document.getElementById('editFolio');
+        if (!fechaInput.value || !folioInput.value) return;
+
+        // Extraer día y mes directamente de la cadena de fecha
+        const fechaPartes = fechaInput.value.split('-'); // Formato esperado: YYYY-MM-DD
+        if (fechaPartes.length !== 3) return;
+
+        // Extraer día y mes directamente sin usar Date
+        const year = fechaPartes[0];
+        const month = fechaPartes[1]; // Ya está en formato MM
+        const day = fechaPartes[2];   // Ya está en formato DD
+        const fechaStr = `${day}${month}`;
+
+        // Mantener el prefijo, categoría y número secuencial, solo actualizar la fecha
+        const folioPartes = folioInput.value.split('_');
+        if (folioPartes.length >= 4) { // Nuevo formato: PNC_DDMM_XX_001
+            folioPartes[1] = fechaStr;
+            folioInput.value = folioPartes.join('_');
+        } else if (folioPartes.length === 3) { // Formato anterior o transición
+            // Verificar si el último elemento tiene formato numérico
+            const lastPart = folioPartes[folioPartes.length - 1];
+            if (/^\d+$/.test(lastPart)) {
+                // Es un número secuencial en el formato antiguo, convertir al nuevo formato
+                const category = "{{ category }}";
+                let categorySuffix;
+
+                if (category === 'PAPA') {
+                    categorySuffix = 'PA';
+                } else if (category === 'EXTRUIDOS') {
+                    categorySuffix = 'EX';
+                } else if (category === 'TORTILLA') {
+                    categorySuffix = 'TO';
+                } else {
+                    categorySuffix = 'XX';
+                }
+
+                folioInput.value = `PNC_${fechaStr}_${categorySuffix}_${lastPart.padStart(3, '0')}`;
+            } else {
+                // Regenerar con el nuevo formato y un número secuencial genérico
+                folioInput.value = `PNC_${fechaStr}_${folioPartes[2]}_001`;
+            }
+        } else {
+            // Si el formato del folio no es el esperado, regenerarlo completamente
+            const category = "{{ category }}";
+            let categorySuffix;
+
+            if (category === 'PAPA') {
+                categorySuffix = 'PA';
+            } else if (category === 'EXTRUIDOS') {
+                categorySuffix = 'EX';
+            } else if (category === 'TORTILLA') {
+                categorySuffix = 'TO';
+            } else {
+                categorySuffix = 'XX';
+            }
+
+            folioInput.value = `PNC_${fechaStr}_${categorySuffix}_001`;
+        }
+    }
+</script>
+
+<!-- Script adicional para asegurar la inicialización de gráficas -->
+<script>
+    // Verificar que Chart.js esté cargado
+    document.addEventListener('DOMContentLoaded', function() {
+        // Esperar un momento adicional para asegurar que todos los scripts estén cargados
+        setTimeout(function() {
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js no está cargado. Por favor recargue la página.');
+                return;
+            }
+            
+            console.log('Chart.js cargado correctamente, versión:', Chart.version);
+            
+            // Verificar que los elementos canvas existan
+            const chartStatus = document.getElementById('chartStatus');
+            const chartOrigen = document.getElementById('chartOrigen');
+            const chartTendencia = document.getElementById('chartTendencia');
+            
+            if (!chartStatus || !chartOrigen || !chartTendencia) {
+                console.error('No se encontraron todos los elementos canvas para las gráficas');
+                return;
+            }
+            
+            console.log('Elementos canvas encontrados correctamente');
+            
+            // Forzar actualización de gráficas cuando se muestre la pestaña de resultados
+            const resultadosTab = document.getElementById('resultados-tab');
+            if (resultadosTab) {
+                resultadosTab.addEventListener('shown.bs.tab', function() {
+                    console.log('Forzando actualización de gráficas...');
+                    if (window.PNCAnalysis && window.PNCAnalysis.charts) {
+                        // Redimensionar las gráficas
+                        Object.values(window.PNCAnalysis.charts).forEach(chart => {
+                            if (chart) {
+                                chart.resize();
+                            }
+                        });
+                    }
+                });
+            }
+        }, 1000);
+    });
+</script>
+{% endblock %}

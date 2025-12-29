@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block title %}Editar {{ category }}{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Inicio</a></li>
+                <li class="breadcrumb-item active">Editar {{ category }}</li>
+            </ol>
+        </nav>
+        <h2 class="text-primary"><i class="fas fa-edit me-2"></i>Editar {{ category }}</h2>
+        <p class="lead">Personalice la información y la imagen para esta categoría.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">{{ form.name.label }}</label>
+                        {{ form.name(class="form-control") }}
+                        {% for error in form.name.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">{{ form.description.label }}</label>
+                        {{ form.description(class="form-control", rows=4) }}
+                        {% for error in form.description.errors %}
+                            <small class="text-danger">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="category" class="form-label">{{ form.category.label }}</label>
+                        {{ form.category(class="form-select", disabled=true) }}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="image" class="form-label">{{ form.image.label }}</label>
+                        <div class="input-group">
+                            {{ form.image(class="form-control") }}
+                        </div>
+                        <small class="text-muted">Formatos permitidos: JPG, PNG, GIF (máx. 16MB)</small>
+                        {% for error in form.image.errors %}
+                            <small class="text-danger d-block">{{ error }}</small>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="d-flex justify-content-between">
+                        <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Volver
+                        </a>
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-image me-2"></i>Vista Previa</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="image-preview mb-3">
+                    <img id="preview-image" src="{% if menu_item.image_path %}{{ url_for('static', filename=menu_item.image_path.replace('\\', '/')) }}{% else %}{{ url_for('static', filename='img/default/' + category.lower() + '.jpg') }}{% endif %}" 
+                         class="img-fluid rounded" style="max-height: 250px;">
+                </div>
+                <p class="mb-0"><strong>Categoría:</strong> {{ category }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Vista previa de la imagen seleccionada
+    document.addEventListener('DOMContentLoaded', function() {
+        const imageInput = document.getElementById('image');
+        const previewImage = document.getElementById('preview-image');
+        
+        if (imageInput && previewImage) {
+            imageInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        previewImage.src = e.target.result;
+                    };
+                    
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

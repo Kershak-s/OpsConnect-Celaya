@@ -1,0 +1,391 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pnc.css') }}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Referencia al formulario y elementos
+        const pncForm = document.querySelector('.pnc-form');
+        const turnoSelect = document.getElementById('turno');
+        const horaInicioHSelect = document.getElementById('hora_inicio_h');
+        const horaInicioMSelect = document.getElementById('hora_inicio_m');
+        const horaFinHSelect = document.getElementById('hora_fin_h');
+        const horaFinMSelect = document.getElementById('hora_fin_m');
+        const horarioHiddenInput = document.getElementById('horario');
+        
+        // Función para poblar los minutos (igual para ambos turnos)
+        function populateMinutes(selectElement) {
+            if (!selectElement) return;
+            
+            // Limpiar opciones actuales excepto la primera
+            while (selectElement.options.length > 1) {
+                selectElement.remove(1);
+            }
+            
+            // Agregar minutos del 00 al 59
+            for (let i = 0; i < 60; i++) {
+                const option = document.createElement('option');
+                option.value = i.toString().padStart(2, '0');
+                option.textContent = i.toString().padStart(2, '0');
+                selectElement.appendChild(option);
+            }
+        }
+        
+        // Función para poblar las horas según el turno
+        function populateHours(selectElement, turnoValue) {
+            if (!selectElement) return;
+            
+            // Limpiar opciones actuales excepto la primera
+            while (selectElement.options.length > 1) {
+                selectElement.remove(1);
+            }
+            
+            let startHour, endHour;
+            
+            // Definir rango de horas según el turno
+            if (turnoValue === 'A') {
+                startHour = 6;
+                endHour = 17;
+            } else if (turnoValue === 'B') {
+                startHour = 18;
+                endHour = 5;
+            } else {
+                // Si no hay turno seleccionado, no mostrar horas
+                return;
+            }
+            
+            // Si el rango cruza la medianoche (como en el turno B)
+            if (endHour < startHour) {
+                // Primero agregar desde la hora de inicio hasta medianoche
+                for (let i = startHour; i <= 23; i++) {
+                    const option = document.createElement('option');
+                    option.value = i.toString().padStart(2, '0');
+                    option.textContent = i.toString().padStart(2, '0');
+                    selectElement.appendChild(option);
+                }
+                
+                // Luego agregar desde medianoche hasta la hora de fin
+                for (let i = 0; i <= endHour; i++) {
+                    const option = document.createElement('option');
+                    option.value = i.toString().padStart(2, '0');
+                    option.textContent = i.toString().padStart(2, '0');
+                    selectElement.appendChild(option);
+                }
+            } else {
+                // Rango normal (como en el turno A)
+                for (let i = startHour; i <= endHour; i++) {
+                    const option = document.createElement('option');
+                    option.value = i.toString().padStart(2, '0');
+                    option.textContent = i.toString().padStart(2, '0');
+                    selectElement.appendChild(option);
+                }
+            }
+        }
+        
+        // Función para inicializar selectores según un valor de horario existente
+        function initializeTimeSelects(horaHSelect, horaMSelect, finHSelect, finMSelect, horarioValue) {
+            if (horarioValue) {
+                try {
+                    const horarioParts = horarioValue.split('-');
+                    if (horarioParts.length === 2) {
+                        let horaInicio = horarioParts[0].trim();
+                        let horaFin = horarioParts[1].trim();
+                        
+                        // Extraer horas y minutos
+                        const inicioMatch = horaInicio.match(/(\d+):(\d+)/);
+                        const finMatch = horaFin.match(/(\d+):(\d+)/);
+                        
+                        if (inicioMatch && inicioMatch.length === 3) {
+                            const h = inicioMatch[1].padStart(2, '0');
+                            const m = inicioMatch[2].padStart(2, '0');
+                            
+                            // Buscar y seleccionar la opción correcta
+                            setSelectOption(horaHSelect, h);
+                            setSelectOption(horaMSelect, m);
+                        }
+                        
+                        if (finMatch && finMatch.length === 3) {
+                            const h = finMatch[1].padStart(2, '0');
+                            const m = finMatch[2].padStart(2, '0');
+                            
+                            // Buscar y seleccionar la opción correcta
+                            setSelectOption(finHSelect, h);
+                            setSelectOption(finMSelect, m);
+                        }
+                    }
+                } catch(e) {
+                    console.error('Error al dividir el horario:', e);
+                }
+            }
+        }
+        
+        // Función para seleccionar una opción en un select
+        function setSelectOption(selectElement, value) {
+            if (!selectElement) return;
+            
+            // Buscar opción por valor
+            for (let i = 0; i < selectElement.options.length; i++) {
+                if (selectElement.options[i].value === value) {
+                    selectElement.selectedIndex = i;
+                    return;
+                }
+            }
+            
+            // Si no existe la opción, agregar y seleccionar
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            selectElement.appendChild(option);
+            selectElement.value = value;
+        }
+        
+        // Inicializar selectores de minutos
+        populateMinutes(horaInicioMSelect);
+        populateMinutes(horaFinMSelect);
+        
+        // Manejar cambio de turno
+        if (turnoSelect) {
+            turnoSelect.addEventListener('change', function() {
+                const turnoValue = this.value;
+                populateHours(horaInicioHSelect, turnoValue);
+                populateHours(horaFinHSelect, turnoValue);
+            });
+            
+            // Inicializar con el valor actual
+            if (turnoSelect.value) {
+                populateHours(horaInicioHSelect, turnoSelect.value);
+                populateHours(horaFinHSelect, turnoSelect.value);
+                
+                // Inicializar valores si ya existen
+                if (horarioHiddenInput && horarioHiddenInput.value) {
+                    initializeTimeSelects(
+                        horaInicioHSelect,
+                        horaInicioMSelect,
+                        horaFinHSelect,
+                        horaFinMSelect,
+                        horarioHiddenInput.value
+                    );
+                }
+            }
+        }
+        
+        // Manejar envío del formulario
+        if (pncForm) {
+            pncForm.addEventListener('submit', function(e) {
+                // Verificar que todos los selectores tengan un valor
+                if (!horaInicioHSelect.value || !horaInicioMSelect.value || 
+                    !horaFinHSelect.value || !horaFinMSelect.value) {
+                    e.preventDefault();
+                    alert('Por favor, complete todos los campos de horario');
+                    return false;
+                }
+                
+                // Formatear el horario como: HH:MM - HH:MM
+                const horaInicio = `${horaInicioHSelect.value}:${horaInicioMSelect.value}`;
+                const horaFin = `${horaFinHSelect.value}:${horaFinMSelect.value}`;
+                horarioHiddenInput.value = `${horaInicio} - ${horaFin}`;
+            });
+        }
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i> Editar Registro PNC - {{ pnc.folio }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="pnc-form">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Formulario en formato tabla horizontal responsiva -->
+                        <div class="table-responsive">
+                            <table class="table table-bordered pnc-table">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>FOLIO</th>
+                                        <th>FECHA</th>
+                                        <th>TURNO</th>
+                                        <th>NOMBRE DEL PRODUCTO</th>
+                                        <th>HORARIOS</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="form-group">
+                                                {{ form.folio(class="form-control", placeholder="Ejemplo: PNC-2025-001") }}
+                                                {% if form.folio.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.folio.errors %}
+                                                    <span>{{ error }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                {{ form.fecha(class="form-control", type="date") }}
+                                                {% if form.fecha.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.fecha.errors %}
+                                                    <span>{{ error }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                {{ form.turno(class="form-select") }}
+                                                {% if form.turno.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.turno.errors %}
+                                                    <span>{{ error }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                {{ form.producto(class="form-select") }}
+                                                {% if form.producto.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.producto.errors %}
+                                                    <span>{{ error }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <div class="input-group">
+                                                    <input type="time" class="form-control" name="hora_inicio" id="hora_inicio" required>
+                                                    <span class="input-group-text">a</span>
+                                                    <input type="time" class="form-control" name="hora_fin" id="hora_fin" required>
+                                                    {{ form.horario(type="hidden", id="horario") }}
+                                                </div>
+                                                <small class="form-text text-muted">Formato 24 horas (HH:MM)</small>
+                                                {% if form.horario.errors %}
+                                                <div class="invalid-feedback d-block">
+                                                    {% for error in form.horario.errors %}
+                                                    <span>{{ error }}</span>
+                                                    {% endfor %}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Campos adicionales en formato convencional -->
+                        <div class="row mt-4">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.cantidad.label(class="form-label") }}
+                                    {{ form.cantidad(class="form-control") }}
+                                    {% if form.cantidad.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.cantidad.errors %}
+                                        <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">{{ form.cantidad.description }}</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.origen.label(class="form-label") }}
+                                    {{ form.origen(class="form-control") }}
+                                    {% if form.origen.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.origen.errors %}
+                                        <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group mb-3">
+                                    {{ form.no_conformidad.label(class="form-label") }}
+                                    {{ form.no_conformidad(class="form-control", rows=4) }}
+                                    {% if form.no_conformidad.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.no_conformidad.errors %}
+                                        <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    {{ form.status.label(class="form-label") }}
+                                    {{ form.status(class="form-select") }}
+                                    {% if form.status.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.status.errors %}
+                                        <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-3">
+                                    {{ form.detector.label(class="form-label") }}
+                                    {{ form.detector(class="form-control") }}
+                                    {% if form.detector.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.detector.errors %}
+                                        <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group mb-4 mt-4">
+                                    <div class="form-check">
+                                        {{ form.rechazo(class="form-check-input") }}
+                                        {{ form.rechazo.label(class="form-check-label") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('list_pnc', category=category) }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            {{ form.submit(class="btn btn-success") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pnc.css') }}">
+<style>
+    .form-section {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #dee2e6;
+    }
+    
+    .time-input-group {
+        display: flex;
+        align-items: center;
+    }
+    
+    .time-input-group input {
+        width: 70px;
+        margin-right: 5px;
+    }
+    
+    .time-input-group span {
+        margin: 0 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i> Editar Análisis Fisicoquímicos - {{ analisis.folio }}
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="POST" class="analisis-form">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Información básica -->
+                        <div class="form-section">
+                            <h6 class="form-section-title">Información</h6>
+                            <div class="table-responsive">
+                                <table class="table table-bordered pnc-table">
+                                    <thead class="table-primary">
+                                        <tr>
+                                            <th>FOLIO</th>
+                                            <th>FECHA</th>
+                                            <th>TURNO</th>
+                                            <th>HORA</th>
+                                            <th>NOMBRE DEL PRODUCTO</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div class="form-group">
+                                                    {{ form.folio(class="form-control", placeholder="Ejemplo: ANL-2025-001") }}
+                                                    {% if form.folio.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {% for error in form.folio.errors %}
+                                                        <span>{{ error }}</span>
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    {{ form.fecha(class="form-control", type="date", readonly=true) }}
+                                                    {% if form.fecha.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {% for error in form.fecha.errors %}
+                                                        <span>{{ error }}</span>
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    {{ form.turno(class="form-select") }}
+                                                    {% if form.turno.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {% for error in form.turno.errors %}
+                                                        <span>{{ error }}</span>
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="time-input-group">
+                                                    <input type="number" id="hora" class="form-control" min="0" max="23" placeholder="HH">
+                                                    <span>:</span>
+                                                    <input type="number" id="minutos" class="form-control" min="0" max="59" placeholder="MM">
+                                                    <input type="hidden" id="horario-completo" name="horario">
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    <select name="producto" id="producto" class="form-select" required>
+                                                        <option value="">Seleccione producto</option>
+                                                        <option value="DORITOS" {% if form.producto.data == "DORITOS" %}selected{% endif %}>DORITOS</option>
+                                                        <option value="TOSTITOS SALSA VERDE" {% if form.producto.data == "TOSTITOS SALSA VERDE" %}selected{% endif %}>TOSTITOS SALSA VERDE</option>
+                                                        <option value="TOSTITOS FH" {% if form.producto.data == "TOSTITOS FH" %}selected{% endif %}>TOSTITOS FH</option>
+                                                        <option value="TOSTITOS PIZZEROLA" {% if form.producto.data == "DORITOS PIZZEROLA" %}selected{% endif %}>DORITOS PIZZEROLA</option>
+                                                        <option value="DORITOS INCÓGNITA" {% if form.producto.data == "DORITOS INCÓGNITA" %}selected{% endif %}>DORITOS INCÓGNITA</option>
+                                                        <option value="DORITOS FH" {% if form.producto.data == "DORITOS FH" %}selected{% endif %}>DORITOS FH</option>
+                                                        <option value="RANCHERITOS" {% if form.producto.data == "RANCHERITOS" %}selected{% endif %}>RANCHERITOS</option>
+                                                    </select>
+                                                    {% if form.producto.errors %}
+                                                    <div class="invalid-feedback d-block">
+                                                        {% for error in form.producto.errors %}
+                                                        <span>{{ error }}</span>
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% endif %}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Detalles del análisis -->
+                        <div class="form-section">
+                            <h6 class="form-section-title">Detalles del Análisis</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        {{ form.lote.label(class="form-label") }}
+                                        {{ form.lote(class="form-control", placeholder="Ejemplo: LOT-20250613-01") }}
+                                        {% if form.lote.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.lote.errors %}
+                                            <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        {{ form.analista.label(class="form-label") }}
+                                        {{ form.analista(class="form-control", placeholder="Nombre del analista") }}
+                                        {% if form.analista.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.analista.errors %}
+                                            <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group mb-3">
+                                        {{ form.peso.label(class="form-label") }}
+                                        {{ form.peso(class="form-control", placeholder="Ejemplo: 125.5") }}
+                                        {% if form.peso.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.peso.errors %}
+                                            <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group mb-3">
+                                        {{ form.observaciones.label(class="form-label") }}
+                                        {{ form.observaciones(class="form-control", rows=4, placeholder="Ingrese observaciones o comentarios adicionales") }}
+                                        {% if form.observaciones.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.observaciones.errors %}
+                                            <span>{{ error }}</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('list_analisis_calidad', category=category) }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Cancelar
+                            </a>
+                            {{ form.submit(class="btn btn-primary") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Establecer la fecha actual automáticamente
+        const fechaInput = document.getElementById('fecha');
+        const fechaActual = new Date();
+        const fechaFormateada = fechaActual.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+        fechaInput.value = fechaFormateada;
+        
+        // Parsear el horario existente si hay uno
+        const horarioCompleto = document.getElementById('horario-completo');
+        if (horarioCompleto.value) {
+            try {
+                const partes = horarioCompleto.value.split(':');
+                if (partes.length >= 2) {
+                    document.getElementById('hora').value = parseInt(partes[0]);
+                    document.getElementById('minutos').value = parseInt(partes[1]);
+                }
+            } catch(e) {
+                console.error('Error al parsear el horario:', e);
+            }
+        }
+        
+        // Actualizar el campo horario cuando se cambien la hora o los minutos
+        function actualizarHorario() {
+            const hora = document.getElementById('hora').value.padStart(2, '0');
+            const minutos = document.getElementById('minutos').value.padStart(2, '0');
+            
+            if (hora && minutos) {
+                document.getElementById('horario-completo').value = `${hora}:${minutos}`;
+            }
+        }
+        
+        document.getElementById('hora').addEventListener('change', actualizarHorario);
+        document.getElementById('minutos').addEventListener('change', actualizarHorario);
+        
+        // Al enviar el formulario, asegurarse de que el horario esté actualizado
+        document.querySelector('.analisis-form').addEventListener('submit', function(e) {
+            actualizarHorario();
+        });
+    });
+</script>
+{% endblock %}

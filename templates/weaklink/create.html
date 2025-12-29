@@ -1,0 +1,1191 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para el formulario de WeakLink */
+    .form-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+    
+    .form-card {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+    
+    .form-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+    
+    .section-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #212529;
+        display: flex;
+        align-items: center;
+    }
+    
+    .section-title i {
+        margin-right: 0.5rem;
+        color: #ffc107;
+    }
+    
+    .readonly-field {
+        background-color: #f8f9fa;
+        cursor: not-allowed;
+    }
+    
+    .form-label {
+        font-weight: 500;
+    }
+    
+    .required-field::after {
+        content: " *";
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex gap-3 mb-3">
+        <a href="{{ url_for('index') }}" class="btn btn-light rounded-pill px-4 py-2 shadow-sm d-flex align-items-center">
+            <i class="fas fa-home me-2"></i> Inicio
+        </a>
+        <a href="{{ url_for('line_sections', category=category) }}" class="btn btn-light rounded-pill px-4 py-2 shadow-sm d-flex align-items-center">
+            <i class="fas fa-th-large me-2"></i> Secciones
+        </a>
+        <a href="{{ url_for('calidad_exercises', category=category, section='calidad', subsection='proceso') }}" class="btn btn-light rounded-pill px-4 py-2 shadow-sm d-flex align-items-center">
+            <i class="fas fa-arrow-left me-2"></i> Volver a Calidad
+        </a>
+    </div>
+    
+    <div class="form-container">
+        <div class="form-card">
+            <h2 class="mb-4">
+                <i class="fas fa-link-slash me-2 text-warning"></i>Nuevo WEAK LINK
+            </h2>
+            
+            <form method="POST">
+                {{ form.hidden_tag() }}
+                
+                <!-- Sección 1: Información básica -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle"></i>Información Básica
+                    </h3>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.fecha.label(class="form-label") }}
+                                {{ form.fecha(class="form-control readonly-field", type="date") }}
+                                {% if form.fecha.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.fecha.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.hora.label(class="form-label") }}
+                                {{ form.hora(class="form-control readonly-field", type="time") }}
+                                {% if form.hora.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.hora.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.turno.label(class="form-label") }}
+                                {{ form.turno(class="form-select readonly-field") }}
+                                {% if form.turno.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.turno.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                {{ form.operador.label(class="form-label required-field") }}
+                                {{ form.operador(class="form-control", placeholder="Ingrese el nombre del operador") }}
+                                {% if form.operador.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.operador.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.orden.label(class="form-label required-field") }}
+                                {{ form.orden(class="form-control", placeholder="Ingrese el número de orden") }}
+                                {% if form.orden.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.orden.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.maquina.label(class="form-label required-field") }}
+                                <select name="{{ form.maquina.name }}" id="{{ form.maquina.id }}" class="form-select">
+                                    <option value="">Seleccionar máquina...</option>
+                                    <!-- Las opciones se llenarán dinámicamente con JavaScript -->
+                                </select>
+                                {% if form.maquina.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.maquina.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                {{ form.producto.label(class="form-label required-field") }}
+                                <select name="{{ form.producto.name }}" id="{{ form.producto.id }}" class="form-select">
+                                    <option value="">Seleccionar...</option>
+                                    {% if category == 'TORTILLA' %}
+                                        <option value="DORITOS" {% if form.producto.data == 'DORITOS' %}selected{% endif %}>DORITOS</option>
+                                        <option value="TOSTITOS SALSA VERDE" {% if form.producto.data == 'TOSTITOS SALSA VERDE' %}selected{% endif %}>TOSTITOS SALSA VERDE</option>
+                                        <option value="TOSTITOS FH" {% if form.producto.data == 'TOSTITOS FH' %}selected{% endif %}>TOSTITOS FH</option>
+                                        <option value="DORITOS PIZZEROLA" {% if form.producto.data == 'DORITOS PIZZEROLA' %}selected{% endif %}>DORITOS PIZZEROLA</option>
+                                        <option value="DORITOS FH" {% if form.producto.data == 'DORITOS FH' %}selected{% endif %}>DORITOS FH</option>
+                                        <option value="DORITOS INCOGNITA" {% if form.producto.data == 'DORITOS INCOGNITA' %}selected{% endif %}>DORITOS INCOGNITA</option>
+                                        <option value="RANCHERITOS" {% if form.producto.data == 'RANCHERITOS' %}selected{% endif %}>RANCHERITOS</option>
+                                    {% elif category == 'EXTRUIDOS' %}
+                                        <option value="CHEETOS TORCIDITOS" {% if form.producto.data == 'CHEETOS TORCIDITOS' %}selected{% endif %}>CHEETOS TORCIDITOS</option>
+                                        <option value="CHEETOS XTRA FLAMIN HOT" {% if form.producto.data == 'CHEETOS XTRA FLAMIN HOT' %}selected{% endif %}>CHEETOS XTRA FLAMIN HOT</option>
+                                        <option value ="CHEETOS XTRA FH NUEVO" {% if form.producto.data == 'CHEETOS XTRA FH NUEVO' %}selected{% endif %}>CHEETOS XTRA FH NUEVO</option>   
+                                        <option value="CHEETOS JALAPENO" {% if form.producto.data == 'CHEETOS JALAPENO' %}selected{% endif %}>CHEETOS JALAQUEÑO</option>
+                                        <option value="OTROS" {% if form.producto.data == 'OTROS' %}selected{% endif %}>OTROS</option>
+                                    {% elif category == 'PAPA' %}
+                                        <option value="PAPA SAL" {% if form.producto.data == 'PAPA SAL' %}selected{% endif %}>PAPA SAL</option>
+                                        <option value="RUFFLES QUESO" {% if form.producto.data == 'RUFFLES QUESO' %}selected{% endif %}>RUFFLES QUESO</option>
+                                        <option value="SABRITAS XTRA FH" {% if form.producto.data == 'SABRITAS XTRA FH' %}selected{% endif %}>SABRITAS XTRA FH</option>
+                                        <option value="OTROS" {% if form.producto.data == 'OTROS' %}selected{% endif %}>OTROS</option>
+                                    {% endif %}
+                                </select>
+                                {% if form.producto.errors %}
+                                <div class="text-danger">
+                                    {% for error in form.producto.errors %}
+                                    <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sección 2: LIL (Limpieza, Inspección, Lubricación) -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-broom"></i>LIL (Limpieza, Inspección, Lubricación)
+                    </h3>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.limpieza_pesadora.label(class="form-label") }}
+                                {{ form.limpieza_pesadora(class="form-select") }}
+                                {% if form.limpieza_pesadora.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.limpieza_pesadora.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.limpieza_cabezal.label(class="form-label") }}
+                                {{ form.limpieza_cabezal(class="form-select") }}
+                                {% if form.limpieza_cabezal.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.limpieza_cabezal.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.limpieza_mordazas.label(class="form-label") }}
+                                {{ form.limpieza_mordazas(class="form-select") }}
+                                {% if form.limpieza_mordazas.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.limpieza_mordazas.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.condicion_velcro.label(class="form-label") }}
+                                {{ form.condicion_velcro(class="form-select") }}
+                                {% if form.condicion_velcro.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.condicion_velcro.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.validacion_recetas.label(class="form-label") }}
+                                {{ form.validacion_recetas(class="form-select") }}
+                                {% if form.validacion_recetas.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.validacion_recetas.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.validacion_etiquetas.label(class="form-label") }}
+                                {{ form.validacion_etiquetas(class="form-control") }}
+                                {% if form.validacion_etiquetas.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.validacion_etiquetas.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sección 3: Centerlines -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-thermometer-half"></i>Centerlines
+                    </h3>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group" id="temperatura-mordaza-frontal-group">
+                                {{ form.temperatura_mordaza_frontal.label(class="form-label") }}
+                                {{ form.temperatura_mordaza_frontal(class="form-control", type="number", step="0.1") }}
+                                <small class="form-text text-muted">Rango: 110°C-160°C</small>
+                                {% if form.temperatura_mordaza_frontal.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.temperatura_mordaza_frontal.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group" id="temperatura-mordaza-trasera-group">
+                                {{ form.temperatura_mordaza_trasera.label(class="form-label") }}
+                                {{ form.temperatura_mordaza_trasera(class="form-control", type="number", step="0.1") }}
+                                <small class="form-text text-muted">Rango: 110°C-160°C</small>
+                                {% if form.temperatura_mordaza_trasera.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.temperatura_mordaza_trasera.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group" id="temperatura-sellado-vertical-group">
+                                {{ form.temperatura_sellado_vertical.label(class="form-label") }}
+                                {{ form.temperatura_sellado_vertical(class="form-control", type="number", step="0.1") }}
+                                <small class="form-text text-muted">Rango: 110°C-160°C</small>
+                                {% if form.temperatura_sellado_vertical.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.temperatura_sellado_vertical.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.bolsa_por_cajas.label(class="form-label") }}
+                                {{ form.bolsa_por_cajas(class="form-control", type="number", step="1") }}
+                                {% if form.bolsa_por_cajas.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.bolsa_por_cajas.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sección 4: Empaque -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-box"></i>Empaque
+                    </h3>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group" id="codigo-empaque-group">
+                                {{ form.codigo_empaque.label(class="form-label") }}
+                                {{ form.codigo_empaque(class="form-control", type="number", step="0.1") }}
+                                <small class="form-text text-muted">Rango: 97.5%-100%</small>
+                                {% if form.codigo_empaque.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.codigo_empaque.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.eficiencia_promocion.label(class="form-label") }}
+                                {{ form.eficiencia_promocion(class="form-select", id="eficiencia_promocion") }}
+                                {% if form.eficiencia_promocion.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.eficiencia_promocion.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Campo para porcentaje de eficiencia (condicional) -->
+                    <div class="row mb-3" id="porcentaje_eficiencia_container" style="display: none;">
+                        <div class="col-md-6 offset-md-6">
+                            <div class="form-group" id="porcentaje-eficiencia-group">
+                                {{ form.porcentaje_eficiencia.label(class="form-label") }}
+                                {{ form.porcentaje_eficiencia(class="form-control", type="number", step="0.1") }}
+                                <small class="form-text text-muted">Ingrese el porcentaje de eficiencia (0-100%)</small>
+                                {% if form.porcentaje_eficiencia.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.porcentaje_eficiencia.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group" id="volumen-llenado-group">
+                                {{ form.volumen_llenado.label(class="form-label") }}
+                                {{ form.volumen_llenado(class="form-control", type="number", step="0.1") }}
+                                <small class="form-text text-muted">Rango: 70%-80%</small>
+                                {% if form.volumen_llenado.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.volumen_llenado.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.fecha_frescura.label(class="form-label") }}
+                                {{ form.fecha_frescura(class="form-control", type="text") }}
+                                {% if form.fecha_frescura.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.fecha_frescura.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.acomodo_correcto.label(class="form-label") }}
+                                {{ form.acomodo_correcto(class="form-select") }}
+                                {% if form.acomodo_correcto.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.acomodo_correcto.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group" id="apariencia-empaque-group">
+                                {{ form.apariencia_empaque.label(class="form-label") }}
+                                {{ form.apariencia_empaque(class="form-control", type="number", step="0.1") }}
+                                <small class="form-text text-muted">Rango: 90%-100%</small>
+                                {% if form.apariencia_empaque.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.apariencia_empaque.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group" id="hermeticidad-group">
+                                {{ form.hermeticidad.label(class="form-label") }}
+                                {{ form.hermeticidad(class="form-control", type="number", step="0.1") }}
+                                <small class="form-text text-muted">Rango: 97.5%-100%</small>
+                                {% if form.hermeticidad.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.hermeticidad.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sección 5: Pesos -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-balance-scale"></i>Pesos
+                    </h3>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.gramaje_impreso.label(class="form-label") }}
+                                {{ form.gramaje_impreso(class="form-control", type="number", step="0.1", id="gramaje_impreso") }}
+                                <small class="form-text text-muted">Gramaje impreso en el empaque</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.peso_ishida.label(class="form-label") }}
+                                {{ form.peso_ishida(class="form-control", type="number", step="0.1", id="peso_ishida") }}
+                                <small class="form-text text-muted">Peso Ishida de referencia</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Indicadores calculados -->
+                    <div class="row mb-3 bg-light p-2 rounded">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.peso_promedio.label(class="form-label") }}
+                                {{ form.peso_promedio(class="form-control", type="number", step="0.1", id="peso_promedio") }}
+                                <small class="form-text text-muted">Promedio de las muestras</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.dif_vs_gramaje.label(class="form-label") }}
+                                {{ form.dif_vs_gramaje(class="form-control", type="number", step="0.1", id="dif_vs_gramaje") }}
+                                <small class="form-text text-muted">Gramaje impreso vs Promedio de las muestras</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.dif_vs_ishida.label(class="form-label") }}
+                                {{ form.dif_vs_ishida(class="form-control", type="number", step="0.1", id="dif_vs_ishida") }}
+                                <small class="form-text text-muted">Gramaje impreso vs Peso Ishida</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h4 class="mt-4 mb-3">Muestras de Peso</h4>
+                    
+                    <!-- Muestras de peso (primera fila) -->
+                    <div class="row mb-3">
+                        <div class="col">
+                            <div class="form-group">
+                                {{ form.peso_muestra_1.label(class="form-label") }}
+                                {{ form.peso_muestra_1(class="form-control peso-muestra", type="number", step="0.1", id="peso_muestra_1") }}
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                {{ form.peso_muestra_2.label(class="form-label") }}
+                                {{ form.peso_muestra_2(class="form-control peso-muestra", type="number", step="0.1", id="peso_muestra_2") }}
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                {{ form.peso_muestra_3.label(class="form-label") }}
+                                {{ form.peso_muestra_3(class="form-control peso-muestra", type="number", step="0.1", id="peso_muestra_3") }}
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                {{ form.peso_muestra_4.label(class="form-label") }}
+                                {{ form.peso_muestra_4(class="form-control peso-muestra", type="number", step="0.1", id="peso_muestra_4") }}
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                {{ form.peso_muestra_5.label(class="form-label") }}
+                                {{ form.peso_muestra_5(class="form-control peso-muestra", type="number", step="0.1", id="peso_muestra_5") }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Muestras de peso (segunda fila) -->
+                    <div class="row mb-3">
+                        <div class="col">
+                            <div class="form-group">
+                                {{ form.peso_muestra_6.label(class="form-label") }}
+                                {{ form.peso_muestra_6(class="form-control peso-muestra", type="number", step="0.1", id="peso_muestra_6") }}
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                {{ form.peso_muestra_7.label(class="form-label") }}
+                                {{ form.peso_muestra_7(class="form-control peso-muestra", type="number", step="0.1", id="peso_muestra_7") }}
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                {{ form.peso_muestra_8.label(class="form-label") }}
+                                {{ form.peso_muestra_8(class="form-control peso-muestra", type="number", step="0.1", id="peso_muestra_8") }}
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                {{ form.peso_muestra_9.label(class="form-label") }}
+                                {{ form.peso_muestra_9(class="form-control peso-muestra", type="number", step="0.1", id="peso_muestra_9") }}
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                {{ form.peso_muestra_10.label(class="form-label") }}
+                                {{ form.peso_muestra_10(class="form-control peso-muestra", type="number", step="0.1", id="peso_muestra_10") }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sección 6: Cama de Aire -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-wind"></i>Cama de Aire
+                    </h3>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                {{ form.cama_aire_tipo.label(class="form-label") }}
+                                {{ form.cama_aire_tipo(class="form-select", id="cama_aire_tipo") }}
+                                {% if form.cama_aire_tipo.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.cama_aire_tipo.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.cama_aire_muestra_1.label(class="form-label") }}
+                                {{ form.cama_aire_muestra_1(class="form-control cama-aire-muestra", type="number", step="0.1", id="cama_aire_muestra_1") }}
+                                {% if form.cama_aire_muestra_1.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.cama_aire_muestra_1.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.cama_aire_muestra_2.label(class="form-label") }}
+                                {{ form.cama_aire_muestra_2(class="form-control cama-aire-muestra", type="number", step="0.1", id="cama_aire_muestra_2") }}
+                                {% if form.cama_aire_muestra_2.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.cama_aire_muestra_2.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                {{ form.cama_aire_muestra_3.label(class="form-label") }}
+                                {{ form.cama_aire_muestra_3(class="form-control cama-aire-muestra", type="number", step="0.1", id="cama_aire_muestra_3") }}
+                                {% if form.cama_aire_muestra_3.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.cama_aire_muestra_3.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3 bg-light p-2 rounded">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                {{ form.cama_aire_promedio.label(class="form-label") }}
+                                {{ form.cama_aire_promedio(class="form-control", type="number", step="0.1", id="cama_aire_promedio") }}
+                                <small class="form-text text-muted">Promedio calculado automáticamente de las muestras</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Sección 7: Oxígeno Residual -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-flask"></i>Oxígeno Residual
+                    </h3>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.oxigeno_residual_muestra_1.label(class="form-label") }}
+                                {{ form.oxigeno_residual_muestra_1(class="form-control oxigeno-residual-muestra", type="number", step="0.1", id="oxigeno_residual_muestra_1") }}
+                                {% if form.oxigeno_residual_muestra_1.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.oxigeno_residual_muestra_1.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form.oxigeno_residual_muestra_2.label(class="form-label") }}
+                                {{ form.oxigeno_residual_muestra_2(class="form-control oxigeno-residual-muestra", type="number", step="0.1", id="oxigeno_residual_muestra_2") }}
+                                {% if form.oxigeno_residual_muestra_2.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.oxigeno_residual_muestra_2.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3 bg-light p-2 rounded">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                {{ form.oxigeno_residual_promedio.label(class="form-label") }}
+                                {{ form.oxigeno_residual_promedio(class="form-control", type="number", step="0.1", id="oxigeno_residual_promedio") }}
+                                <small class="form-text text-muted">Promedio calculado automáticamente de las muestras</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección 8: Observaciones -->
+                <div class="form-section">
+                    <h3 class="section-title">
+                        <i class="fas fa-comment-alt"></i>Observaciones
+                    </h3>
+
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                {{ form.observaciones.label(class="form-label") }}
+                                {{ form.observaciones(class="form-control") }}
+                                {% if form.observaciones.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.observaciones.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <a href="{{ url_for('weaklink_dashboard', category=category) }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save me-1"></i>Guardar Registro
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Eliminar cualquier mensaje de información de horario que pudiera existir
+        function removeHorarioInfoBox() {
+            const infoBoxes = document.querySelectorAll('.horario-info-box, .horario-info-turno-a, .horario-info-turno-b');
+            infoBoxes.forEach(box => {
+                console.log('Eliminando mensaje de información de horario:', box);
+                box.remove();
+            });
+        }
+        
+        // Ejecutar inmediatamente
+        removeHorarioInfoBox();
+        
+        // También ejecutar después de un pequeño retraso para asegurarse de capturar elementos añadidos dinámicamente
+        setTimeout(removeHorarioInfoBox, 500);
+        
+        // Mostrar/ocultar campo de porcentaje de eficiencia según la selección
+        const eficienciaPromocionSelect = document.getElementById('eficiencia_promocion');
+        const porcentajeEficienciaContainer = document.getElementById('porcentaje_eficiencia_container');
+        
+        // Función para mostrar/ocultar el campo de porcentaje de eficiencia
+        function togglePorcentajeEficiencia() {
+            if (eficienciaPromocionSelect.value === 'Aplica') {
+                porcentajeEficienciaContainer.style.display = 'flex';
+            } else {
+                porcentajeEficienciaContainer.style.display = 'none';
+            }
+        }
+        
+        // Verificar estado inicial
+        togglePorcentajeEficiencia();
+        
+        // Agregar evento para cuando cambie la selección
+        eficienciaPromocionSelect.addEventListener('change', togglePorcentajeEficiencia);
+        // Validación de rangos de temperatura
+        const tempMordazaFrontalInput = document.getElementById('temperatura_mordaza_frontal');
+        const tempMordazaTraseraInput = document.getElementById('temperatura_mordaza_trasera');
+        const tempSelladoInput = document.getElementById('temperatura_sellado_vertical');
+        const tempMordazaFrontalGroup = document.getElementById('temperatura-mordaza-frontal-group');
+        const tempMordazaTraseraGroup = document.getElementById('temperatura-mordaza-trasera-group');
+        const tempSelladoGroup = document.getElementById('temperatura-sellado-vertical-group');
+        
+        // Función para validar y mostrar el color de fondo según el rango
+        function validateTemperature(input, group) {
+            if (!input.value) return;
+            
+            const value = parseFloat(input.value);
+            // Rango válido: 110°C-160°C
+            if (value >= 110 && value <= 160) {
+                // Dentro del rango - verde
+                input.style.backgroundColor = '#d4edda'; // Bootstrap success light
+            } else {
+                // Fuera del rango - rojo
+                input.style.backgroundColor = '#f8d7da'; // Bootstrap danger light
+            }
+        }
+        
+        // Validar inicialmente
+        if (tempMordazaFrontalInput) {
+            validateTemperature(tempMordazaFrontalInput, tempMordazaFrontalGroup);
+            // Validar en cambios
+            tempMordazaFrontalInput.addEventListener('input', function() {
+                validateTemperature(tempMordazaFrontalInput, tempMordazaFrontalGroup);
+            });
+        }
+        
+        if (tempMordazaTraseraInput) {
+            validateTemperature(tempMordazaTraseraInput, tempMordazaTraseraGroup);
+            // Validar en cambios
+            tempMordazaTraseraInput.addEventListener('input', function() {
+                validateTemperature(tempMordazaTraseraInput, tempMordazaTraseraGroup);
+            });
+        }
+        
+        if (tempSelladoInput) {
+            validateTemperature(tempSelladoInput, tempSelladoGroup);
+            // Validar en cambios
+            tempSelladoInput.addEventListener('input', function() {
+                validateTemperature(tempSelladoInput, tempSelladoGroup);
+            });
+        }
+        
+        // Validación para la sección de Empaque
+        const codigoEmpaqueInput = document.getElementById('codigo_empaque');
+        const volumenLlenadoInput = document.getElementById('volumen_llenado');
+        const aparienciaEmpaqueInput = document.getElementById('apariencia_empaque');
+        const hermeticidadInput = document.getElementById('hermeticidad');
+        
+        // Función para validar Código Empaque (97.5%-100%)
+        function validateCodigoEmpaque() {
+            if (!codigoEmpaqueInput || !codigoEmpaqueInput.value) return;
+            
+            const value = parseFloat(codigoEmpaqueInput.value);
+            if (value >= 97.5 && value <= 100) {
+                // Dentro del rango - verde
+                codigoEmpaqueInput.style.backgroundColor = '#d4edda'; // Bootstrap success light
+            } else {
+                // Fuera del rango - rojo
+                codigoEmpaqueInput.style.backgroundColor = '#f8d7da'; // Bootstrap danger light
+            }
+        }
+        
+        // Función para validar Volumen de Llenado (70%-80%)
+        function validateVolumenLlenado() {
+            if (!volumenLlenadoInput || !volumenLlenadoInput.value) return;
+            
+            const value = parseFloat(volumenLlenadoInput.value);
+            if (value >= 70 && value <= 80) {
+                // Dentro del rango - verde
+                volumenLlenadoInput.style.backgroundColor = '#d4edda'; // Bootstrap success light
+            } else {
+                // Fuera del rango - rojo
+                volumenLlenadoInput.style.backgroundColor = '#f8d7da'; // Bootstrap danger light
+            }
+        }
+        
+        // Función para validar Apariencia Empaque (90%-100%)
+        function validateAparienciaEmpaque() {
+            if (!aparienciaEmpaqueInput || !aparienciaEmpaqueInput.value) return;
+            
+            const value = parseFloat(aparienciaEmpaqueInput.value);
+            if (value >= 90 && value <= 100) {
+                // Dentro del rango - verde
+                aparienciaEmpaqueInput.style.backgroundColor = '#d4edda'; // Bootstrap success light
+            } else {
+                // Fuera del rango - rojo
+                aparienciaEmpaqueInput.style.backgroundColor = '#f8d7da'; // Bootstrap danger light
+            }
+        }
+        
+        // Función para validar Hermeticidad (97.5%-100%)
+        function validateHermeticidad() {
+            if (!hermeticidadInput || !hermeticidadInput.value) return;
+            
+            const value = parseFloat(hermeticidadInput.value);
+            if (value >= 97.5 && value <= 100) {
+                // Dentro del rango - verde
+                hermeticidadInput.style.backgroundColor = '#d4edda'; // Bootstrap success light
+            } else {
+                // Fuera del rango - rojo
+                hermeticidadInput.style.backgroundColor = '#f8d7da'; // Bootstrap danger light
+            }
+        }
+        
+        // Validar inicialmente todos los campos de Empaque
+        if (codigoEmpaqueInput) {
+            validateCodigoEmpaque();
+            codigoEmpaqueInput.addEventListener('input', validateCodigoEmpaque);
+        }
+        
+        if (volumenLlenadoInput) {
+            validateVolumenLlenado();
+            volumenLlenadoInput.addEventListener('input', validateVolumenLlenado);
+        }
+        
+        if (aparienciaEmpaqueInput) {
+            validateAparienciaEmpaque();
+            aparienciaEmpaqueInput.addEventListener('input', validateAparienciaEmpaque);
+        }
+        
+        if (hermeticidadInput) {
+            validateHermeticidad();
+            hermeticidadInput.addEventListener('input', validateHermeticidad);
+        }
+        
+        // Funcionalidad para la sección de Pesos
+        const calcularPesosBtn = document.getElementById('calcular_pesos');
+        const gramajeImpresoInput = document.getElementById('gramaje_impreso');
+        const pesoIshidaInput = document.getElementById('peso_ishida');
+        const pesoPromedioInput = document.getElementById('peso_promedio');
+        const difVsGramajeInput = document.getElementById('dif_vs_gramaje');
+        const difVsIshidaInput = document.getElementById('dif_vs_ishida');
+        
+        // Obtener todas las entradas de muestras de peso
+        const pesoMuestraInputs = document.querySelectorAll('.peso-muestra');
+        
+        // Función para calcular el promedio y las diferencias
+        function calcularPesos() {
+            // Obtener valores de gramaje y peso Ishida
+            const gramajeImpreso = parseFloat(gramajeImpresoInput.value) || 0;
+            const pesoIshida = parseFloat(pesoIshidaInput.value) || 0;
+            
+            // Calcular el promedio de las muestras
+            let suma = 0;
+            let contador = 0;
+            
+            pesoMuestraInputs.forEach(input => {
+                const valor = parseFloat(input.value);
+                if (!isNaN(valor) && valor > 0) {
+                    suma += valor;
+                    contador++;
+                }
+            });
+            
+            // Calcular promedio si hay al menos una muestra válida
+            const promedio = contador > 0 ? suma / contador : 0;
+            
+            // Calcular diferencias
+            const difVsGramaje = gramajeImpreso - promedio; // Gramaje impreso menos promedio
+            const difVsIshida = pesoIshida - promedio; // Peso Ishida menos promedio
+            
+            // Mostrar los resultados redondeados a 2 decimales
+            pesoPromedioInput.value = promedio.toFixed(2);
+            difVsGramajeInput.value = difVsGramaje.toFixed(2);
+            difVsIshidaInput.value = difVsIshida.toFixed(2);
+            
+            // Aplicar colores a las diferencias (rojo si es negativo, verde si es positivo)
+            difVsGramajeInput.style.backgroundColor = difVsGramaje >= 0 ? '#d4edda' : '#f8d7da';
+            difVsIshidaInput.style.backgroundColor = difVsIshida >= 0 ? '#d4edda' : '#f8d7da';
+        }
+        
+        // Evento para el botón de calcular
+        if (calcularPesosBtn) {
+            calcularPesosBtn.addEventListener('click', calcularPesos);
+        }
+        
+        // Calcular automáticamente cuando se cambia cualquier valor de muestra
+        pesoMuestraInputs.forEach(input => {
+            input.addEventListener('input', calcularPesos);
+        });
+        
+        // Calcular automáticamente cuando se cambian los valores de referencia
+        if (gramajeImpresoInput) {
+            gramajeImpresoInput.addEventListener('input', calcularPesos);
+        }
+        
+        if (pesoIshidaInput) {
+            pesoIshidaInput.addEventListener('input', calcularPesos);
+        }
+        
+        // Cálculos para la sección Cama de Aire
+        const camaAireMuestraInputs = document.querySelectorAll('.cama-aire-muestra');
+        const camaAirePromedioInput = document.getElementById('cama_aire_promedio');
+        
+        // Función para calcular el promedio de las muestras de cama de aire
+        function calcularPromedioCamaAire() {
+            let suma = 0;
+            let contador = 0;
+            
+            camaAireMuestraInputs.forEach(input => {
+                const valor = parseFloat(input.value);
+                if (!isNaN(valor) && valor > 0) {
+                    suma += valor;
+                    contador++;
+                }
+            });
+            
+            // Calcular promedio si hay al menos una muestra válida
+            const promedio = contador > 0 ? suma / contador : 0;
+            
+            // Mostrar el resultado redondeado a 2 decimales
+            camaAirePromedioInput.value = promedio.toFixed(2);
+        }
+        
+        // Calcular automáticamente cuando se cambia cualquier valor de muestra de cama de aire
+        camaAireMuestraInputs.forEach(input => {
+            input.addEventListener('input', calcularPromedioCamaAire);
+        });
+        
+        // Cálculos para la sección Oxígeno Residual
+        const oxigenoResidualMuestraInputs = document.querySelectorAll('.oxigeno-residual-muestra');
+        const oxigenoResidualPromedioInput = document.getElementById('oxigeno_residual_promedio');
+        
+        // Función para calcular el promedio de las muestras de oxígeno residual
+        function calcularPromedioOxigenoResidual() {
+            let suma = 0;
+            let contador = 0;
+            
+            // Solo considera las muestras 1 y 2 (el campo de muestra 3 fue eliminado)
+            const muestra1 = parseFloat(document.getElementById('oxigeno_residual_muestra_1').value);
+            const muestra2 = parseFloat(document.getElementById('oxigeno_residual_muestra_2').value);
+            
+            if (!isNaN(muestra1) && muestra1 >= 0) {
+                suma += muestra1;
+                contador++;
+            }
+            
+            if (!isNaN(muestra2) && muestra2 >= 0) {
+                suma += muestra2;
+                contador++;
+            }
+            
+            // Calcular promedio si hay al menos una muestra válida
+            const promedio = contador > 0 ? suma / contador : 0;
+            
+            // Mostrar el resultado redondeado a 2 decimales
+            oxigenoResidualPromedioInput.value = promedio.toFixed(2);
+        }
+        
+        // Calcular automáticamente cuando se cambia cualquier valor de muestra de oxígeno residual
+        oxigenoResidualMuestraInputs.forEach(input => {
+            input.addEventListener('input', calcularPromedioOxigenoResidual);
+        });
+        
+        // Función para actualizar las opciones de máquina según la categoría
+        function updateMaquinaOptions() {
+            const productoSelect = document.getElementById('producto');
+            const maquinaSelect = document.getElementById('maquina');
+            
+            if (!productoSelect || !maquinaSelect) return;
+            
+            const categoria = '{{ category }}';
+            const producto = productoSelect.value;
+            
+            // Guardar el valor actual antes de limpiar
+            const currentValue = maquinaSelect.value;
+            
+            // Limpiar opciones existentes
+            maquinaSelect.innerHTML = '<option value="">Seleccionar máquina...</option>';
+            
+            let opciones = [];
+            
+            if (categoria === 'TORTILLA') {
+                // Para TORTILLA: mostrar tubos del 1 al 16
+                opciones = [
+                    { value: 'Tubo 1', text: 'Tubo 1' },
+                    { value: 'Tubo 2', text: 'Tubo 2' },
+                    { value: 'Tubo 3', text: 'Tubo 3' },
+                    { value: 'Tubo 4', text: 'Tubo 4' },
+                    { value: 'Tubo 5', text: 'Tubo 5' },
+                    { value: 'Tubo 6', text: 'Tubo 6' },
+                    { value: 'Tubo 7', text: 'Tubo 7' },
+                    { value: 'Tubo 8', text: 'Tubo 8' },
+                    { value: 'Tubo 9', text: 'Tubo 9' },
+                    { value: 'Tubo 10', text: 'Tubo 10' },
+                    { value: 'Tubo 11', text: 'Tubo 11' },
+                    { value: 'Tubo 12', text: 'Tubo 12' },
+                    { value: 'Tubo 13', text: 'Tubo 13' },
+                    { value: 'Tubo 14', text: 'Tubo 14' },
+                    { value: 'Tubo 15', text: 'Tubo 15' },
+                    { value: 'Tubo 16', text: 'Tubo 16' }
+                ];
+            } else if (categoria === 'EXTRUIDOS') {
+                // Para EXTRUIDOS: mostrar tubos del 17 al 32
+                opciones = [
+                    { value: 'Tubo 17', text: 'Tubo 17' },
+                    { value: 'Tubo 18', text: 'Tubo 18' },
+                    { value: 'Tubo 19', text: 'Tubo 19' },
+                    { value: 'Tubo 20', text: 'Tubo 20' },
+                    { value: 'Tubo 21', text: 'Tubo 21' },
+                    { value: 'Tubo 22', text: 'Tubo 22' },
+                    { value: 'Tubo 23', text: 'Tubo 23' },
+                    { value: 'Tubo 24', text: 'Tubo 24' },
+                    { value: 'Tubo 25', text: 'Tubo 25' },
+                    { value: 'Tubo 26', text: 'Tubo 26' },
+                    { value: 'Tubo 27', text: 'Tubo 27' },
+                    { value: 'Tubo 28', text: 'Tubo 28' },
+                    { value: 'Tubo 29', text: 'Tubo 29' },
+                    { value: 'Tubo 30', text: 'Tubo 30' },
+                    { value: 'Tubo 31', text: 'Tubo 31' },
+                    { value: 'Tubo 32', text: 'Tubo 32' }
+                ];
+            } else if (categoria === 'PAPA') {
+                // Para PAPA: mostrar tubos del 33 al 50
+                opciones = [
+                    { value: 'Tubo 33', text: 'Tubo 33' },
+                    { value: 'Tubo 34', text: 'Tubo 34' },
+                    { value: 'Tubo 35', text: 'Tubo 35' },
+                    { value: 'Tubo 36', text: 'Tubo 36' },
+                    { value: 'Tubo 37', text: 'Tubo 37' },
+                    { value: 'Tubo 38', text: 'Tubo 38' },
+                    { value: 'Tubo 39', text: 'Tubo 39' },
+                    { value: 'Tubo 40', text: 'Tubo 40' },
+                    { value: 'Tubo 41', text: 'Tubo 41' },
+                    { value: 'Tubo 42', text: 'Tubo 42' },
+                    { value: 'Tubo 43', text: 'Tubo 43' },
+                    { value: 'Tubo 44', text: 'Tubo 44' },
+                    { value: 'Tubo 45', text: 'Tubo 45' },
+                    { value: 'Tubo 46', text: 'Tubo 46' },
+                    { value: 'Tubo 47', text: 'Tubo 47' },
+                    { value: 'Tubo 48', text: 'Tubo 48' },
+                    { value: 'Tubo 49', text: 'Tubo 49' },
+                    { value: 'Tubo 50', text: 'Tubo 50' }
+                ];
+            }
+            
+            // Agregar las opciones al select
+            opciones.forEach(opcion => {
+                const option = document.createElement('option');
+                option.value = opcion.value;
+                option.textContent = opcion.text;
+                // Restaurar la selección si coincide
+                if (opcion.value === currentValue) {
+                    option.selected = true;
+                }
+                maquinaSelect.appendChild(option);
+            });
+        }
+        
+        // Ejecutar cuando se carga la página
+        updateMaquinaOptions();
+        
+        // NO actualizar cuando cambie el producto para no perder la selección de máquina
+        // Las opciones de máquina dependen solo de la categoría, no del producto
+    });
+</script>
+{% endblock %}

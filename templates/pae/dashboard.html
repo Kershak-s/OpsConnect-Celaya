@@ -1,0 +1,2283 @@
+{% extends "base.html" %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/custom/pae-hourly-summary.css') }}">
+<script src="{{ url_for('static', filename='js/custom/pae-visualizar-registro.js') }}"></script>
+<style>
+    /* Estilos del menú superior */
+    .top-navbar {
+        background-color: #0d6efd;
+        color: white;
+        padding: 12px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    /* Estilos especiales para la tabla de detalle hora */
+    #detalleHoraPanel .table tr:nth-of-type(odd) {
+        background-color: transparent !important;
+    }
+    
+    #detalleHoraPanel .table tr td {
+        background-color: white !important;
+    }
+    
+    #detalleHoraPanel .table tr td.bg-danger,
+    #detalleHoraPanel .table tr td.bg-success {
+        color: white !important;
+    }
+    
+    #detalleHoraPanel .table tr td.bg-danger {
+        background-color: #dc3545 !important;
+    }
+    
+    #detalleHoraPanel .table tr td.bg-success {
+        background-color: #198754 !important;
+    }
+    
+    .top-navbar .brand {
+        font-size: 20px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+    }
+    
+    .top-navbar .brand i {
+        margin-right: 10px;
+        font-size: 22px;
+    }
+    
+    .top-navbar .user-menu {
+        display: flex;
+        align-items: center;
+    }
+    
+    .top-navbar .user-menu .btn {
+        color: white;
+        background-color: rgba(255, 255, 255, 0.15);
+        border: none;
+        font-weight: 500;
+    }
+    
+    /* Botones de navegación */
+    .nav-buttons {
+        display: flex;
+        gap: 10px;
+        margin: 20px 0;
+    }
+    
+    .nav-button {
+        padding: 8px 15px;
+        border-radius: 25px;
+        background-color: white;
+        color: #333;
+        border: 1px solid #dee2e6;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        text-decoration: none;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .nav-button i {
+        margin-right: 8px;
+    }
+    
+    .nav-button:hover {
+        background-color: #f8f9fa;
+        text-decoration: none;
+    }
+    
+    /* Encabezado de sección */
+    .section-header {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: flex-start;
+        border-left: 8px solid #0d6efd;
+    }
+    
+    .section-header .icon {
+        font-size: 2.5rem;
+        color: #0d6efd;
+        margin-right: 1rem;
+        margin-top: 4px;
+    }
+    
+    .section-header .title {
+        margin: 0;
+        font-weight: 700;
+        font-size: 2rem;
+        color: #333;
+    }
+    
+    .section-header .subtitle {
+        color: #6c757d;
+        margin-top: 0.5rem;
+        margin-bottom: 0;
+    }
+    
+    /* Sección de turno */
+    .turno-section {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+        padding: 1.5rem 2rem;
+        margin-bottom: 1.5rem;
+        border-left: 8px solid #0d6efd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .turno-info {
+        display: flex;
+        align-items: center;
+    }
+    
+    .turno-label {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-right: 12px;
+        margin-bottom: 0;
+    }
+    
+    .turno-badge {
+        display: inline-block;
+        background-color: #0d6efd;
+        color: white;
+        font-weight: bold;
+        width: 40px;
+        height: 40px;
+        line-height: 40px;
+        text-align: center;
+        border-radius: 6px;
+        font-size: 1.4rem;
+    }
+    
+    .turno-horario {
+        margin-left: 15px;
+        font-size: 1.1rem;
+        color: #6c757d;
+    }
+    
+    .date-time {
+        text-align: right;
+        color: #6c757d;
+    }
+    
+    .date-time i {
+        margin-right: 5px;
+    }
+    
+    /* Pestañas de navegación */
+    .custom-tabs {
+        display: flex;
+        border-bottom: 1px solid #dee2e6;
+        margin-bottom: 20px;
+    }
+    
+    .custom-tab {
+        padding: 12px 20px;
+        font-weight: 600;
+        color: #6c757d;
+        text-decoration: none;
+        border-bottom: 3px solid transparent;
+        display: flex;
+        align-items: center;
+        transition: all 0.2s;
+    }
+    
+    .custom-tab i {
+        margin-right: 8px;
+        font-size: 16px;
+    }
+    
+    .custom-tab.active {
+        color: #0d6efd;
+        border-bottom-color: #0d6efd;
+    }
+    
+    .custom-tab:hover:not(.active) {
+        color: #495057;
+        border-bottom-color: #dee2e6;
+    }
+    
+    /* Selector de línea */
+    .line-selector-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    
+    .line-selector-title {
+        font-weight: 600;
+        font-size: 1.2rem;
+        margin: 0;
+    }
+    
+    .line-selector-controls {
+        display: flex;
+        align-items: center;
+    }
+    
+    .line-selector-select {
+        border-radius: 6px;
+        padding: 8px 12px;
+        margin-right: 10px;
+    }
+    
+    .line-selector-button {
+        border-radius: 6px;
+        padding: 8px 16px;
+        background-color: #0d6efd;
+        color: white;
+        border: none;
+        font-weight: 500;
+    }
+    
+    /* Estilos para la cuadrícula de horas */
+    .hours-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 15px;
+        margin-top: 1.5rem;
+    }
+    
+    .hour-box {
+        position: relative;
+        height: 100px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        overflow: hidden;
+        cursor: pointer;
+    }
+    
+    .hour-box.disabled {
+        background-color: #e9ecef;
+        color: #adb5bd;
+        cursor: not-allowed;
+    }
+    
+    .hour-box.active {
+        background-color: white;
+        color: #0d6efd;
+        border: 2px solid #0d6efd;
+        animation: pulse 2s infinite;
+    }
+    
+    .hour-box.completed {
+        background-color: #d1e7dd;
+        color: #0f5132;
+        border: 1px solid #0f5132;
+    }
+    
+    .hour-box.missed {
+        background-color: #f8d7da;
+        color: #842029;
+        border: 1px solid #842029;
+    }
+    
+    .hour-time {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+    
+    .hour-status {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* Animación de pulso para la hora actual */
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+        }
+    }
+    
+    /* Estilos para la sección contenedora */
+    .content-section {
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        padding: 25px;
+        margin-bottom: 20px;
+    }
+    
+    .hourly-summary-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.625rem;
+    }
+
+    .hour-summary-box {
+        background: #f8f9fa;
+        border: 1px solid #ced4da;
+        border-radius: 0.5rem;
+        padding: 0.625rem 0.5rem;
+        min-width: 4rem;
+        text-align: center;
+    }
+
+    .hour-label {
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+
+    .hour-count {
+        font-size: 1.3em;
+        color: #007bff;
+    }
+
+    /* Ajuste para que el gráfico de pastel no se corte */
+    #chart-distribucion {
+        max-width: 100% !important;
+        width: 100% !important;
+        height: auto !important;
+        display: block;
+        margin: 0 auto;
+        box-sizing: border-box;
+    }
+
+    /* Ajuste para el contenedor del gráfico de pastel */
+    .col-md-6, .card-body {
+        overflow-x: auto;
+    }
+
+    /* Círculos de iconos */
+    .icon-circle {
+        height: 60px;
+        width: 60px;
+        border-radius: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .bg-primary-lighter { background-color: rgba(255, 255, 255, 0.2); }
+    .bg-danger-lighter { background-color: rgba(255, 255, 255, 0.2); }
+    .bg-warning-lighter { background-color: rgba(255, 255, 255, 0.2); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 mt-0">
+    <!-- Botones de navegación -->
+    <div class="nav-buttons">
+        <a href="{{ url_for('index') }}" class="nav-button">
+            <i class="fas fa-home"></i>Inicio
+        </a>
+        <a href="{{ url_for('line_sections', category=category) }}" class="nav-button">
+            <i class="fas fa-th-large"></i>Secciones
+        </a>
+        <a href="{{ url_for('calidad_exercises', category=category, section='calidad', subsection='proceso') }}" class="nav-button">
+            <i class="fas fa-arrow-left"></i>Volver a Calidad
+        </a>
+    </div>
+    
+    <div class="section-header">
+        <div class="icon">
+            <i class="fas fa-clipboard-check"></i>
+        </div>
+        <div class="flex-grow-1">
+            <h1 class="title">PAE - Evaluación de Producto por Atributos</h1>
+            <p class="subtitle">Evaluación y registro de atributos del producto por hora, para asegurar la calidad del producto en cada etapa del proceso.</p>
+            
+            <div class="d-flex justify-content-between align-items-end mt-3 pt-2 border-top">
+                <!-- Turno a la izquierda -->
+                <div class="d-flex align-items-center" style="width: 60%">
+                    <h5 class="turno-label mb-0 me-2">Turno:</h5>
+                    <div class="turno-badge">{{ current_turno }}</div>
+                    <p class="turno-horario mb-0">
+                        {% if current_turno == 'A' %}
+                            Horario: 7:00 AM - 6:00 PM
+                        {% else %}
+                            Horario: 7:00 PM - 6:00 AM
+                        {% endif %}
+                    </p>
+                </div>
+                
+                <!-- Espacio central -->
+                <div style="width: 15%"></div>
+                
+                <!-- Fecha y hora en una sola línea a la derecha -->
+                <div class="date-time text-end" style="width: 25%">
+                    <div class="d-flex justify-content-end">
+                        <div class="me-3"><i class="fas fa-calendar-alt me-1"></i>{{ now.strftime('%d/%m/%Y') }}</div>
+                        <div><i class="fas fa-clock me-1"></i>{{ now.strftime('%H:%M') }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="custom-tabs">
+        <a href="#registro" class="custom-tab active" id="registro-tab-link">
+            <i class="fas fa-list"></i> Registro por Hora
+        </a>
+        <a href="#resultados" class="custom-tab" id="resultados-tab-link">
+            <i class="fas fa-chart-bar"></i> Resultados
+        </a>
+    </div>
+    
+    <div id="tab-content" data-category="{{ category }}">
+        <!-- Sección de título y selector fuera del cuadro blanco -->
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <h5 class="m-0 fw-bold">Registro por Hora</h5>
+        </div>
+            
+        <!-- Cuadro blanco solo con los botones de horas -->
+        <div id="registro-content" class="tab-content active content-section">
+            <div class="hours-grid">
+                {# Mostrar las horas según el turno seleccionado #}
+                {# Turno A: 7 AM - 6 PM (horas 7-18) #}
+                {# Turno B: 7 PM - 6 AM (horas 19-23, 0-6) #}
+                {% if current_turno == 'A' %}
+                    {% set horas_turno = [7,8,9,10,11,12,13,14,15,16,17,18] %}
+                {% elif current_turno == 'B' %}
+                    {% set horas_turno = [19,20,21,22,23,0,1,2,3,4,5,6] %}
+                {% else %}
+                    {# Si no se detecta turno, mostrar todas las horas #}
+                    {% set horas_turno = [7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,0,1,2,3,4,5,6] %}
+                {% endif %}
+
+                {% for hora in horas_turno %}
+                    {% set hora_str = '%02d:00'|format(hora) %}
+                    {% set estado = 'disabled' %}
+                    {% set status_text = 'Bloqueado' %}
+
+                    {# Si la hora ya tiene registro, mostrar como completado #}
+                    {% if hora in horas_con_registros %}
+                        {% set estado = 'completed' %}
+                        {% set status_text = 'Completado' %}
+                    {# Si es la hora actual, mostrar como activa #}
+                    {% elif hora == current_hour %}
+                        {% set estado = 'active' %}
+                        {% set status_text = 'Disponible' %}
+                    {# Si la hora es menor que la actual, mostrar como pendiente (missed) SOLO si es del mismo día/turno #}
+                    {% elif current_turno == 'A' and hora < current_hour and hora >= 7 and hora <= 18 %}
+                        {% set estado = 'missed' %}
+                        {% set status_text = 'Pendiente' %}
+                    {% elif current_turno == 'B' %}
+                        {% if current_hour >= 19 %}
+                            {# Estamos en la primera parte del turno (19-23) #}
+                            {# Las horas 19 hasta current_hour son pendientes #}
+                            {% if hora >= 19 and hora < current_hour %}
+                                {% set estado = 'missed' %}
+                                {% set status_text = 'Pendiente' %}
+                            {% endif %}
+                        {% elif current_hour <= 6 %}
+                            {# Estamos en la segunda parte del turno (0-6) #}
+                            {# Las horas 19-23 del día anterior son pendientes #}
+                            {# Las horas 0 hasta current_hour son pendientes #}
+                            {% if hora >= 19 or (hora >= 0 and hora < current_hour) %}
+                                {% set estado = 'missed' %}
+                                {% set status_text = 'Pendiente' %}
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                    {# Todas las demás horas quedan bloqueadas (disabled) #}
+
+                    <a href="{% if estado == 'completed' %}javascript:void(0){% else %}{{ url_for('pae_registro', category=category, hora=hora) }}{% endif %}"
+                       class="hour-box {{ estado }}"
+                       {% if estado == 'disabled' %}onclick="event.preventDefault();"{% elif estado == 'completed' %}onclick="mostrarRegistroPAE('{{ category }}', {{ hora }}, '{{ current_turno }}'); event.preventDefault();"{% endif %}>
+                        <div class="hour-time">{{ hora_str }}</div>
+                        <div class="hour-status">{{ status_text }}</div>
+                    </a>
+                {% endfor %}
+            </div>
+            
+            <!-- Leyenda en formato idéntico a la imagen -->
+            <div class="mt-4 pt-3 border-top">
+                <div class="d-flex align-items-center justify-content-start" style="gap: 20px;">
+                    <div class="d-flex align-items-center">
+                        <div style="width: 20px; height: 20px; background-color: #f8f9fa; border: 1px solid #ced4da; margin-right: 8px;"></div>
+                        <span style="font-size: 1rem; color: #212529;">Bloqueado</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div style="width: 20px; height: 20px; background-color: #ffffff; border: 2px solid #007bff; margin-right: 8px;"></div>
+                        <span style="font-size: 1rem; color: #212529;">Hora actual</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div style="width: 20px; height: 20px; background-color: #d4edda; border: 1px solid #28a745; margin-right: 8px;"></div>
+                        <span style="font-size: 1rem; color: #212529;">Completado</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div style="width: 20px; height: 20px; background-color: #f8d7da; border: 1px solid #dc3545; margin-right: 8px;"></div>
+                        <span style="font-size: 1rem; color: #212529;">Pendiente</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        
+        <div id="resultados-content" class="tab-content" style="display: none;">
+            <!-- Filtros -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Filtros</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label" for="filter-periodo">Periodo</label>
+                            <select class="form-select" id="filter-periodo">
+                                <option value="turno" selected>Turno Actual</option>
+                                <option value="hoy">Hoy</option>
+                                <option value="ayer">Ayer</option>
+                                <option value="semana">Última Semana</option>
+                                <option value="personalizado">Personalizado</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="filter-turno">Turno</label>
+                            <select class="form-select" id="filter-turno">
+                                <option value="all">Todos</option>
+                                <option value="A" {% if current_turno == 'A' %}selected{% endif %}>Turno A (7AM-6PM)</option>
+                                <option value="B" {% if current_turno == 'B' %}selected{% endif %}>Turno B (7PM-6AM)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="filter-producto">Producto</label>
+                            <select class="form-select" id="filter-producto">
+                                <option value="all">Todos</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Campos de fecha personalizada (ocultos por defecto) -->
+                    <div class="row g-3 mt-2" id="date-range-container" style="display: none;">
+                        <div class="col-md-6">
+                            <label class="form-label" for="filter-fecha-inicio">Fecha Inicio</label>
+                            <input type="date" class="form-control" id="filter-fecha-inicio">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="filter-fecha-fin">Fecha Fin</label>
+                            <input type="date" class="form-control" id="filter-fecha-fin">
+                        </div>
+                    </div>
+                    <div class="text-end mt-3">
+                        <button type="button" class="btn btn-primary" id="btn-filtrar">
+                            <i class="fas fa-filter me-1"></i> Aplicar Filtros
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botones de acción principales -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="button" class="btn btn-outline-primary" id="btn-actualizar-resumen">
+                            <i class="fas fa-sync-alt me-1"></i> Actualizar Datos
+                        </button>
+                        <button type="button" class="btn btn-success" id="btn-reporte-completo">
+                            <i class="fas fa-file-alt me-1"></i> Ver Reporte Completo
+                        </button>
+                    </div>
+                    <!-- Elementos ocultos necesarios para JavaScript -->
+                    <div style="display: none;">
+                        <span id="total-defectos-badge">0</span>
+                        <div id="hourlySummaryContainer"></div>
+                        <div id="loadingHourlySummary"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gráficos con diseño mejorado -->
+            <div class="row mb-4">
+                <!-- Gráfico de barras por hora -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100" style="border-radius: 10px; overflow: hidden; border: none;">
+                        <div class="card-header bg-white" style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 fw-bold">
+                                    <i class="fas fa-chart-bar text-primary me-2"></i>
+                                    Defectos por Hora
+                                </h5>
+                                <span class="badge bg-primary">Tiempo real</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="loadingChart1" class="text-center py-5" style="display: none;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                                <p class="mt-2">Cargando gráfica...</p>
+                            </div>
+                            <div class="chart-container" style="position: relative; height: 300px;">
+                                <canvas id="chart-por-hora"></canvas>
+                            </div>
+                            <div class="text-center mt-2 small text-muted" id="chart1-info">
+                                <i class="fas fa-info-circle me-1"></i> Las barras rojas indican valores fuera de rango (≥17 defectos)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gráfico de distribución de defectos -->
+                <div class="col-md-6">
+                    <div class="card shadow-sm h-100" style="border-radius: 10px; overflow: hidden; border: none;">
+                        <div class="card-header bg-white" style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0 fw-bold">
+                                    <i class="fas fa-chart-pie text-primary me-2"></i>
+                                    Distribución de Defectos
+                                </h5>
+                                <span class="badge bg-info">Top 10</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="loadingChart2" class="text-center py-5" style="display: none;">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                                <p class="mt-2">Cargando gráfica...</p>
+                            </div>
+                            <div class="chart-container" style="position: relative; height: 300px;">
+                                <canvas id="chart-distribucion"></canvas>
+                            </div>
+                            <div class="text-center mt-2 small text-muted" id="chart2-info">
+                                <i class="fas fa-info-circle me-1"></i> Muestra los principales tipos de defectos y su proporción
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Estadísticas rápidas -->
+            <div class="row mb-4">
+                <!-- Tarjeta de estadísticas: Total defectos -->
+                <div class="col-md-4">
+                    <div class="card text-white bg-primary mb-3" style="border-radius: 10px; border: none; overflow: hidden;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1 text-white-50">Total de Defectos</h6>
+                                    <h2 class="mb-0 fw-bold" id="stats-total-defectos">-</h2>
+                                </div>
+                                <div class="icon-circle bg-primary-lighter">
+                                    <i class="fas fa-bug fa-2x text-white"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3 small" id="stats-total-tendencia">
+                                <i class="fas fa-arrow-right me-1"></i> Actualizado en tiempo real
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tarjeta de estadísticas: Defecto Principal -->
+                <div class="col-md-4">
+                    <div class="card text-white bg-danger mb-3" style="border-radius: 10px; border: none; overflow: hidden;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1 text-white-50">Defecto Principal</h6>
+                                    <h2 class="mb-0 fw-bold" id="stats-defecto-principal">-</h2>
+                                </div>
+                                <div class="icon-circle bg-danger-lighter">
+                                    <i class="fas fa-exclamation-triangle fa-2x text-white"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3 small" id="stats-principal-tendencia">
+                                <i class="fas fa-arrow-right me-1"></i> <span id="stats-principal-cantidad">-</span> casos registrados
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tarjeta de estadísticas: Hora Crítica -->
+                <div class="col-md-4">
+                    <div class="card text-white bg-warning mb-3" style="border-radius: 10px; border: none; overflow: hidden;">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1 text-white-50">Hora Crítica</h6>
+                                    <h2 class="mb-0 fw-bold" id="stats-hora-critica">-</h2>
+                                </div>
+                                <div class="icon-circle bg-warning-lighter">
+                                    <i class="fas fa-clock fa-2x text-white"></i>
+                                </div>
+                            </div>
+                            <div class="mt-3 small" id="stats-hora-tendencia">
+                                <i class="fas fa-arrow-right me-1"></i> <span id="stats-hora-cantidad">-</span> defectos en esta hora
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Gráfico de tendencia en el tiempo -->
+            <div class="card shadow-sm mb-4" style="border-radius: 10px; overflow: hidden; border: none;">
+                <div class="card-header bg-white" style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold">
+                            <i class="fas fa-chart-line text-primary me-2"></i>
+                            Tendencia de Defectos
+                        </h5>
+                        <span class="badge bg-success">Top 3 Defectos</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="loadingChart3" class="text-center py-5" style="display: none;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                        <p class="mt-2">Cargando gráfica...</p>
+                    </div>
+                    <div class="chart-container" style="position: relative; height: 250px;">
+                        <canvas id="chart-tendencia"></canvas>
+                    </div>
+                    <div class="text-center mt-2 small text-muted" id="chart3-info">
+                        <i class="fas fa-info-circle me-1"></i> Muestra los 3 tipos de defectos más comunes a lo largo del tiempo
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabla de resumen con diseño mejorado -->
+            <div class="card shadow-sm mb-4" style="border-radius: 10px; overflow: hidden; border: none;">
+                <div class="card-header bg-white" style="border-bottom: 1px solid rgba(0,0,0,0.05);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 fw-bold" id="resumen-title">
+                            <i class="fas fa-table text-primary me-2"></i>
+                            Resumen por Atributo
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-primary" id="btn-exportar-resumen">
+                                <i class="fas fa-download me-1"></i> Exportar CSV
+                            </button>
+                            <button class="btn btn-sm btn-success" id="btn-descargar-excel">
+                                <i class="fas fa-file-excel me-1"></i> Descargar Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="tabla-resumen" style="border-collapse: separate; border-spacing: 0;">
+                            <thead style="position: sticky; top: 0; z-index: 1;">
+                                <tr class="bg-light">
+                                    <th class="py-3" style="border-bottom: 2px solid #dee2e6; font-weight: 600;">Atributo</th>
+                                    <th class="py-3 text-center" style="border-bottom: 2px solid #dee2e6; font-weight: 600;">Promedio por Hora</th>
+                                    <th class="py-3 text-center" style="border-bottom: 2px solid #dee2e6; font-weight: 600;">Máximo</th>
+                                    <th class="py-3" style="border-bottom: 2px solid #dee2e6; font-weight: 600;">Hora con más defectos</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resumen-body" style="border-top: none;">
+                                <tr>
+                                    <td colspan="4" class="text-center py-5">
+                                        <div class="py-4">
+                                            <i class="fas fa-info-circle fa-2x text-muted mb-3"></i>
+                                            <p class="mb-0 text-muted">No hay datos disponibles para los filtros seleccionados</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Botón Volver -->
+            <div class="mb-4">
+                <a href="{{ url_for('section_exercises', category=category, section='calidad') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i> Volver a Calidad
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+    // Variables para almacenar gráficos
+    let chartPorHora, chartDistribucion, chartTendencia;
+    const colores = [
+        '#4e73df', '#1cc88a', '#e74a3b', '#f6c23e', '#36b9cc', 
+        '#e83e8c', '#6610f2', '#fd7e14', '#20c997', '#6f42c1', 
+        '#17a2b8', '#5a5c69', '#858796', '#343a40', '#007bff', '#28a745'
+    ];
+
+    // Configuración global de Chart.js
+    Chart.defaults.font.family = '"Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = '#858796';
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    Chart.defaults.plugins.tooltip.padding = 10;
+    Chart.defaults.plugins.tooltip.cornerRadius = 4;
+    Chart.defaults.plugins.legend.labels.usePointStyle = true;
+
+    // Variables globales para mapeos
+    window.atributosMap = {};
+    window.atributosCodigos = [];
+    let datosDetallesHora = {};
+
+    // FUNCIÓN AUXILIAR PARA OBTENER MAPEO DE ATRIBUTOS
+    function obtenerAtributosMap(categoria) {
+        const mapeos = {
+            'EXTRUIDOS': {
+                'A': 'Quemado (<0%)',
+                'B': 'Roto (<=3.8 cm) (<8%)',
+                'C': 'Defectos Totales (<18%)',
+                'D': 'Densidad (64-72 g/l)',
+                'E': 'Densidad Base Frita (95-110 g/l)',
+                'F': 'Diámetro 20 Collects (21-23 cm)',
+                'G': 'Cobertura (90-100%)'
+            },
+            'TORTILLA': {
+                'A': 'Puntos Negros',
+                'B': 'Quemado',
+                'C': 'Manchas',
+                'D': 'Doblados',
+                'E': 'Pegados',
+                'F': 'Aceitoso',
+                'G': 'Puntos Tostados',
+                'H': 'Forma',
+                'I': 'Planos (Burbuja)',
+                'J': 'Ámpulas (Burbuja)',
+                'K': 'Cúmulos (Laminado)',
+                'L': 'Hoyos (Laminado)',
+                'M': 'Tiras de Masa (Laminado)',
+                'N': 'Pliegue (Laminado)',
+                'O': 'Dobles (Laminado)',
+                'P': 'Tamaño (Tamaño)'
+            },
+            'PAPA': {
+                'A': 'Defectos de color',
+                'B': 'Daño seco',
+                'C': 'Color indeseable',
+                'D': 'Defectos internos papa',
+                'E': 'Defectos externos papa',
+                'F': 'Defectos totales de papa',
+                'G': 'Centros suaves + clusters',
+                'H': 'Exceso de cáscara',
+                'I': 'Hojuelas aceitosas',
+                'J': 'Ampulas',
+                'K': 'Puntos obscuros',
+                'L': 'Defectos totales de proceso',
+                'M': 'Hojuelas dobladas'
+            }
+        };
+        
+        return mapeos[categoria] || {};
+    }
+
+    // FUNCIÓN PARA MOSTRAR DETALLES COMPLETOS DE HORA
+    function mostrarDetallesHoraCompleto(hora, total, detalles, categoria) {
+        const atributosMap = obtenerAtributosMap(categoria);
+        
+        // Crear modal si no existe
+        let modal = document.getElementById('detalleHoraCompletoModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.id = 'detalleHoraCompletoModal';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-info text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-clock me-2"></i>
+                                Detalle Completo - <span id="horaDetalleCompleto"></span>
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" id="detalleHoraCompletoBody"></div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        // Actualizar contenido
+        const horaStr = ('0' + hora).slice(-2) + ':00';
+        document.getElementById('horaDetalleCompleto').textContent = horaStr;
+        
+        let html = `
+            <div class="mb-3">
+                <h6><strong>Total de Defectos:</strong> <span class="badge bg-primary fs-6">${total}</span></h6>
+            </div>
+        `;
+        
+        if (detalles && Object.keys(detalles).length > 0) {
+            html += `
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead class="table-primary">
+                            <tr>
+                                <th>Atributo</th>
+                                <th class="text-center">Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            // Ordenar por cantidad descendente
+            const detallesOrdenados = Object.entries(detalles)
+                .sort(([,a], [,b]) => b - a);
+            
+            detallesOrdenados.forEach(([codigo, valor]) => {
+                const nombreAtributo = atributosMap[codigo] || codigo;
+                html += `
+                    <tr>
+                        <td>${nombreAtributo}</td>
+                        <td class="text-center">
+                            <span class="badge bg-danger">${valor}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        } else {
+            html += '<p class="text-muted">No hay detalles de defectos para esta hora.</p>';
+        }
+        
+        document.getElementById('detalleHoraCompletoBody').innerHTML = html;
+        
+        // Mostrar modal
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    }
+
+    // FUNCIÓN PRINCIPAL PARA MOSTRAR REPORTE COMPLETO EN MODAL
+    function mostrarReporteHorario() {
+        const categoria = document.getElementById('tab-content')?.dataset.category;
+        if (!categoria) {
+            alert('Error: No se pudo determinar la categoría');
+            return;
+        }
+        
+        const periodo = document.getElementById('filter-periodo')?.value || 'turno';
+        const turno = document.getElementById('filter-turno')?.value || 'all';
+        const producto = document.getElementById('filter-producto')?.value || 'all';
+        
+        // Crear modal de reporte si no existe
+        let modal = document.getElementById('reporteHorarioModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.id = 'reporteHorarioModal';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-xl modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header bg-primary text-white">
+                            <h5 class="modal-title">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Reporte PAE - Resumen por Hora
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body" id="reporteHorarioBody">
+                            <div class="text-center py-4">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Cargando...</span>
+                                </div>
+                                <p class="mt-2">Generando reporte...</p>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-1"></i> Cerrar
+                            </button>
+                            <button type="button" class="btn btn-success" id="btn-exportar-reporte">
+                                <i class="fas fa-file-excel me-1"></i> Exportar Excel
+                            </button>
+                            <button type="button" class="btn btn-primary" id="btn-imprimir-reporte">
+                                <i class="fas fa-print me-1"></i> Imprimir
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+        
+        // Mostrar modal
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+        
+        // Cargar datos del reporte
+        const url = `/pae/${categoria}/datos?periodo=${periodo}&turno=${turno}&producto=${producto}`;
+        
+        fetch(url)
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                generarContenidoReporte(data, categoria, periodo, turno, producto);
+            })
+            .catch(err => {
+                console.error('Error cargando datos:', err);
+                document.getElementById('reporteHorarioBody').innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Error al cargar los datos del reporte: ${err.message}
+                        <br><small>Endpoint: ${url}</small>
+                    </div>
+                `;
+            });
+    }
+
+    // FUNCIÓN PARA GENERAR CONTENIDO DEL REPORTE
+    function generarContenidoReporte(data, categoria, periodo, turno, producto) {
+        const atributosMap = obtenerAtributosMap(categoria);
+        
+        // Validar estructura de datos
+        if (!data || !data.horas || !data.datos) {
+            document.getElementById('reporteHorarioBody').innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No hay datos disponibles para el período seleccionado.
+                </div>
+            `;
+            return;
+        }
+        
+        // Procesar datos para obtener defectos por hora
+        const defectosPorHora = data.horas.map((hora, idx) => {
+            let totalHora = 0;
+            let detallesHora = {};
+            
+            Object.keys(data.datos).forEach(atributo => {
+                const valor = data.datos[atributo][idx] || 0;
+                totalHora += valor;
+                if (valor > 0) {
+                    detallesHora[atributo] = valor;
+                }
+            });
+            
+            return {
+                hora: hora,
+                total: totalHora,
+                detalles: detallesHora
+            };
+        });
+        
+        const totalGeneral = defectosPorHora.reduce((a, b) => a + b.total, 0);
+        const horasCriticas = defectosPorHora.filter(h => h.total > 10);
+        const horasAtencion = defectosPorHora.filter(h => h.total >= 5 && h.total <= 10);
+        
+        // Generar HTML del reporte
+        let html = `
+            <!-- Encabezado del Reporte -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-primary">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0 fw-bold">Información del Reporte</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <strong>Categoría:</strong><br>
+                                    <span class="badge bg-primary">${categoria}</span>
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Período:</strong><br>
+                                    ${periodo.toUpperCase()}
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Turno:</strong><br>
+                                    ${turno === 'all' ? 'TODOS' : 'TURNO ' + turno}
+                                </div>
+                                <div class="col-md-3">
+                                    <strong>Fecha:</strong><br>
+                                    ${new Date().toLocaleDateString('es-ES')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Estadísticas Generales -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary">
+                        <div class="card-body text-center">
+                            <h3>${totalGeneral}</h3>
+                            <p class="mb-0">Total Defectos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-danger">
+                        <div class="card-body text-center">
+                            <h3>${horasCriticas.length}</h3>
+                            <p class="mb-0">Horas Críticas</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning">
+                        <div class="card-body text-center">
+                            <h3>${horasAtencion.length}</h3>
+                            <p class="mb-0">Horas Atención</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-success">
+                        <div class="card-body text-center">
+                            <h3>${data.horas.length - horasCriticas.length - horasAtencion.length}</h3>
+                            <p class="mb-0">Horas Normales</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Resumen Visual por Hora -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="fas fa-clock me-2"></i>
+                        Resumen Visual por Hora
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2 justify-content-center">
+        `;
+        
+        // Agregar cuadros de horas con colores
+        defectosPorHora.forEach(item => {
+            const horaStr = ('0' + item.hora).slice(-2) + ':00';
+            let colorClass = 'bg-light text-muted';
+            
+            if (item.total === 0) {
+                colorClass = 'bg-light text-muted';
+            } else if (item.total <= 5) {
+                colorClass = 'bg-success text-white';
+            } else if (item.total <= 10) {
+                colorClass = 'bg-warning text-dark';
+            } else if (item.total <= 17) {
+                colorClass = 'bg-danger text-white';
+            } else {
+                colorClass = 'bg-dark text-white';
+            }
+            
+            // Escapar comillas en JSON para onclick
+            const detallesJson = JSON.stringify(item.detalles).replace(/"/g, '&quot;');
+            
+            html += `
+                <div class="text-center p-3 rounded ${colorClass}" style="min-width: 80px; cursor: pointer;" 
+                     onclick="mostrarDetallesHoraCompleto(${item.hora}, ${item.total}, ${detallesJson}, '${categoria}')">
+                    <div style="font-weight: bold; font-size: 1.1em;">${horaStr}</div>
+                    <div style="font-size: 1.3em; font-weight: bold;">${item.total}</div>
+                </div>
+            `;
+        });
+        
+        html += `
+                    </div>
+                    <div class="mt-3">
+                        <h6><i class="fas fa-info-circle me-2"></i>Código de Colores:</h6>
+                        <div class="d-flex gap-3 flex-wrap justify-content-center">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light border px-2 py-1 rounded me-2">0</div>
+                                <small>Sin defectos</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-success text-white px-2 py-1 rounded me-2">1-5</div>
+                                <small>Aceptable</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-warning px-2 py-1 rounded me-2">6-10</div>
+                                <small>Atención</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-danger text-white px-2 py-1 rounded me-2">11-17</div>
+                                <small>Crítico</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-dark text-white px-2 py-1 rounded me-2">18+</div>
+                                <small>Muy Crítico</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tabla Detallada -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0 fw-bold">
+                        <i class="fas fa-table me-2"></i>
+                        Detalle por Hora y Atributo
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-primary">
+                                <tr>
+                                    <th>Hora</th>
+                                    <th class="text-center">Total</th>
+                                    <th class="text-center">Estado</th>
+                                    <th>Principales Defectos</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+        `;
+        
+        // Agregar filas de la tabla
+        defectosPorHora.forEach(item => {
+            const horaStr = ('0' + item.hora).slice(-2) + ':00';
+            let estado = 'Normal';
+            let estadoClass = 'bg-success text-white';
+            
+            if (item.total === 0) {
+                estado = 'Sin defectos';
+                estadoClass = 'bg-light text-muted';
+            } else if (item.total <= 5) {
+                estado = 'Aceptable';
+                estadoClass = 'bg-success text-white';
+            } else if (item.total <= 10) {
+                estado = 'Atención';
+                estadoClass = 'bg-warning text-dark';
+            } else if (item.total <= 17) {
+                estado = 'Crítico';
+                estadoClass = 'bg-danger text-white';
+            } else {
+                estado = 'Muy Crítico';
+                estadoClass = 'bg-dark text-white';
+            }
+            
+            // Obtener principales defectos
+            const principales = Object.entries(item.detalles)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 3)
+                .map(([codigo, valor]) => `${atributosMap[codigo] || codigo}: ${valor}`)
+                .join(', ');
+            
+            const detallesJson = JSON.stringify(item.detalles).replace(/"/g, '&quot;');
+            
+            html += `
+                <tr style="cursor: pointer;" onclick="mostrarDetallesHoraCompleto(${item.hora}, ${item.total}, ${detallesJson}, '${categoria}')">
+                    <td><strong>${horaStr}</strong></td>
+                    <td class="text-center"><span class="badge bg-primary">${item.total}</span></td>
+                    <td class="text-center"><span class="badge ${estadoClass}">${estado}</span></td>
+                    <td>${principales || 'Ninguno'}</td>
+                </tr>
+            `;
+        });
+        
+        html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Insertar contenido en el modal
+        document.getElementById('reporteHorarioBody').innerHTML = html;
+        
+        // Configurar botones del modal
+        configurarBotonesReporte(data, categoria, periodo, turno, producto);
+    }
+
+    // FUNCIÓN PARA CONFIGURAR BOTONES DEL REPORTE
+    function configurarBotonesReporte(data, categoria, periodo, turno, producto) {
+        // Botón exportar Excel
+        const btnExportar = document.getElementById('btn-exportar-reporte');
+        if (btnExportar) {
+            btnExportar.onclick = function() {
+                // Si existe la función mostrarModalDescargaExcel, usarla
+                if (typeof mostrarModalDescargaExcel === 'function') {
+                    mostrarModalDescargaExcel();
+                } else {
+                    alert('Funcionalidad de exportación no disponible');
+                }
+            };
+        }
+        
+        // Botón imprimir
+        const btnImprimir = document.getElementById('btn-imprimir-reporte');
+        if (btnImprimir) {
+            btnImprimir.onclick = function() {
+                const contenido = document.getElementById('reporteHorarioBody').innerHTML;
+                const ventanaImpresion = window.open('', '_blank');
+                
+                if (ventanaImpresion) {
+                    ventanaImpresion.document.write(`
+                        <html>
+                        <head>
+                            <title>Reporte PAE - ${categoria}</title>
+                            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                            <style>
+                                body { font-size: 12px; }
+                                .badge { padding: 0.25em 0.5em; }
+                                @media print { 
+                                    .btn { display: none !important; }
+                                    .modal-footer { display: none !important; }
+                                }
+                            </style>
+                        </head>
+                        <body>
+                            <div class="container-fluid">
+                                <h2 class="text-center mb-4">Reporte PAE - ${categoria}</h2>
+                                ${contenido}
+                            </div>
+                        </body>
+                        </html>
+                    `);
+                    ventanaImpresion.document.close();
+                    ventanaImpresion.print();
+                } else {
+                    alert('No se pudo abrir la ventana de impresión');
+                }
+            };
+        }
+    }
+
+    // Inicializar variables globales según la categoría
+    function inicializarVariablesGlobales(categoria) {
+        window.atributosMap = obtenerAtributosMap(categoria);
+        window.atributosCodigos = Object.keys(window.atributosMap);
+    }
+
+    // Configurar navegación entre pestañas
+    function configurarNavegacionPestanas() {
+        const registroTab = document.getElementById('registro-tab-link');
+        const resultadosTab = document.getElementById('resultados-tab-link');
+
+        if (registroTab) {
+            registroTab.addEventListener('click', function(e) {
+                e.preventDefault();
+                mostrarPestanaRegistro();
+            });
+        }
+
+        if (resultadosTab) {
+            resultadosTab.addEventListener('click', function(e) {
+                e.preventDefault();
+                mostrarPestanaResultados();
+            });
+        }
+    }
+
+    function mostrarPestanaRegistro() {
+        document.getElementById('registro-tab-link').classList.add('active');
+        document.getElementById('resultados-tab-link').classList.remove('active');
+        document.getElementById('registro-content').style.display = 'block';
+        document.getElementById('resultados-content').style.display = 'none';
+        window.history.pushState({}, '', window.location.pathname + '#registro');
+    }
+
+    function mostrarPestanaResultados() {
+        document.getElementById('registro-tab-link').classList.remove('active');
+        document.getElementById('resultados-tab-link').classList.add('active');
+        document.getElementById('registro-content').style.display = 'none';
+        document.getElementById('resultados-content').style.display = 'block';
+        window.history.pushState({}, '', window.location.pathname + '#resultados');
+        initHourlySummary();
+        cargarDatosGraficos();
+    }
+
+    function initHourlySummary() {
+        const categoria = document.getElementById('tab-content').dataset.category;
+        inicializarVariablesGlobales(categoria);
+        cargarResumenPorHora();
+    }
+
+    // Cargar productos únicos para el filtro
+    function cargarProductosUnicos(categoria) {
+        fetch(`/api/pae/productos?categoria=${categoria}`)
+            .then(res => res.json())
+            .then(data => {
+                const select = document.getElementById('filter-producto');
+                if (data && Array.isArray(data.productos) && select) {
+                    const todasOption = select.querySelector('option[value="all"]');
+                    select.innerHTML = '';
+                    if (todasOption) {
+                        select.appendChild(todasOption);
+                    } else {
+                        const opt = document.createElement('option');
+                        opt.value = 'all';
+                        opt.textContent = 'Todos';
+                        select.appendChild(opt);
+                    }
+                    
+                    data.productos.forEach(producto => {
+                        const opt = document.createElement('option');
+                        opt.value = producto;
+                        opt.textContent = producto;
+                        select.appendChild(opt);
+                    });
+                }
+            })
+            .catch(err => console.error('Error cargando productos:', err));
+    }
+
+    // Configurar eventos de filtros
+    function configurarEventosFiltros() {
+        const btnFiltrar = document.getElementById('btn-filtrar');
+        const btnActualizar = document.getElementById('btn-actualizar-resumen');
+        const btnReporteCompleto = document.getElementById('btn-reporte-completo');
+        const filterPeriodo = document.getElementById('filter-periodo');
+        const dateRangeContainer = document.getElementById('date-range-container');
+        
+        // Mostrar/ocultar campos de fecha según periodo seleccionado
+        if (filterPeriodo && dateRangeContainer) {
+            filterPeriodo.addEventListener('change', function() {
+                if (this.value === 'personalizado') {
+                    dateRangeContainer.style.display = 'block';
+                    // Establecer fecha de hoy por defecto
+                    const today = new Date().toISOString().split('T')[0];
+                    document.getElementById('filter-fecha-inicio').value = today;
+                    document.getElementById('filter-fecha-fin').value = today;
+                } else {
+                    dateRangeContainer.style.display = 'none';
+                }
+            });
+        }
+        
+        if (btnFiltrar) {
+            btnFiltrar.addEventListener('click', cargarDatosGraficos);
+        }
+        
+        if (btnActualizar) {
+            btnActualizar.addEventListener('click', function() {
+                cargarResumenPorHora();
+                cargarDatosGraficos();
+            });
+        }
+
+        if (btnReporteCompleto) {
+            btnReporteCompleto.addEventListener('click', mostrarReporteHorario);
+        }
+    }
+
+    // Cargar datos para gráficos
+    function cargarDatosGraficos() {
+        const categoria = document.getElementById('tab-content').dataset.category;
+        const periodo = document.getElementById('filter-periodo')?.value || 'turno';
+        let turno = document.getElementById('filter-turno')?.value || 'all';
+        const producto = document.getElementById('filter-producto')?.value || 'all';
+
+        // Si el periodo es 'turno', usar el turno actual del servidor
+        if (periodo === 'turno' && turno === 'all') {
+            turno = '{{ current_turno }}';
+        }
+
+        // Construir URL con parámetros
+        let url = `/pae/${categoria}/datos?periodo=${periodo}&turno=${turno}&producto=${producto}`;
+        
+        // Agregar fechas si periodo es personalizado
+        if (periodo === 'personalizado') {
+            const fechaInicio = document.getElementById('filter-fecha-inicio')?.value;
+            const fechaFin = document.getElementById('filter-fecha-fin')?.value;
+            if (fechaInicio && fechaFin) {
+                url += `&fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+            }
+        }
+        
+        ['loadingChart1', 'loadingChart2', 'loadingChart3'].forEach(id => {
+            const loading = document.getElementById(id);
+            if (loading) loading.style.display = 'block';
+        });
+        
+        fetch(url)
+            .then(res => res.json())
+            .then(datos => {
+                ['loadingChart1', 'loadingChart2', 'loadingChart3'].forEach(id => {
+                    const loading = document.getElementById(id);
+                    if (loading) loading.style.display = 'none';
+                });
+
+                actualizarGraficos(datos);
+                actualizarEstadisticas(datos);
+                actualizarTablaResumen(datos);
+            })
+            .catch(err => {
+                console.error('Error cargando datos:', err);
+                ['loadingChart1', 'loadingChart2', 'loadingChart3'].forEach(id => {
+                    const loading = document.getElementById(id);
+                    if (loading) loading.style.display = 'none';
+                });
+            });
+    }
+
+    // Actualizar gráficos
+    function actualizarGraficos(datos) {
+        actualizarGraficoBarras(datos);
+        actualizarGraficoDistribucion(datos);
+        actualizarGraficoTendencia(datos);
+    }
+
+    // Gráfico de barras por hora
+    function actualizarGraficoBarras(datos) {
+        const ctx = document.getElementById('chart-por-hora');
+        if (!ctx) return;
+        
+        if (chartPorHora) {
+            chartPorHora.destroy();
+        }
+        
+        const defectosPorHora = datos.horas.map((_, idx) => {
+            let total = 0;
+            Object.keys(datos.datos).forEach(atributo => {
+                total += datos.datos[atributo][idx] || 0;
+            });
+            return total;
+        });
+        
+        chartPorHora = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: datos.horas.map(h => h + ':00'),
+                datasets: [{
+                    label: 'Defectos',
+                    data: defectosPorHora,
+                    backgroundColor: defectosPorHora.map(val => val >= 17 ? '#dc3545' : colores[0]),
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Cantidad de Defectos'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Hora'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Gráfico de distribución (pastel)
+    function actualizarGraficoDistribucion(datos) {
+        const ctx = document.getElementById('chart-distribucion');
+        if (!ctx) return;
+        
+        if (chartDistribucion) {
+            chartDistribucion.destroy();
+        }
+        
+        const top10 = datos.resumen ? datos.resumen.slice(0, 10) : [];
+        
+        if (top10.length === 0) {
+            return;
+        }
+        
+        chartDistribucion = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: top10.map(item => item.atributo),
+                datasets: [{
+                    data: top10.map(item => item.total),
+                    backgroundColor: colores.slice(0, top10.length)
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 15
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Gráfico de tendencia (líneas)
+    function actualizarGraficoTendencia(datos) {
+        const ctx = document.getElementById('chart-tendencia');
+        if (!ctx) return;
+        
+        if (chartTendencia) {
+            chartTendencia.destroy();
+        }
+        
+        const top3 = datos.resumen ? datos.resumen.slice(0, 3) : [];
+        
+        if (top3.length === 0) {
+            return;
+        }
+        
+        const datasets = top3.map((item, index) => ({
+            label: item.atributo,
+            data: datos.datos[item.codigo] || [],
+            borderColor: colores[index],
+            backgroundColor: colores[index] + '20',
+            fill: false,
+            tension: 0.1
+        }));
+        
+        chartTendencia = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: datos.horas.map(h => h + ':00'),
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Cantidad de Defectos'
+                        }
+                    },
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Hora'
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Actualizar estadísticas
+    function actualizarEstadisticas(datos) {
+        let totalDefectos = 0;
+
+        Object.keys(datos.datos).forEach(atributo => {
+            totalDefectos += datos.datos[atributo].reduce((a, b) => a + b, 0);
+        });
+
+        // Mostrar con 2 decimales
+        document.getElementById('stats-total-defectos').textContent = totalDefectos.toFixed(2);
+        
+        if (datos.resumen && datos.resumen.length > 0) {
+            const defectoPrincipal = datos.resumen[0];
+            document.getElementById('stats-defecto-principal').textContent = defectoPrincipal.atributo;
+            document.getElementById('stats-principal-cantidad').textContent = defectoPrincipal.total;
+        } else {
+            document.getElementById('stats-defecto-principal').textContent = 'Ninguno';
+            document.getElementById('stats-principal-cantidad').textContent = '0';
+        }
+        
+        if (datos.horas && datos.horas.length > 0) {
+            let maxDefectosPorHora = 0;
+            let horaCritica = null;
+            let totalDefectosCriticos = 0;
+            
+            datos.horas.forEach((hora, idx) => {
+                let defectosEnHora = 0;
+                Object.keys(datos.datos).forEach(atributo => {
+                    defectosEnHora += datos.datos[atributo][idx] || 0;
+                });
+                
+                if (defectosEnHora > maxDefectosPorHora) {
+                    maxDefectosPorHora = defectosEnHora;
+                    horaCritica = hora;
+                    totalDefectosCriticos = defectosEnHora;
+                }
+            });
+            
+            if (horaCritica !== null) {
+                document.getElementById('stats-hora-critica').textContent = `${horaCritica}:00`;
+                document.getElementById('stats-hora-cantidad').textContent = totalDefectosCriticos;
+            } else {
+                document.getElementById('stats-hora-critica').textContent = 'N/A';
+                document.getElementById('stats-hora-cantidad').textContent = '0';
+            }
+        } else {
+            document.getElementById('stats-hora-critica').textContent = 'N/A';
+            document.getElementById('stats-hora-cantidad').textContent = '0';
+        }
+    }
+
+    // ========== RANGOS DE VALIDACIÓN POR CATEGORÍA ==========
+
+    // Rangos de validación para EXTRUIDOS
+    const RANGOS_EXTRUIDOS = {
+        'A': { verde: [0, 0], amarillo: null },           // Verde: 0, Rojo: >0
+        'B': { verde: [0, 8], amarillo: null },           // Verde: 0-8, Rojo: >8
+        'C': { verde: [0, 18], amarillo: null },          // Verde: 0-18, Rojo: >18
+        'D': { verde: [64, 72], amarillo: null },         // Verde: 64-72 g/l
+        'E': { verde: [95, 110], amarillo: null },        // Verde: 95-110 g/l
+        'F': { verde: [21, 23], amarillo: null },         // Verde: 21-23 cm
+        'G': { verde: [100, 100], amarillo: [90, 99.99] } // Verde: 100%, Amarillo: 90-99.99%, Rojo: <90%
+    };
+
+    // Rangos de validación para TORTILLA
+    const RANGOS_TORTILLA = {
+        'A': { verde: [0, 0.99], amarillo: null },    // Puntos Negros: Verde: <1, Rojo: >=1
+        'B': { verde: [0, 0.99], amarillo: null },    // Quemado: Verde: <1, Rojo: >=1
+        'C': { verde: [0, 0.99], amarillo: null },    // Manchas: Verde: <1, Rojo: >=1
+        'D': { verde: [0, 0], amarillo: null },       // Doblados: Verde: 0, Rojo: >0
+        'E': { verde: [0, 0], amarillo: null },       // Pegados: Verde: 0, Rojo: >0
+        'F': { verde: [0, 1.99], amarillo: null },    // Aceitoso: Verde: <2, Rojo: >=2
+        'G': { verde: [0, 1.99], amarillo: null },    // Puntos Tostados: Verde: <2, Rojo: >=2
+        'H': { verde: [0, 4.99], amarillo: null },    // Forma: Verde: <5, Rojo: >=5
+        'I': { verde: [0, 1.99], amarillo: null },    // Planos: Verde: <2, Rojo: >=2
+        'J': { verde: [0, 4.99], amarillo: null },    // Ámpulas: Verde: <5, Rojo: >=5
+        'K': { verde: [0, 0], amarillo: null },       // Cúmulos: Verde: 0, Rojo: >0
+        'L': { verde: [0, 0], amarillo: null },       // Hoyos: Verde: 0, Rojo: >0
+        'M': { verde: [0, 0], amarillo: null },       // Tiras de masa: Verde: 0, Rojo: >0
+        'N': { verde: [0, 0], amarillo: null },       // Pliegue: Verde: 0, Rojo: >0
+        'O': { verde: [0, 0], amarillo: null },       // Dobles: Verde: 0, Rojo: >0
+        'P': { verde: [0, 4.99], amarillo: null },    // Tamaño: Verde: <5, Rojo: >=5
+        'Q': { verde: [0, 16.99], amarillo: null }    // Total: Verde: <17, Rojo: >=17
+    };
+
+    // Rangos de validación para PAPA
+    const RANGOS_PAPA = {
+        'A': { verde: [0, 4], amarillo: [4.1, 10] },      // Defectos de color
+        'B': { verde: [0, 4], amarillo: [4.1, 10] },      // Daño seco
+        'C': { verde: [0, 4], amarillo: [4.1, 10] },      // Color indeseable
+        'D': { verde: [0, 10], amarillo: [10.1, 20] },    // Defectos internos papa
+        'E': { verde: [0, 10], amarillo: [10.1, 20] },    // Defectos externos papa
+        'F': { verde: [0, 10], amarillo: [10.1, 20] },    // Defectos totales de papa
+        'G': { verde: [0, 1], amarillo: [1.1, 2] },       // Centros suaves + clusters
+        'H': { verde: [0, 6], amarillo: [6.1, 20] },      // Exceso de cáscara
+        'I': { verde: [0, 6], amarillo: [6.1, 20] },      // Hojuelas aceitosas
+        'J': { verde: [0, 6], amarillo: [6.1, 20] },      // Ampulas
+        'K': { verde: [0, 6], amarillo: [6.1, 20] },      // Puntos obscuros
+        'L': { verde: [0, 20], amarillo: [20.1, 40] },    // Defectos totales de proceso
+        'M': { verde: [0, 30], amarillo: [30.1, 35] },    // Hojuelas dobladas
+        'N': { verde: [75, 100], amarillo: null },        // Hojuela Entera (%): Verde: 75-100, Rojo: <75
+        'O': { verde: [100, 100], amarillo: [73, 99.99] },// Hojuela Entera FIESTA: Verde: 100, Amarillo: 73-99.99, Rojo: <73
+        'P': { verde: [0, 12], amarillo: [12.1, 15] },    // Pedacera/scrap (%)
+        'Q': { verde: [61, 100], amarillo: [58, 60.9] },  // Color de la Base L
+        'R': { verde: [-3, 2.5], amarillo: [2.51, 10] }   // Color de la base a
+    };
+
+    // Colores para estados
+    const COLOR_VERDE = { clase: 'bg-success text-white', estilo: 'background-color: #d4edda !important; color: #155724 !important;' };
+    const COLOR_AMARILLO = { clase: 'bg-warning text-dark', estilo: 'background-color: #fff3cd !important; color: #856404 !important;' };
+    const COLOR_ROJO = { clase: 'bg-danger text-white', estilo: 'background-color: #f8d7da !important; color: #721c24 !important;' };
+    const COLOR_GRIS = { clase: '', estilo: 'background-color: #6c757d; color: white;' };
+
+    // Función para obtener los rangos según la categoría
+    function obtenerRangos(categoria) {
+        switch(categoria) {
+            case 'EXTRUIDOS': return RANGOS_EXTRUIDOS;
+            case 'TORTILLA': return RANGOS_TORTILLA;
+            case 'PAPA': return RANGOS_PAPA;
+            default: return {};
+        }
+    }
+
+    // Función para determinar el color del promedio según los rangos
+    function obtenerColorPromedio(codigo, valor, categoria) {
+        const rangos = obtenerRangos(categoria);
+        const rango = rangos[codigo];
+
+        if (!rango) {
+            return COLOR_GRIS;
+        }
+
+        const [verdeMin, verdeMax] = rango.verde;
+        const amarillo = rango.amarillo;
+
+        // ========== CASOS ESPECIALES POR CATEGORÍA ==========
+
+        // EXTRUIDOS - Campo A: Quemado (Verde solo si es exactamente 0)
+        if (categoria === 'EXTRUIDOS' && codigo === 'A') {
+            return valor === 0 ? COLOR_VERDE : COLOR_ROJO;
+        }
+
+        // EXTRUIDOS - Campo G: Cobertura (Verde: 100%, Amarillo: 90-99.99%, Rojo: <90%)
+        if (categoria === 'EXTRUIDOS' && codigo === 'G') {
+            if (valor === 100) return COLOR_VERDE;
+            if (amarillo && valor >= amarillo[0] && valor <= amarillo[1]) return COLOR_AMARILLO;
+            return COLOR_ROJO;
+        }
+
+        // TORTILLA - Campos D, E, K, L, M, N, O (Verde solo si es exactamente 0)
+        if (categoria === 'TORTILLA' && ['D', 'E', 'K', 'L', 'M', 'N', 'O'].includes(codigo)) {
+            return valor === 0 ? COLOR_VERDE : COLOR_ROJO;
+        }
+
+        // PAPA - Campo N: Hojuela Entera (Verde: 75-100%, Rojo: <75%)
+        if (categoria === 'PAPA' && codigo === 'N') {
+            return (valor >= 75 && valor <= 100) ? COLOR_VERDE : COLOR_ROJO;
+        }
+
+        // PAPA - Campo O: Hojuela Entera FIESTA (Verde: 100%, Amarillo: 73-99.99%, Rojo: <73%)
+        if (categoria === 'PAPA' && codigo === 'O') {
+            if (valor === 100) return COLOR_VERDE;
+            if (amarillo && valor >= amarillo[0] && valor <= amarillo[1]) return COLOR_AMARILLO;
+            return COLOR_ROJO;
+        }
+
+        // PAPA - Campo R: Color base a (puede ser negativo)
+        if (categoria === 'PAPA' && codigo === 'R') {
+            if (valor >= verdeMin && valor <= verdeMax) return COLOR_VERDE;
+            if (amarillo && ((valor >= amarillo[0] && valor <= amarillo[1]) || valor < -3)) return COLOR_AMARILLO;
+            return COLOR_ROJO;
+        }
+
+        // ========== LÓGICA ESTÁNDAR ==========
+
+        // Verde: dentro del rango verde
+        if (valor >= verdeMin && valor <= verdeMax) {
+            return COLOR_VERDE;
+        }
+
+        // Amarillo: dentro del rango amarillo (si existe)
+        if (amarillo && valor >= amarillo[0] && valor <= amarillo[1]) {
+            return COLOR_AMARILLO;
+        }
+
+        // Rojo: fuera de ambos rangos
+        return COLOR_ROJO;
+    }
+
+    // Actualizar tabla de resumen
+    function actualizarTablaResumen(datos) {
+        const tbody = document.getElementById('resumen-body');
+        if (!tbody) return;
+
+        const categoria = document.getElementById('tab-content')?.dataset.category || 'EXTRUIDOS';
+
+        tbody.innerHTML = '';
+
+        if (!datos.resumen || datos.resumen.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center py-5">
+                        <div class="py-4">
+                            <i class="fas fa-info-circle fa-2x text-muted mb-3"></i>
+                            <p class="mb-0 text-muted">No hay datos disponibles para los filtros seleccionados</p>
+                        </div>
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        datos.resumen.forEach(item => {
+            // Usar el promedio calculado por el backend
+            const promedio = item.promedio || 0;
+            const maximo = item.maximo || 0;
+            const horaMayor = item.hora_max || '-';
+
+            // Obtener color para el promedio según rangos
+            const colorPromedio = obtenerColorPromedio(item.codigo, promedio, categoria);
+
+            const fila = document.createElement('tr');
+            fila.innerHTML = `
+                <td class="fw-semibold">${item.atributo}</td>
+                <td class="text-center">
+                    <span class="badge fs-6" style="${colorPromedio.estilo || 'background-color: #6c757d; color: white;'}">${promedio}</span>
+                </td>
+                <td class="text-center">
+                    <span class="badge bg-secondary fs-6">${maximo}</span>
+                </td>
+                <td class="text-center">${horaMayor !== null && horaMayor !== '-' ? horaMayor + ':00' : '-'}</td>
+            `;
+
+            tbody.appendChild(fila);
+        });
+    }
+
+    // Función para cargar resumen por hora
+    function cargarResumenPorHora() {
+        const categoria = document.getElementById('tab-content').dataset.category;
+        const periodo = document.getElementById('filter-periodo') ? document.getElementById('filter-periodo').value : 'turno';
+        let turno = document.getElementById('filter-turno') ? document.getElementById('filter-turno').value : 'all';
+        const producto = document.getElementById('filter-producto') ? document.getElementById('filter-producto').value : 'all';
+
+        // Si el periodo es 'turno', usar el turno actual del servidor
+        if (periodo === 'turno' && turno === 'all') {
+            turno = '{{ current_turno }}';
+        }
+
+        document.getElementById('loadingHourlySummary').style.display = 'block';
+
+        fetch(`/api/pae/resumen_por_hora?categoria=${categoria}&periodo=${periodo}&turno=${turno}&producto=${producto}`)
+            .then(res => res.json())
+            .then(data => {
+                const container = document.getElementById('hourlySummaryContainer');
+                container.innerHTML = '';
+                data.resumen.forEach(item => {
+                    const horaStr = ('0' + item.hora).slice(-2) + ':00';
+                    const box = document.createElement('div');
+                    box.className = 'hour-summary-box clickable';
+                    box.style.cursor = 'pointer';
+                    box.innerHTML = `
+                        <div class="hour-label">${horaStr}</div>
+                        <div class="hour-count">${item.cantidad}</div>
+                    `;
+                    box.addEventListener('click', function() {
+                        mostrarDetallesHora(horaStr, item.cantidad, item.detalles || {}, 'all');
+                    });
+                    container.appendChild(box);
+                });
+                document.getElementById('loadingHourlySummary').style.display = 'none';
+                document.getElementById('total-defectos-badge').textContent = data.resumen.reduce((a, b) => a + b.cantidad, 0);
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                document.getElementById('loadingHourlySummary').style.display = 'none';
+            });
+    }
+
+    // Función para mostrar detalles de una hora específica
+    function mostrarDetallesHora(hora, totalDefectos, datos, atributoSeleccionado) {
+        let modal = document.getElementById('detalleHoraPanel');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.id = 'detalleHoraPanel';
+            modal.tabIndex = -1;
+            modal.innerHTML = `
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">Detalle de la hora <span id='detalleHoraTitulo'></span></h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body" id="detalleHoraBody"></div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    </div>
+                  </div>
+                </div>`;
+            document.body.appendChild(modal);
+        }
+        
+        document.getElementById('detalleHoraTitulo').innerText = hora;
+        let html = `<p><b>Total de defectos:</b> ${totalDefectos}</p>`;
+        
+        const atributosMap = obtenerAtributosMap(document.getElementById('tab-content').dataset.category);
+        
+        let detalles = datos;
+        if (typeof datos === 'string') {
+            try {
+                detalles = JSON.parse(datos);
+            } catch (e) {
+                detalles = {};
+            }
+        }
+        
+        if (detalles && typeof detalles === 'object' && Object.keys(detalles).length > 0) {
+            html += '<table class="table table-bordered"><thead><tr><th>Atributo</th><th>Valor</th></tr></thead><tbody>';
+            for (const [clave, valor] of Object.entries(detalles)) {
+                let etiqueta = atributosMap[clave] || clave;
+                html += `<tr><td>${etiqueta}</td><td>${valor}</td></tr>`;
+            }
+            html += '</tbody></table>';
+        } else {
+            html += '<p>No hay detalles disponibles.</p>';
+        }
+        
+        document.getElementById('detalleHoraBody').innerHTML = html;
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    }
+
+    // Configurar botones de exportar
+    document.addEventListener('DOMContentLoaded', function() {
+        const btnExportar = document.getElementById('btn-exportar-resumen');
+        if (btnExportar) {
+            btnExportar.addEventListener('click', function() {
+                try {
+                    const tabla = document.getElementById('tabla-resumen');
+                    if (!tabla) return;
+                    
+                    const tablaTemp = tabla.cloneNode(true);
+                    let csv = [];
+                    const filas = tablaTemp.querySelectorAll('tr');
+                    
+                    filas.forEach(function(fila) {
+                        const celdas = fila.querySelectorAll('th, td');
+                        const filaDatos = [];
+                        
+                        celdas.forEach(function(celda) {
+                            const texto = celda.textContent.trim().replace(/\n/g, ' ').replace(/,/g, ';');
+                            filaDatos.push('"' + texto + '"');
+                        });
+                        
+                        csv.push(filaDatos.join(','));
+                    });
+                    
+                    const csvString = csv.join('\n');
+                    const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', 'resumen_pae_' + new Date().toISOString().slice(0, 10) + '.csv');
+                    link.style.display = 'none';
+                    
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    alert('Datos exportados correctamente');
+                } catch (error) {
+                    console.error('Error al exportar datos:', error);
+                    alert('Error al exportar datos. Inténtelo de nuevo.');
+                }
+            });
+        }
+        
+        // Configurar botón de descargar Excel
+        const btnDescargarExcel = document.getElementById('btn-descargar-excel');
+        if (btnDescargarExcel) {
+            btnDescargarExcel.addEventListener('click', function() {
+                mostrarModalDescargaExcel();
+            });
+        }
+    });
+    
+    // Función para mostrar modal de descarga Excel
+    function mostrarModalDescargaExcel() {
+        // Crear modal si no existe
+        let modal = document.getElementById('modalDescargaExcel');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.id = 'modalDescargaExcel';
+            modal.innerHTML = `
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                <i class="fas fa-file-excel text-success me-2"></i>
+                                Descargar Base de Datos PAE en Excel
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="form-descarga-excel">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Fecha de Inicio</label>
+                                        <input type="date" class="form-control" id="fecha-inicio" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Fecha de Fin</label>
+                                        <input type="date" class="form-control" id="fecha-fin" required>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Turno</label>
+                                        <select class="form-select" id="turno-excel">
+                                            <option value="all">Todos los turnos</option>
+                                            <option value="A">Turno A (6:30 AM - 6:30 PM)</option>
+                                            <option value="B">Turno B (6:30 PM - 6:30 AM)</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Producto</label>
+                                        <select class="form-select" id="producto-excel">
+                                            <option value="all">Todos los productos</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-12">
+                                        <label class="form-label">Tipo de Descarga</label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="tipo-descarga" id="descarga-resumen" value="resumen" checked>
+                                            <label class="form-check-label" for="descarga-resumen">
+                                                <strong>Resumen por atributos</strong> (Totales y promedios)
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="tipo-descarga" id="descarga-detallado" value="detallado">
+                                            <label class="form-check-label" for="descarga-detallado">
+                                                <strong>Datos detallados</strong> (Todos los registros)
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-info mt-3">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    <strong>Nota:</strong> El archivo Excel contendrá todos los datos de PAE para el período seleccionado.
+                                    Para períodos largos, la descarga puede tomar varios segundos.
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="button" class="btn btn-success" id="btn-confirmar-descarga">
+                                <i class="fas fa-download me-2"></i>Descargar Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Configurar valores por defecto
+            const hoy = new Date();
+            const hace30Dias = new Date();
+            hace30Dias.setDate(hoy.getDate() - 30);
+            
+            document.getElementById('fecha-inicio').value = hace30Dias.toISOString().split('T')[0];
+            document.getElementById('fecha-fin').value = hoy.toISOString().split('T')[0];
+            
+            // Cargar productos para el filtro
+            cargarProductosParaExcel();
+            
+            // Configurar evento de descarga
+            document.getElementById('btn-confirmar-descarga').addEventListener('click', function() {
+                descargarExcel();
+            });
+        }
+        
+        // Mostrar modal
+        const bsModal = new bootstrap.Modal(modal);
+        bsModal.show();
+    }
+    
+    // Función para cargar productos para el filtro de Excel
+    function cargarProductosParaExcel() {
+        const categoria = document.getElementById('tab-content').dataset.category;
+        const select = document.getElementById('producto-excel');
+        
+        // Productos por categoría
+        let productos = [];
+        if (categoria === 'TORTILLA') {
+            productos = ['DORITOS', 'TOSTITOS SALSA VERDE','TOSTITOS FH','DORITOS PIZZEROLA','DORITOS FH','RANCHERITOS', 'OTROS'];
+        } else if (categoria === 'EXTRUIDOS') {
+            productos = ['CHEETOS TORCIDITOS', 'CHEETOS XTRA FH NUEVO', 'CHEETOS XTRA FLAMIN HOT', 'OTROS'];
+        } else if (categoria === 'PAPA') {
+            productos = ['PAPA SAL', 'SABRITAS XTRA FH', 'OTROS'];
+        }
+        
+        // Limpiar y llenar select
+        while (select.children.length > 1) {
+            select.removeChild(select.lastChild);
+        }
+        
+        productos.forEach(producto => {
+            const option = document.createElement('option');
+            option.value = producto;
+            option.textContent = producto;
+            select.appendChild(option);
+        });
+    }
+    
+    // Función para descargar Excel
+    function descargarExcel() {
+        const categoria = document.getElementById('tab-content').dataset.category;
+        const fechaInicio = document.getElementById('fecha-inicio').value;
+        const fechaFin = document.getElementById('fecha-fin').value;
+        const turno = document.getElementById('turno-excel').value;
+        const producto = document.getElementById('producto-excel').value;
+        const tipoDescarga = document.querySelector('input[name="tipo-descarga"]:checked').value;
+        
+        // Validar fechas
+        if (!fechaInicio || !fechaFin) {
+            alert('Por favor seleccione ambas fechas');
+            return;
+        }
+        
+        if (new Date(fechaInicio) > new Date(fechaFin)) {
+            alert('La fecha de inicio no puede ser mayor que la fecha de fin');
+            return;
+        }
+        
+        // Mostrar loading
+        const btnConfirmar = document.getElementById('btn-confirmar-descarga');
+        const textoOriginal = btnConfirmar.innerHTML;
+        btnConfirmar.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Descargando...';
+        btnConfirmar.disabled = true;
+        
+        // Construir URL
+        const params = new URLSearchParams({
+            categoria: categoria,
+            fecha_inicio: fechaInicio,
+            fecha_fin: fechaFin,
+            turno: turno,
+            producto: producto,
+            tipo: tipoDescarga
+        });
+        
+        const url = `/pae/descargar-excel?${params.toString()}`;
+        
+        // Crear link temporal para descarga
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `pae_${categoria.toLowerCase()}_${fechaInicio}_${fechaFin}.xlsx`;
+        link.style.display = 'none';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Restaurar botón después de un delay
+        setTimeout(() => {
+            btnConfirmar.innerHTML = textoOriginal;
+            btnConfirmar.disabled = false;
+            
+            // Cerrar modal
+            bootstrap.Modal.getInstance(document.getElementById('modalDescargaExcel')).hide();
+        }, 2000);
+    }
+
+    // Inicialización principal
+    document.addEventListener('DOMContentLoaded', function() {
+        const categoria = document.getElementById('tab-content').dataset.category;
+        
+        inicializarVariablesGlobales(categoria);
+        configurarNavegacionPestanas();
+        cargarProductosUnicos(categoria);
+        configurarEventosFiltros();
+        
+        if (window.location.hash === '#resultados') {
+            mostrarPestanaResultados();
+        }
+        
+        // Cargar productos únicos para el filtro
+        cargarProductosUnicos(categoria);
+    });
+</script>
+{% endblock %}

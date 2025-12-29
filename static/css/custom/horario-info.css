@@ -1,0 +1,52 @@
+/**
+ * Estilos para los mensajes de horario
+ */
+
+/* Estilo para el cuadro de información de horario */
+.horario-info-box {
+    background-color: #212529;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 5px;
+    margin-top: 10px;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    font-size: 14px;
+    display: inline-block;
+}
+
+/* Ocultar en páginas de PNC Simple */
+body:has([data-page-type="pnc_simple"]) .horario-info-box,
+body.pnc-simple-page .horario-info-box {
+    display: none !important;
+}
+
+/* Estilos específicos para cada turno */
+.horario-info-turno-a {
+    background-color: #0d6efd;
+    border-left: 4px solid #0a58ca;
+}
+
+.horario-info-turno-b {
+    background-color: #6610f2;
+    border-left: 4px solid #520dc2;
+}
+
+/* Mejoras para visualización en móviles */
+@media (max-width: 768px) {
+    .horario-info-box {
+        font-size: 12px;
+        padding: 6px 10px;
+    }
+}
+
+/* Animación sutil al cargar */
+.horario-info-box {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}

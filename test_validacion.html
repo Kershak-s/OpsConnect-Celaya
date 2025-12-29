@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Validación PAPA</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .campo {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        label {
+            min-width: 200px;
+            font-weight: bold;
+        }
+        input {
+            padding: 8px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 150px;
+        }
+        h1 {
+            color: #333;
+        }
+        .info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Test de Validación PAE PAPA</h1>
+
+    <div class="info">
+        <strong>Instrucciones:</strong>
+        <ul>
+            <li>Abre la <strong>Consola del navegador</strong> (F12)</li>
+            <li>Escribe valores en los campos</li>
+            <li>El fondo debe cambiar de color según el rango</li>
+            <li>Verifica los mensajes en la consola</li>
+        </ul>
+    </div>
+
+    <h2>Prueba rápida - Campo A (Defectos de color)</h2>
+    <div class="campo">
+        <label>Campo A:</label>
+        <input type="number" step="0.01" data-type="A" placeholder="Escribe aquí">
+        <span>Verde: 0-4 | Amarillo: 4.1-10 | Rojo: >10</span>
+    </div>
+
+    <h2>Prueba todos los campos</h2>
+    <div class="campo">
+        <label>A - Defectos de color:</label>
+        <input type="number" step="0.01" data-type="A">
+    </div>
+    <div class="campo">
+        <label>B - Daño seco:</label>
+        <input type="number" step="0.01" data-type="B">
+    </div>
+    <div class="campo">
+        <label>L - Defectos totales proceso:</label>
+        <input type="number" step="0.01" data-type="L">
+    </div>
+    <div class="campo">
+        <label>N - Hojuelas enteras (%):</label>
+        <input type="number" step="0.01" data-type="N">
+    </div>
+    <div class="campo">
+        <label>P - Pedacera (%):</label>
+        <input type="number" step="0.01" data-type="P">
+    </div>
+
+    <h2>Valores de prueba sugeridos</h2>
+    <ul>
+        <li><strong>Campo A:</strong> 2 (verde), 5 (amarillo), 12 (rojo)</li>
+        <li><strong>Campo L:</strong> 25 (verde), 32 (amarillo), 40 (rojo)</li>
+        <li><strong>Campo N:</strong> 100 (verde), 85 (amarillo), 70 (rojo)</li>
+        <li><strong>Campo P:</strong> 10 (verde), 13 (amarillo), 18 (rojo)</li>
+    </ul>
+
+    <!-- Script de validación -->
+    <script>
+        console.log('🥔 INICIANDO VALIDACIÓN PAPA - Test Page');
+
+        // RANGOS DE VALIDACIÓN
+        const RANGOS = {
+            'A': { verde: [0, 4], amarillo: [4.1, 10] },
+            'B': { verde: [0, 4], amarillo: [4.1, 10] },
+            'C': { verde: [0, 4], amarillo: [4.1, 10] },
+            'D': { verde: [0, 10], amarillo: [10.1, 20] },
+            'E': { verde: [0, 10], amarillo: [10.1, 20] },
+            'F': { verde: [0, 10], amarillo: [10.1, 20] },
+            'G': { verde: [0, 1], amarillo: [1.1, 2] },
+            'H': { verde: [0, 6], amarillo: [6.1, 20] },
+            'I': { verde: [0, 6], amarillo: [6.1, 20] },
+            'J': { verde: [0, 6], amarillo: [6.1, 20] },
+            'K': { verde: [0, 6], amarillo: [6.1, 20] },
+            'L': { verde: [0, 30], amarillo: [30.1, 35] },
+            'M': { verde: [0, 30], amarillo: [30.1, 35] },
+            'N': { verde: [100, 100], amarillo: [75, 99.99] },
+            'O': { verde: [100, 100], amarillo: [73, 99.99] },
+            'P': { verde: [0, 12], amarillo: [12.1, 15] }
+        };
+
+        // INYECTAR CSS
+        const css = `
+            input[data-type].input-value-ok {
+                background-color: #d4edda !important;
+                border-color: #28a745 !important;
+                color: #155724 !important;
+            }
+            input[data-type].input-value-warning {
+                background-color: #fff3cd !important;
+                border-color: #ffc107 !important;
+                color: #856404 !important;
+            }
+            input[data-type].input-value-error {
+                background-color: #f8d7da !important;
+                border-color: #dc3545 !important;
+                color: #721c24 !important;
+            }
+        `;
+
+        const styleElement = document.createElement('style');
+        styleElement.textContent = css;
+        document.head.appendChild(styleElement);
+        console.log('✅ CSS inyectado');
+
+        // FUNCIÓN DE VALIDACIÓN
+        function validar(input) {
+            const tipo = input.getAttribute('data-type');
+            const valor = parseFloat(input.value);
+
+            console.log(`Validando ${tipo} = ${valor}`);
+
+            // Limpiar clases
+            input.classList.remove('input-value-ok', 'input-value-warning', 'input-value-error');
+
+            if (!valor || isNaN(valor)) {
+                return;
+            }
+
+            if (!RANGOS[tipo]) {
+                return;
+            }
+
+            const rango = RANGOS[tipo];
+            let estado = 'error';
+
+            // Casos especiales
+            if (tipo === 'N' || tipo === 'O') {
+                const min = tipo === 'N' ? 75 : 73;
+                if (valor === 100) estado = 'ok';
+                else if (valor >= min) estado = 'warning';
+                else estado = 'error';
+            } else {
+                // Lógica estándar
+                if (valor >= rango.verde[0] && valor <= rango.verde[1]) {
+                    estado = 'ok';
+                } else if (valor >= rango.amarillo[0] && valor <= rango.amarillo[1]) {
+                    estado = 'warning';
+                } else {
+                    estado = 'error';
+                }
+            }
+
+            const clase = `input-value-${estado}`;
+            input.classList.add(clase);
+            console.log(`  → ${estado.toUpperCase()}: ${clase}`);
+        }
+
+        // CONFIGURAR CAMPOS
+        document.addEventListener('DOMContentLoaded', () => {
+            const campos = document.querySelectorAll('input[data-type]');
+            console.log(`📋 Configurando ${campos.length} campos`);
+
+            campos.forEach(input => {
+                input.addEventListener('input', () => validar(input));
+                input.addEventListener('change', () => validar(input));
+            });
+
+            console.log('🎉 ¡Listo! Escribe en los campos para ver los colores');
+        });
+    </script>
+</body>
+</html>

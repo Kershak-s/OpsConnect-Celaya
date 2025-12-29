@@ -1,0 +1,1989 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos para el dashboard de WeakLink */
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    .header-card {
+        background-color: #f8f9fa;
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-left: 5px solid #ffc107;
+    }
+
+    .header-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #212529;
+    }
+
+    .header-subtitle {
+        font-size: 1.1rem;
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    .action-btn {
+        margin-left: 10px;
+    }
+
+    .card {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+
+    .card-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        padding: 1rem 1.5rem;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+        margin-bottom: 0;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .data-table th {
+        background-color: #f8f9fa;
+        color: #343a40;
+        font-weight: 600;
+        text-align: center;
+        padding: 1rem;
+        border-bottom: 2px solid #dee2e6;
+    }
+
+    .data-table td {
+        padding: 1rem;
+        text-align: center;
+        border-bottom: 1px solid #dee2e6;
+        vertical-align: middle;
+    }
+
+    .data-table tr:hover td {
+        background-color: #f8f9fa;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        color: #dee2e6;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        color: #343a40;
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: #6c757d;
+        margin-bottom: 1.5rem;
+    }
+
+    /* Estilos para Resumen del Turno */
+    .bg-gradient {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    .stat-card {
+        padding: 1rem;
+        border-radius: 8px;
+        transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .equipos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 0.75rem;
+        margin-top: 1rem;
+    }
+
+    .equipo-card {
+        background: white;
+        border-radius: 8px;
+        padding: 0.75rem;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        animation: slideIn 0.5s ease-out;
+        text-align: center;
+    }
+
+    .equipo-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+    }
+
+    .equipo-card.status-danger {
+        border-color: #fee;
+        background: #fff5f5;
+    }
+
+    .equipo-card.status-warning {
+        border-color: #fff3cd;
+        background: #fffef5;
+    }
+
+    .equipo-card.status-success {
+        border-color: #d4edda;
+        background: #f0fdf4;
+    }
+
+    .equipo-nombre {
+        font-weight: 600;
+        font-size: 0.85rem;
+        margin-bottom: 0.4rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .equipo-icon {
+        font-size: 1.2rem;
+    }
+
+    .icon-danger { color: #dc3545; animation: pulse 2s infinite; }
+    .icon-warning { color: #ffc107; }
+    .icon-success { color: #28a745; }
+
+    .equipo-progreso {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin: 0.3rem 0;
+    }
+
+    .text-danger { color: #dc3545 !important; }
+    .text-warning { color: #ffc107 !important; }
+    .text-success { color: #28a745 !important; }
+
+    .progress {
+        height: 6px;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #e9ecef;
+        margin: 0.3rem 0;
+    }
+
+    .progress-bar {
+        transition: width 1s ease;
+        border-radius: 8px;
+    }
+
+    .bg-danger { background-color: #dc3545 !important; }
+    .bg-warning { background-color: #ffc107 !important; }
+    .bg-success { background-color: #28a745 !important; }
+
+    .equipo-badge {
+        display: inline-block;
+        padding: 0.15rem 0.5rem;
+        border-radius: 12px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        margin-top: 0.3rem;
+    }
+
+    .badge-danger {
+        background: #fee;
+        color: #dc3545;
+    }
+
+    .badge-warning {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .badge-success {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    /* Animaciones */
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+
+    @keyframes spin {
+        from {
+            transform: rotate(0deg);
+        }
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    .fa-sync-alt.spinning {
+        animation: spin 1s linear infinite;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex gap-3 mb-3">
+        <a href="{{ url_for('index') }}"
+            class="btn btn-light rounded-pill px-4 py-2 shadow-sm d-flex align-items-center">
+            <i class="fas fa-home me-2"></i> Inicio
+        </a>
+        <a href="{{ url_for('line_sections', category=category) }}"
+            class="btn btn-light rounded-pill px-4 py-2 shadow-sm d-flex align-items-center">
+            <i class="fas fa-th-large me-2"></i> Secciones
+        </a>
+        <a href="{{ url_for('calidad_exercises', category=category, section='calidad', subsection='proceso') }}"
+            class="btn btn-light rounded-pill px-4 py-2 shadow-sm d-flex align-items-center">
+            <i class="fas fa-arrow-left me-2"></i> Volver a Calidad
+        </a>
+    </div>
+
+    <div class="dashboard-container">
+        <div class="header-card">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2 class="header-title">
+                        <i class="fas fa-link-slash me-2"></i>WEAK LINK - Análisis de puntos débiles
+                    </h2>
+                    <p class="header-subtitle">
+                        Identificación y seguimiento de puntos débiles en la cadena de producción.
+                    </p>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    <a href="{{ url_for('weaklink_create', category=category) }}" class="btn btn-warning">
+                        <i class="fas fa-plus me-1"></i>Nuevo WEAK LINK
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <ul class="nav nav-tabs card-header-tabs" id="weaklinkMainTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="registros-tab" data-bs-toggle="tab"
+                            data-bs-target="#registros" type="button" role="tab" aria-controls="registros"
+                            aria-selected="true">
+                            <i class="fas fa-table me-2"></i>Registros WEAK LINK
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="resultados-tab" data-bs-toggle="tab" data-bs-target="#resultados"
+                            type="button" role="tab" aria-controls="resultados" aria-selected="false">
+                            <i class="fas fa-chart-bar me-2"></i>Resultados
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="weaklinkMainTabsContent">
+                    <div class="tab-pane fade show active" id="registros" role="tabpanel"
+                        aria-labelledby="registros-tab">
+                        {% if records %}
+                        <div class="table-responsive">
+                            <table class="data-table table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Hora</th>
+                                        <th>Turno</th>
+                                        <th>Operador</th>
+                                        <th>Tubo</th>
+                                        <th>Producto</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for record in records %}
+                                    <tr>
+                                        <td>{{ record.fecha.strftime('%d/%m/%Y') }}</td>
+                                        <td>{{ record.hora.strftime('%H:%M') }}</td>
+                                        <td>{{ record.turno }}</td>
+                                        <td>{{ record.operador }}</td>
+                                        <td>{{ record.maquina }}</td>
+                                        <td>{{ record.producto }}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-info action-btn"
+                                                data-bs-toggle="modal" data-bs-target="#viewModal"
+                                                data-bs-tooltip="tooltip" title="Visualización"
+                                                data-record-id="{{ record.id }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button type="button"
+                                                class="btn btn-sm btn-warning action-btn btn-edit-weaklink"
+                                                data-record-id="{{ record.id }}" data-bs-tooltip="tooltip"
+                                                title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button"
+                                                class="btn btn-sm btn-danger action-btn open-delete-modal"
+                                                data-bs-toggle="modal" data-bs-target="#deleteModal"
+                                                data-id="{{ record.id }}" data-category="{{ category }}"
+                                                data-bs-tooltip="tooltip" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="empty-state">
+                            <i class="fas fa-clipboard-list"></i>
+                            <h3>No hay registros disponibles</h3>
+                            <p>Aún no se han creado registros de WEAK LINK para {{ category }}.</p>
+                            <a href="{{ url_for('weaklink_create', category=category) }}" class="btn btn-warning">
+                                <i class="fas fa-plus me-1"></i>Crear Primer Registro
+                            </a>
+                        </div>
+                        {% endif %}
+                    </div>
+<div class="tab-pane fade" id="resultados" role="tabpanel" aria-labelledby="resultados-tab" data-category="{{ category }}">
+    <div class="p-4">
+        <!-- Resumen del Turno Actual -->
+        <div class="card mb-4 shadow-sm" id="resumen-turno-card">
+            <div class="card-header bg-gradient text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-line me-2"></i>📊 Resumen del Turno Actual
+                </h5>
+                <div class="d-flex align-items-center gap-3">
+                    <small id="hora-actual-display">--:--</small>
+                    <button class="btn btn-sm btn-light" id="btn-refrescar-turno" title="Refrescar datos">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Estadísticas Generales -->
+                <div class="row mb-4">
+                    <div class="col-md-4 text-center">
+                        <div class="stat-card">
+                            <i class="fas fa-clipboard-list fa-2x text-primary mb-2"></i>
+                            <h3 class="mb-1" id="total-registros-turno">0</h3>
+                            <p class="text-muted mb-0">Registros Totales</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="stat-card">
+                            <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                            <h3 class="mb-1" id="equipos-completados">0/0</h3>
+                            <p class="text-muted mb-0">Equipos Completos (3/3)</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="stat-card">
+                            <i class="fas fa-chart-pie fa-2x text-info mb-2"></i>
+                            <h3 class="mb-1" id="porcentaje-completado">0%</h3>
+                            <p class="text-muted mb-0">Progreso Global</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid de Equipos -->
+                <h6 class="mb-3"><i class="fas fa-desktop me-2"></i>Estado por Equipo/Tubo</h6>
+                <div id="equipos-grid" class="equipos-grid">
+                    <!-- Las tarjetas de equipos se generarán dinámicamente aquí -->
+                </div>
+            </div>
+        </div>
+
+        <h4 class="mb-3">Análisis de Resultados</h4>
+        <p class="text-muted mb-4">Filtra los registros por fecha y turno para ver los resultados específicos.</p>
+
+                            <!-- Barra de búsqueda en tiempo real -->
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <span class="input-group-text bg-primary text-white">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text" class="form-control" id="busqueda-resultados"
+                                           placeholder="Buscar por fecha, hora, turno, operador, tubo o producto...">
+                                    <button class="btn btn-outline-secondary" type="button" id="btn-limpiar-busqueda">
+                                        <i class="fas fa-times"></i> Limpiar
+                                    </button>
+                                </div>
+                            </div>
+
+                            <form id="filtros-resultados" class="row g-3 align-items-end mb-4">
+                                <div class="col-md-2">
+                                    <label for="fecha-inicio" class="form-label">Fecha inicio</label>
+                                    <input type="date" class="form-control" id="fecha-inicio" name="fecha_inicio">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="fecha-fin" class="form-label">Fecha fin</label>
+                                    <input type="date" class="form-control" id="fecha-fin" name="fecha_fin">
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="turno" class="form-label">Turno</label>
+                                    <select class="form-select" id="turno" name="turno">
+                                        <option value="">Todos</option>
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="tubo-filter" class="form-label">Tubo</label>
+                                    <select class="form-select" id="tubo-filter" name="tubo">
+                                        <option value="">Todos</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 d-flex gap-2">
+                                    <button type="button" class="btn btn-primary w-100" id="btn-filtrar-resultados">
+                                        <i class="fas fa-filter me-1"></i>Filtrar
+                                    </button>
+                                    <button type="button" class="btn btn-success w-100" id="btn-exportar-excel" data-bs-toggle="modal" data-bs-target="#exportExcelModal">
+                                        <i class="fas fa-file-excel me-1"></i>Exportar Excel
+                                    </button>
+<!-- Modal para exportar Excel -->
+<div class="modal fade" id="exportExcelModal" tabindex="-1" aria-labelledby="exportExcelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="exportExcelModalLabel"><i class="fas fa-file-excel me-2"></i>Exportar a Excel</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <form id="exportExcelForm">
+                    <div class="mb-3">
+                        <label for="exportOption" class="form-label">Selecciona el tipo de exportación</label>
+                        <select class="form-select" id="exportOption" name="exportOption">
+                            <option value="todo">Todo</option>
+                            <option value="info_basica">Información Básica</option>
+                            <option value="lil">LIL (Limpieza, Inspección, Lubricación)</option>
+                            <option value="centerlines">Centerlines</option>
+                            <option value="empaque">Empaque</option>
+                            <option value="pesos">Pesos</option>
+                            <option value="cama_aire">Cama de Aire</option>
+                            <option value="oxigeno_residual">Oxígeno residual</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success" id="btn-confirmar-exportar-excel">
+                    <i class="fas fa-file-export me-1"></i>Exportar Excel
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+                                </div>
+                            </form>
+                            <div class="table-responsive">
+                                <table class="data-table table table-hover" id="tabla-resultados">
+                                    <thead>
+                                        <tr>
+                                            <th>Fecha</th>
+                                            <th>Hora</th>
+                                            <th>Turno</th>
+                                            <th>Operador</th>
+                                            <th>Tubo</th>
+                                            <th>Producto</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Aquí se llenarán los resultados filtrados por JS -->
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div id="resultados-vacios" class="empty-state d-none">
+                                <i class="fas fa-clipboard-list"></i>
+                                <h3>No hay resultados para los filtros seleccionados</h3>
+                                <p>Intenta con otro rango de fechas o turno.</p>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a href="{{ url_for('calidad_exercises', category=category, section='calidad', subsection='proceso') }}"
+                class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para visualizar detalles -->
+<div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title" id="viewModalLabel"><i class="fas fa-eye me-2"></i>Visualización de Registro
+                    WEAK LINK</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Navegación por pestañas para facilitar la visualización -->
+                <ul class="nav nav-tabs mb-4" id="weaklinkTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="resumen-tab" data-bs-toggle="tab" data-bs-target="#resumen"
+                            type="button" role="tab" aria-controls="resumen" aria-selected="true">
+                            <i class="fas fa-list-alt me-1"></i>Resumen
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="info-tab" data-bs-toggle="tab" data-bs-target="#info" type="button"
+                            role="tab" aria-controls="info" aria-selected="false">
+                            <i class="fas fa-info-circle me-1"></i>Información
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="lil-tab" data-bs-toggle="tab" data-bs-target="#lil" type="button"
+                            role="tab" aria-controls="lil" aria-selected="false">
+                            <i class="fas fa-broom me-1"></i>LIL
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="centerlines-tab" data-bs-toggle="tab" data-bs-target="#centerlines"
+                            type="button" role="tab" aria-controls="centerlines" aria-selected="false">
+                            <i class="fas fa-thermometer-half me-1"></i>Centerlines
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="empaque-tab" data-bs-toggle="tab" data-bs-target="#empaque"
+                            type="button" role="tab" aria-controls="empaque" aria-selected="false">
+                            <i class="fas fa-box me-1"></i>Empaque
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="pesos-tab" data-bs-toggle="tab" data-bs-target="#pesos"
+                            type="button" role="tab" aria-controls="pesos" aria-selected="false">
+                            <i class="fas fa-balance-scale me-1"></i>Pesos
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cama-aire-tab" data-bs-toggle="tab" data-bs-target="#cama-aire"
+                            type="button" role="tab" aria-controls="cama-aire" aria-selected="false">
+                            <i class="fas fa-wind me-1"></i>Cama Aire
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="oxigeno-tab" data-bs-toggle="tab" data-bs-target="#oxigeno"
+                            type="button" role="tab" aria-controls="oxigeno" aria-selected="false">
+                            <i class="fas fa-flask me-1"></i>Oxígeno
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="weaklinkTabsContent">
+                    <!-- Pestaña: Resumen de toda la información -->
+                    <div class="tab-pane fade show active" id="resumen" role="tabpanel" aria-labelledby="resumen-tab">
+                        <!-- Sección: Información Básica -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-info-circle me-2 text-primary"></i>Información Básica
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Fecha:</strong></p>
+                                        <p id="view-resumen-fecha" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Hora:</strong></p>
+                                        <p id="view-resumen-hora" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Turno:</strong></p>
+                                        <p id="view-resumen-turno" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Operador:</strong></p>
+                                        <p id="view-resumen-operador" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Línea:</strong></p>
+                                        <p id="view-resumen-linea" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Orden:</strong></p>
+                                        <p id="view-resumen-orden" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Máquina:</strong></p>
+                                        <p id="view-resumen-maquina" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Producto:</strong></p>
+                                        <p id="view-resumen-producto" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: LIL -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-broom me-2 text-warning"></i>LIL (Limpieza,
+                                    Inspección, Lubricación)</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Limpieza a pesadora:</strong></p>
+                                        <p id="view-resumen-limpieza-pesadora" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Limpieza cabezal:</strong></p>
+                                        <p id="view-resumen-limpieza-cabezal" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Limpieza de mordazas:</strong></p>
+                                        <p id="view-resumen-limpieza-mordazas" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Condición del Velcro:</strong></p>
+                                        <p id="view-resumen-condicion-velcro" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Validación de recetas:</strong></p>
+                                        <p id="view-resumen-validacion-recetas" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Validación de etiquetas:</strong></p>
+                                        <p id="view-resumen-validacion-etiquetas" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Centerlines -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-thermometer-half me-2 text-danger"></i>Centerlines
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Temperatura Mordaza frontal:</strong></p>
+                                        <p id="view-resumen-temperatura-mordaza-frontal" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Temperatura Mordaza trasera:</strong></p>
+                                        <p id="view-resumen-temperatura-mordaza-trasera" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Temperatura sellado Vertical:</strong></p>
+                                        <p id="view-resumen-temperatura-sellado-vertical" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Bolsa por cajas:</strong></p>
+                                        <p id="view-resumen-bolsa-por-cajas" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Empaque -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-box me-2 text-success"></i>Empaque</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Código de Empaque:</strong></p>
+                                        <p id="view-resumen-codigo-empaque" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Eficiencia de Promoción:</strong></p>
+                                        <p id="view-resumen-eficiencia-promocion" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                                <div class="row mb-3" id="view-resumen-porcentaje-eficiencia-row">
+                                    <div class="col-md-6 offset-md-6">
+                                        <p class="mb-1"><strong>% de Eficiencia:</strong></p>
+                                        <p id="view-resumen-porcentaje-eficiencia" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Volumen de llenado:</strong></p>
+                                        <p id="view-resumen-volumen-llenado" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Fecha de frescura:</strong></p>
+                                        <p id="view-resumen-fecha-frescura" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Acomodo Correcto:</strong></p>
+                                        <p id="view-resumen-acomodo-correcto" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Apariencia del empaque:</strong></p>
+                                        <p id="view-resumen-apariencia-empaque" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Hermeticidad:</strong></p>
+                                        <p id="view-resumen-hermeticidad" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Pesos -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-balance-scale me-2 text-info"></i>Pesos</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Gramaje Impreso (g):</strong></p>
+                                        <p id="view-resumen-gramaje-impreso" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Peso Ishida (g):</strong></p>
+                                        <p id="view-resumen-peso-ishida" class="text-primary">-</p>
+                                    </div>
+                                </div>
+
+                                <!-- Resumen de pesos -->
+                                <div class="row mb-3 bg-light p-2 rounded">
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Peso Promedio (g):</strong></p>
+                                        <p id="view-resumen-peso-promedio" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Dif. vs Gramaje (g):</strong></p>
+                                        <p id="view-resumen-dif-vs-gramaje" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Dif. vs Ishida (g):</strong></p>
+                                        <p id="view-resumen-dif-vs-ishida" class="text-primary">-</p>
+                                    </div>
+                                </div>
+
+                                <!-- Muestras de peso -->
+                                <h6 class="mt-3 mb-2">Muestras de peso</h6>
+                                <div class="row mb-2">
+                                    <div class="col">
+                                        <p class="mb-1"><strong>M1:</strong></p>
+                                        <p id="view-resumen-peso-muestra-1" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col">
+                                        <p class="mb-1"><strong>M2:</strong></p>
+                                        <p id="view-resumen-peso-muestra-2" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col">
+                                        <p class="mb-1"><strong>M3:</strong></p>
+                                        <p id="view-resumen-peso-muestra-3" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col">
+                                        <p class="mb-1"><strong>M4:</strong></p>
+                                        <p id="view-resumen-peso-muestra-4" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col">
+                                        <p class="mb-1"><strong>M5:</strong></p>
+                                        <p id="view-resumen-peso-muestra-5" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col">
+                                        <p class="mb-1"><strong>M6:</strong></p>
+                                        <p id="view-resumen-peso-muestra-6" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col">
+                                        <p class="mb-1"><strong>M7:</strong></p>
+                                        <p id="view-resumen-peso-muestra-7" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col">
+                                        <p class="mb-1"><strong>M8:</strong></p>
+                                        <p id="view-resumen-peso-muestra-8" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col">
+                                        <p class="mb-1"><strong>M9:</strong></p>
+                                        <p id="view-resumen-peso-muestra-9" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col">
+                                        <p class="mb-1"><strong>M10:</strong></p>
+                                        <p id="view-resumen-peso-muestra-10" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Cama de Aire -->
+                        <div class="card mb-4">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-wind me-2 text-secondary"></i>Cama de Aire</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <p class="mb-1"><strong>Tipo de Cama de Aire:</strong></p>
+                                        <p id="view-resumen-cama-aire-tipo" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Muestra 1:</strong></p>
+                                        <p id="view-resumen-cama-aire-muestra-1" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Muestra 2:</strong></p>
+                                        <p id="view-resumen-cama-aire-muestra-2" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p class="mb-1"><strong>Muestra 3:</strong></p>
+                                        <p id="view-resumen-cama-aire-muestra-3" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <p class="mb-1"><strong>Promedio:</strong></p>
+                                        <p id="view-resumen-cama-aire-promedio" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Oxígeno Residual -->
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-flask me-2 text-purple"></i>Oxígeno Residual</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Muestra 1:</strong></p>
+                                        <p id="view-resumen-oxigeno-residual-muestra-1" class="text-primary">-</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="mb-1"><strong>Muestra 2:</strong></p>
+                                        <p id="view-resumen-oxigeno-residual-muestra-2" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <p class="mb-1"><strong>Promedio:</strong></p>
+                                        <p id="view-resumen-oxigeno-residual-promedio" class="text-primary">-</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sección: Observaciones -->
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0"><i class="fas fa-comment-alt me-2 text-success"></i>Observaciones / Planes de Acción</h6>
+                            </div>
+                            <div class="card-body">
+                                <p id="view-resumen-observaciones" class="text-muted" style="white-space: pre-wrap;">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pestaña: Información Básica -->
+                    <div class="tab-pane fade" id="info" role="tabpanel" aria-labelledby="info-tab">
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h6 class="text-muted mb-2">Información Básica</h6>
+                                <hr class="my-2">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Fecha:</strong></p>
+                                <p id="view-fecha" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Hora:</strong></p>
+                                <p id="view-hora" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Turno:</strong></p>
+                                <p id="view-turno" class="text-primary">-</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Operador:</strong></p>
+                                <p id="view-operador" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Línea:</strong></p>
+                                <p id="view-linea" class="text-primary">-</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Orden:</strong></p>
+                                <p id="view-orden" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Máquina:</strong></p>
+                                <p id="view-maquina" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Producto:</strong></p>
+                                <p id="view-producto" class="text-primary">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pestaña: LIL -->
+                    <div class="tab-pane fade" id="lil" role="tabpanel" aria-labelledby="lil-tab">
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h6 class="text-muted mb-2"><i class="fas fa-broom me-2"></i>LIL (Limpieza, Inspección,
+                                    Lubricación)</h6>
+                                <hr class="my-2">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Limpieza a pesadora:</strong></p>
+                                <p id="view-limpieza-pesadora" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Limpieza cabezal:</strong></p>
+                                <p id="view-limpieza-cabezal" class="text-primary">-</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Limpieza de mordazas:</strong></p>
+                                <p id="view-limpieza-mordazas" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Condición del Velcro:</strong></p>
+                                <p id="view-condicion-velcro" class="text-primary">-</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Validación de recetas:</strong></p>
+                                <p id="view-validacion-recetas" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Validación de etiquetas:</strong></p>
+                                <p id="view-validacion-etiquetas" class="text-primary">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pestaña: Centerlines -->
+                    <div class="tab-pane fade" id="centerlines" role="tabpanel" aria-labelledby="centerlines-tab">
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h6 class="text-muted mb-2"><i class="fas fa-thermometer-half me-2"></i>Centerlines</h6>
+                                <hr class="my-2">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Temperatura Mordaza frontal:</strong></p>
+                                <p id="view-temperatura-mordaza-frontal" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Temperatura Mordaza trasera:</strong></p>
+                                <p id="view-temperatura-mordaza-trasera" class="text-primary">-</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Temperatura sellado Vertical:</strong></p>
+                                <p id="view-temperatura-sellado-vertical" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Bolsa por cajas:</strong></p>
+                                <p id="view-bolsa-por-cajas" class="text-primary">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pestaña: Empaque -->
+                    <div class="tab-pane fade" id="empaque" role="tabpanel" aria-labelledby="empaque-tab">
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h6 class="text-muted mb-2"><i class="fas fa-box me-2"></i>Empaque</h6>
+                                <hr class="my-2">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Código de Empaque:</strong></p>
+                                <p id="view-codigo-empaque" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Eficiencia de Promoción:</strong></p>
+                                <p id="view-eficiencia-promocion" class="text-primary">-</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3" id="view-porcentaje-eficiencia-row">
+                            <div class="col-md-6 offset-md-6">
+                                <p class="mb-1"><strong>% de Eficiencia:</strong></p>
+                                <p id="view-porcentaje-eficiencia" class="text-primary">-</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Volumen de llenado:</strong></p>
+                                <p id="view-volumen-llenado" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Fecha de frescura:</strong></p>
+                                <p id="view-fecha-frescura" class="text-primary">-</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Acomodo Correcto:</strong></p>
+                                <p id="view-acomodo-correcto" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Apariencia del empaque:</strong></p>
+                                <p id="view-apariencia-empaque" class="text-primary">-</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Hermeticidad:</strong></p>
+                                <p id="view-hermeticidad" class="text-primary">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pestaña: Pesos -->
+                    <div class="tab-pane fade" id="pesos" role="tabpanel" aria-labelledby="pesos-tab">
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h6 class="text-muted mb-2"><i class="fas fa-balance-scale me-2"></i>Pesos</h6>
+                                <hr class="my-2">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Gramaje Impreso (g):</strong></p>
+                                <p id="view-gramaje-impreso" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Peso Ishida (g):</strong></p>
+                                <p id="view-peso-ishida" class="text-primary">-</p>
+                            </div>
+                        </div>
+
+                        <!-- Resumen de pesos -->
+                        <div class="row mb-3 bg-light p-2 rounded">
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Peso Promedio (g):</strong></p>
+                                <p id="view-peso-promedio" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Dif. vs Gramaje (g):</strong></p>
+                                <p id="view-dif-vs-gramaje" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Dif. vs Ishida (g):</strong></p>
+                                <p id="view-dif-vs-ishida" class="text-primary">-</p>
+                            </div>
+                        </div>
+
+                        <!-- Muestras de peso -->
+                        <h6 class="mt-3 mb-2">Muestras de peso</h6>
+                        <div class="row mb-2">
+                            <div class="col">
+                                <p class="mb-1"><strong>Muestra 1:</strong></p>
+                                <p id="view-peso-muestra-1" class="text-primary">-</p>
+                            </div>
+                            <div class="col">
+                                <p class="mb-1"><strong>Muestra 2:</strong></p>
+                                <p id="view-peso-muestra-2" class="text-primary">-</p>
+                            </div>
+                            <div class="col">
+                                <p class="mb-1"><strong>Muestra 3:</strong></p>
+                                <p id="view-peso-muestra-3" class="text-primary">-</p>
+                            </div>
+                            <div class="col">
+                                <p class="mb-1"><strong>Muestra 4:</strong></p>
+                                <p id="view-peso-muestra-4" class="text-primary">-</p>
+                            </div>
+                            <div class="col">
+                                <p class="mb-1"><strong>Muestra 5:</strong></p>
+                                <p id="view-peso-muestra-5" class="text-primary">-</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <p class="mb-1"><strong>Muestra 6:</strong></p>
+                                <p id="view-peso-muestra-6" class="text-primary">-</p>
+                            </div>
+                            <div class="col">
+                                <p class="mb-1"><strong>Muestra 7:</strong></p>
+                                <p id="view-peso-muestra-7" class="text-primary">-</p>
+                            </div>
+                            <div class="col">
+                                <p class="mb-1"><strong>Muestra 8:</strong></p>
+                                <p id="view-peso-muestra-8" class="text-primary">-</p>
+                            </div>
+                            <div class="col">
+                                <p class="mb-1"><strong>Muestra 9:</strong></p>
+                                <p id="view-peso-muestra-9" class="text-primary">-</p>
+                            </div>
+                            <div class="col">
+                                <p class="mb-1"><strong>Muestra 10:</strong></p>
+                                <p id="view-peso-muestra-10" class="text-primary">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pestaña: Cama de Aire -->
+                    <div class="tab-pane fade" id="cama-aire" role="tabpanel" aria-labelledby="cama-aire-tab">
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h6 class="text-muted mb-2"><i class="fas fa-wind me-2"></i>Cama de Aire</h6>
+                                <hr class="my-2">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <p class="mb-1"><strong>Tipo de Cama de Aire:</strong></p>
+                                <p id="view-cama-aire-tipo" class="text-primary">-</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Muestra 1:</strong></p>
+                                <p id="view-cama-aire-muestra-1" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Muestra 2:</strong></p>
+                                <p id="view-cama-aire-muestra-2" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-4">
+                                <p class="mb-1"><strong>Muestra 3:</strong></p>
+                                <p id="view-cama-aire-muestra-3" class="text-primary">-</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3 bg-light p-2 rounded">
+                            <div class="col-md-12">
+                                <p class="mb-1"><strong>Promedio:</strong></p>
+                                <p id="view-cama-aire-promedio" class="text-primary">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pestaña: Oxígeno Residual -->
+                    <div class="tab-pane fade" id="oxigeno" role="tabpanel" aria-labelledby="oxigeno-tab">
+                        <div class="row mb-4">
+                            <div class="col-md-12">
+                                <h6 class="text-muted mb-2"><i class="fas fa-flask me-2"></i>Oxígeno Residual</h6>
+                                <hr class="my-2">
+                            </div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Muestra 1:</strong></p>
+                                <p id="view-oxigeno-residual-muestra-1" class="text-primary">-</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Muestra 2:</strong></p>
+                                <p id="view-oxigeno-residual-muestra-2" class="text-primary">-</p>
+                            </div>
+                        </div>
+                        <div class="row mb-3 bg-light p-2 rounded">
+                            <div class="col-md-12">
+                                <p class="mb-1"><strong>Promedio:</strong></p>
+                                <p id="view-oxigeno-residual-promedio" class="text-primary">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para eliminar -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel"><i class="fas fa-exclamation-triangle me-2"></i>Confirmar
+                    Eliminación</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-3">
+                    <i class="fas fa-trash-alt text-danger" style="font-size: 3rem;"></i>
+                </div>
+                <p class="text-center">¿Estás seguro de que deseas eliminar este registro de WEAK LINK?</p>
+                <p class="text-center text-danger"><strong>Esta acción no se puede deshacer.</strong></p>
+            </div>
+            <div class="modal-footer">
+                <form id="deleteForm" method="POST" action="">
+                    {% if csrf_token %}
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    {% endif %}
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button id="delete-confirm-btn" type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash-alt me-1"></i>Eliminar
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Script para exportar como Excel -->
+<script>
+// Exportar a Excel según la opción seleccionada en el modal
+document.addEventListener('DOMContentLoaded', function() {
+    const btnConfirmarExportar = document.getElementById('btn-confirmar-exportar-excel');
+    if (btnConfirmarExportar) {
+        btnConfirmarExportar.addEventListener('click', async function() {
+            // Obtener filtros actuales
+            const urlParams = new URLSearchParams();
+            let category = null;
+            const tabResultados = document.getElementById('resultados');
+            if (tabResultados && tabResultados.dataset.category) {
+                category = tabResultados.dataset.category;
+            } else if (typeof window.category !== 'undefined') {
+                category = window.category;
+            } else if (document.body.dataset.category) {
+                category = document.body.dataset.category;
+            }
+            if (!category) {
+                alert('No se pudo determinar la categoría.');
+                return;
+            }
+            urlParams.set('category', category);
+            const fecha_inicio = document.getElementById('fecha-inicio')?.value;
+            const fecha_fin = document.getElementById('fecha-fin')?.value;
+            const turno = document.getElementById('turno')?.value;
+            if (fecha_inicio) urlParams.set('fecha_inicio', fecha_inicio);
+            if (fecha_fin) urlParams.set('fecha_fin', fecha_fin);
+            if (turno) urlParams.set('turno', turno);
+            // Llamar API para obtener todos los datos completos
+            const resp = await fetch(`/api/weaklink/resultados?${urlParams.toString()}`);
+            const data = await resp.json();
+            if (!data.length) {
+                alert('No hay datos para exportar.');
+                return;
+            }
+            // Obtener la opción seleccionada
+            const exportOption = document.getElementById('exportOption').value;
+            // Definir los headers según la opción
+            let headers = [];
+            if (exportOption === 'todo') {
+                headers = [
+                    'id', 'categoria', 'fecha', 'hora', 'turno', 'operador', 'orden', 'maquina', 'producto',
+                    // LIL
+                    'limpieza_pesadora', 'limpieza_cabezal', 'limpieza_mordazas', 'condicion_velcro', 'validacion_recetas', 'validacion_etiquetas',
+                    // Centerlines
+                    'temperatura_mordaza_frontal', 'temperatura_mordaza_trasera', 'temperatura_sellado_vertical', 'bolsa_por_cajas',
+                    // Empaque
+                    'codigo_empaque', 'eficiencia_promocion', 'porcentaje_eficiencia', 'volumen_llenado', 'fecha_frescura', 'acomodo_correcto', 'apariencia_empaque', 'hermeticidad',
+                    // Pesos
+                    'gramaje_impreso', 'peso_ishida',
+                    'peso_muestra_1', 'peso_muestra_2', 'peso_muestra_3', 'peso_muestra_4', 'peso_muestra_5',
+                    'peso_muestra_6', 'peso_muestra_7', 'peso_muestra_8', 'peso_muestra_9', 'peso_muestra_10',
+                    'peso_promedio', 'dif_vs_gramaje', 'dif_vs_ishida',
+                    // Cama de Aire
+                    'cama_aire_tipo', 'cama_aire_muestra_1', 'cama_aire_muestra_2', 'cama_aire_muestra_3', 'cama_aire_promedio',
+                    // Oxígeno Residual
+                    'oxigeno_residual_muestra_1', 'oxigeno_residual_muestra_2', 'oxigeno_residual_muestra_3', 'oxigeno_residual_promedio',
+                    // Metadatos
+                    'created_by', 'created_at', 'updated_at'
+                ];
+            } else if (exportOption === 'info_basica') {
+                headers = [
+                    'id', 'categoria', 'fecha', 'hora', 'turno', 'operador', 'orden', 'maquina', 'producto'
+                ];
+            } else if (exportOption === 'lil') {
+                headers = [
+                    'id', 'categoria', 'fecha', 'hora', 'turno', 'operador', 'maquina', 'producto',
+                    'limpieza_pesadora', 'limpieza_cabezal', 'limpieza_mordazas', 'condicion_velcro', 'validacion_recetas', 'validacion_etiquetas'
+                ];
+            } else if (exportOption === 'centerlines') {
+                headers = [
+                    'id', 'categoria', 'fecha', 'hora', 'turno', 'operador', 'maquina', 'producto',
+                    'temperatura_mordaza_frontal', 'temperatura_mordaza_trasera', 'temperatura_sellado_vertical', 'bolsa_por_cajas'
+                ];
+            } else if (exportOption === 'empaque') {
+                headers = [
+                    'id', 'categoria', 'fecha', 'hora', 'turno', 'operador', 'maquina', 'producto',
+                    'codigo_empaque', 'eficiencia_promocion', 'porcentaje_eficiencia', 'volumen_llenado', 'fecha_frescura', 'acomodo_correcto', 'apariencia_empaque', 'hermeticidad'
+                ];
+            } else if (exportOption === 'pesos') {
+                headers = [
+                    'id', 'categoria', 'fecha', 'hora', 'turno', 'operador', 'maquina', 'producto',
+                    'gramaje_impreso', 'peso_ishida',
+                    'peso_muestra_1', 'peso_muestra_2', 'peso_muestra_3', 'peso_muestra_4', 'peso_muestra_5',
+                    'peso_muestra_6', 'peso_muestra_7', 'peso_muestra_8', 'peso_muestra_9', 'peso_muestra_10',
+                    'peso_promedio', 'dif_vs_gramaje', 'dif_vs_ishida'
+                ];
+            } else if (exportOption === 'cama_aire') {
+                headers = [
+                    'id', 'categoria', 'fecha', 'hora', 'turno', 'operador', 'maquina', 'producto',
+                    'cama_aire_tipo', 'cama_aire_muestra_1', 'cama_aire_muestra_2', 'cama_aire_muestra_3', 'cama_aire_promedio'
+                ];
+            } else if (exportOption === 'oxigeno_residual') {
+                headers = [
+                    'id', 'categoria', 'fecha', 'hora', 'turno', 'operador', 'maquina', 'producto',
+                    'oxigeno_residual_muestra_1', 'oxigeno_residual_muestra_2', 'oxigeno_residual_muestra_3', 'oxigeno_residual_promedio'
+                ];
+            }
+            // Solo incluir los headers que existan en los datos
+            const filteredHeaders = headers.filter(h => typeof data[0][h] !== 'undefined');
+            const rows = data.map(row => filteredHeaders.map(h => row[h] ?? ''));
+            // Crear hoja de cálculo
+            const ws = XLSX.utils.aoa_to_sheet([filteredHeaders, ...rows]);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Resultados');
+            XLSX.writeFile(wb, 'resultados_weaklink.xlsx');
+            // Cerrar el modal después de exportar
+            const exportExcelModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('exportExcelModal'));
+            exportExcelModal.hide();
+        });
+    }
+});
+</script>
+
+<!-- Script para filtros -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const btnFiltrar = document.getElementById('btn-filtrar-resultados');
+        const tablaResultados = document.getElementById('tabla-resultados').getElementsByTagName('tbody')[0];
+        const vacioDiv = document.getElementById('resultados-vacios');
+        function cargarResultados() {
+            const fechaInicio = document.getElementById('fecha-inicio').value;
+            const fechaFin = document.getElementById('fecha-fin').value;
+            const turno = document.getElementById('turno').value;
+            let url = `/api/weaklink/resultados?category={{ category }}`;
+            const params = [];
+            if (fechaInicio) params.push(`fecha_inicio=${fechaInicio}`);
+            if (fechaFin) params.push(`fecha_fin=${fechaFin}`);
+            if (turno) params.push(`turno=${turno}`);
+            if (params.length > 0) url += '&' + params.join('&');
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    tablaResultados.innerHTML = '';
+                    if (data && data.length > 0) {
+                        vacioDiv.classList.add('d-none');
+                        data.forEach(record => {
+                            const tr = document.createElement('tr');
+                            tr.innerHTML = `
+                                <td>${record.fecha}</td>
+                                <td>${record.hora}</td>
+                                <td>${record.turno}</td>
+                                <td>${record.operador}</td>
+                                <td>${record.maquina}</td>
+                                <td>${record.producto}</td>
+                            `;
+                            tablaResultados.appendChild(tr);
+                        });
+                        // Poblar filtro de tubos después de cargar datos
+                        poblarFiltroTubos();
+                    } else {
+                        vacioDiv.classList.remove('d-none');
+                    }
+                });
+        }
+        btnFiltrar.addEventListener('click', cargarResultados);
+        // Cargar resultados al abrir la pestaña
+        document.getElementById('resultados-tab').addEventListener('shown.bs.tab', function() {
+            cargarResultados();
+            poblarFiltroTubos();
+        });
+
+        // Función para poblar el filtro de tubos dinámicamente
+        function poblarFiltroTubos() {
+            const tuboFilter = document.getElementById('tubo-filter');
+            const filas = tablaResultados.getElementsByTagName('tr');
+            const tubosUnicos = new Set();
+
+            // Obtener todos los tubos únicos de la tabla
+            Array.from(filas).forEach(fila => {
+                const tubo = fila.cells[4]?.textContent.trim(); // Columna de máquina/tubo
+                if (tubo) tubosUnicos.add(tubo);
+            });
+
+            // Limpiar opciones existentes (excepto "Todos")
+            tuboFilter.innerHTML = '<option value="">Todos</option>';
+
+            // Agregar opciones ordenadas
+            Array.from(tubosUnicos).sort().forEach(tubo => {
+                const option = document.createElement('option');
+                option.value = tubo;
+                option.textContent = tubo;
+                tuboFilter.appendChild(option);
+            });
+        }
+
+        // Búsqueda en tiempo real
+        const busquedaInput = document.getElementById('busqueda-resultados');
+        const tuboFilterSelect = document.getElementById('tubo-filter');
+
+        function filtrarTabla() {
+            const busqueda = busquedaInput.value.toLowerCase();
+            const tuboSeleccionado = tuboFilterSelect.value.toLowerCase();
+            const filas = tablaResultados.getElementsByTagName('tr');
+            let hayResultados = false;
+
+            Array.from(filas).forEach(fila => {
+                const fecha = fila.cells[0]?.textContent.toLowerCase() || '';
+                const hora = fila.cells[1]?.textContent.toLowerCase() || '';
+                const turno = fila.cells[2]?.textContent.toLowerCase() || '';
+                const operador = fila.cells[3]?.textContent.toLowerCase() || '';
+                const tubo = fila.cells[4]?.textContent.toLowerCase() || '';
+                const producto = fila.cells[5]?.textContent.toLowerCase() || '';
+
+                const coincideBusqueda = fecha.includes(busqueda) ||
+                                        hora.includes(busqueda) ||
+                                        turno.includes(busqueda) ||
+                                        operador.includes(busqueda) ||
+                                        tubo.includes(busqueda) ||
+                                        producto.includes(busqueda);
+
+                const coincideTubo = !tuboSeleccionado || tubo.includes(tuboSeleccionado);
+
+                if (coincideBusqueda && coincideTubo) {
+                    fila.style.display = '';
+                    hayResultados = true;
+                } else {
+                    fila.style.display = 'none';
+                }
+            });
+
+            // Mostrar/ocultar mensaje de vacío
+            if (hayResultados) {
+                vacioDiv.classList.add('d-none');
+            } else {
+                vacioDiv.classList.remove('d-none');
+            }
+        }
+
+        // Evento de búsqueda en tiempo real
+        busquedaInput.addEventListener('input', filtrarTabla);
+        tuboFilterSelect.addEventListener('change', filtrarTabla);
+
+        // Botón limpiar búsqueda
+        document.getElementById('btn-limpiar-busqueda').addEventListener('click', function() {
+            busquedaInput.value = '';
+            filtrarTabla();
+        });
+    });
+</script>
+
+<!-- Script para eliminar registros -->
+<script>
+    // Script para manejar la eliminación correctamente
+    let deleteRecordId = null;
+    let deleteCategory = null;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Asignar eventos a los botones de eliminar (deben tener la clase 'open-delete-modal')
+        document.querySelectorAll('.open-delete-modal').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                deleteRecordId = btn.getAttribute('data-id') || btn.getAttribute('data-record-id');
+                deleteCategory = btn.getAttribute('data-category') || btn.getAttribute('data-record-category') || (typeof category !== 'undefined' ? category : null);
+                // Actualiza la acción del formulario con la ruta correcta
+                const deleteForm = document.getElementById('deleteForm');
+                if (deleteForm && deleteRecordId && deleteCategory) {
+                    deleteForm.action = `/weaklink/${deleteCategory}/delete/${deleteRecordId}`;
+                }
+            });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Inicializar los tooltips de Bootstrap
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-tooltip="tooltip"]');
+        const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+
+        // Configurar el modal de visualización
+        const viewModal = document.getElementById('viewModal');
+        if (viewModal) {
+            viewModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const recordId = button.getAttribute('data-record-id');
+
+                // Obtener datos del registro mediante una solicitud AJAX
+                fetch(`/api/weaklink/${recordId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Información Básica (para ambas pestañas: Resumen e Información)
+                        document.getElementById('view-fecha').textContent = data.fecha;
+                        document.getElementById('view-hora').textContent = data.hora;
+                        document.getElementById('view-turno').textContent = data.turno;
+                        document.getElementById('view-operador').textContent = data.operador;
+                        document.getElementById('view-linea').textContent = data.linea;
+                        document.getElementById('view-orden').textContent = data.orden;
+                        document.getElementById('view-maquina').textContent = data.maquina;
+                        document.getElementById('view-producto').textContent = data.producto;
+
+                        // Información para pestaña Resumen
+                        document.getElementById('view-resumen-fecha').textContent = data.fecha;
+                        document.getElementById('view-resumen-hora').textContent = data.hora;
+                        document.getElementById('view-resumen-turno').textContent = data.turno;
+                        document.getElementById('view-resumen-operador').textContent = data.operador;
+                        document.getElementById('view-resumen-linea').textContent = data.linea;
+                        document.getElementById('view-resumen-orden').textContent = data.orden;
+                        document.getElementById('view-resumen-maquina').textContent = data.maquina;
+                        document.getElementById('view-resumen-producto').textContent = data.producto;
+
+                        // Sección LIL
+                        document.getElementById('view-limpieza-pesadora').textContent = data.limpieza_pesadora || '-';
+                        document.getElementById('view-limpieza-cabezal').textContent = data.limpieza_cabezal || '-';
+                        document.getElementById('view-limpieza-mordazas').textContent = data.limpieza_mordazas || '-';
+                        document.getElementById('view-condicion-velcro').textContent = data.condicion_velcro || '-';
+                        document.getElementById('view-validacion-recetas').textContent = data.validacion_recetas || '-';
+                        document.getElementById('view-validacion-etiquetas').textContent = data.validacion_etiquetas || '-';
+
+                        // LIL para pestaña Resumen
+                        document.getElementById('view-resumen-limpieza-pesadora').textContent = data.limpieza_pesadora || '-';
+                        document.getElementById('view-resumen-limpieza-cabezal').textContent = data.limpieza_cabezal || '-';
+                        document.getElementById('view-resumen-limpieza-mordazas').textContent = data.limpieza_mordazas || '-';
+                        document.getElementById('view-resumen-condicion-velcro').textContent = data.condicion_velcro || '-';
+                        document.getElementById('view-resumen-validacion-recetas').textContent = data.validacion_recetas || '-';
+                        document.getElementById('view-resumen-validacion-etiquetas').textContent = data.validacion_etiquetas || '-';
+
+                        // Sección Centerlines
+                        document.getElementById('view-temperatura-mordaza-frontal').textContent = data.temperatura_mordaza_frontal ? `${data.temperatura_mordaza_frontal} °C` : '-';
+                        document.getElementById('view-temperatura-mordaza-trasera').textContent = data.temperatura_mordaza_trasera ? `${data.temperatura_mordaza_trasera} °C` : '-';
+                        document.getElementById('view-temperatura-sellado-vertical').textContent = data.temperatura_sellado_vertical ? `${data.temperatura_sellado_vertical} °C` : '-';
+                        document.getElementById('view-bolsa-por-cajas').textContent = data.bolsa_por_cajas || '-';
+
+                        // Centerlines para pestaña Resumen
+                        document.getElementById('view-resumen-temperatura-mordaza-frontal').textContent = data.temperatura_mordaza_frontal ? `${data.temperatura_mordaza_frontal} °C` : '-';
+                        document.getElementById('view-resumen-temperatura-mordaza-trasera').textContent = data.temperatura_mordaza_trasera ? `${data.temperatura_mordaza_trasera} °C` : '-';
+                        document.getElementById('view-resumen-temperatura-sellado-vertical').textContent = data.temperatura_sellado_vertical ? `${data.temperatura_sellado_vertical} °C` : '-';
+                        document.getElementById('view-resumen-bolsa-por-cajas').textContent = data.bolsa_por_cajas || '-';
+
+                        // Sección Empaque
+                        document.getElementById('view-codigo-empaque').textContent = data.codigo_empaque ? `${data.codigo_empaque}%` : '-';
+                        document.getElementById('view-eficiencia-promocion').textContent = data.eficiencia_promocion || '-';
+
+                        // Empaque para pestaña Resumen
+                        document.getElementById('view-resumen-codigo-empaque').textContent = data.codigo_empaque ? `${data.codigo_empaque}%` : '-';
+                        document.getElementById('view-resumen-eficiencia-promocion').textContent = data.eficiencia_promocion || '-';
+
+                        // Mostrar/ocultar fila de porcentaje de eficiencia según si eficiencia_promocion es 'Aplica'
+                        const porcentajeEficienciaRow = document.getElementById('view-porcentaje-eficiencia-row');
+                        const porcentajeEficienciaResumenRow = document.getElementById('view-resumen-porcentaje-eficiencia-row');
+
+                        if (data.eficiencia_promocion === 'Aplica' && data.porcentaje_eficiencia) {
+                            porcentajeEficienciaRow.style.display = 'flex';
+                            porcentajeEficienciaResumenRow.style.display = 'flex';
+                            document.getElementById('view-porcentaje-eficiencia').textContent = `${data.porcentaje_eficiencia}%`;
+                            document.getElementById('view-resumen-porcentaje-eficiencia').textContent = `${data.porcentaje_eficiencia}%`;
+                        } else {
+                            porcentajeEficienciaRow.style.display = 'none';
+                            porcentajeEficienciaResumenRow.style.display = 'none';
+                        }
+
+                        document.getElementById('view-volumen-llenado').textContent = data.volumen_llenado ? `${data.volumen_llenado}%` : '-';
+                        document.getElementById('view-fecha-frescura').textContent = data.fecha_frescura || '-';
+                        document.getElementById('view-acomodo-correcto').textContent = data.acomodo_correcto || '-';
+                        document.getElementById('view-apariencia-empaque').textContent = data.apariencia_empaque ? `${data.apariencia_empaque}%` : '-';
+                        document.getElementById('view-hermeticidad').textContent = data.hermeticidad ? `${data.hermeticidad}%` : '-';
+
+                        document.getElementById('view-resumen-volumen-llenado').textContent = data.volumen_llenado ? `${data.volumen_llenado}%` : '-';
+                        document.getElementById('view-resumen-fecha-frescura').textContent = data.fecha_frescura || '-';
+                        document.getElementById('view-resumen-acomodo-correcto').textContent = data.acomodo_correcto || '-';
+                        document.getElementById('view-resumen-apariencia-empaque').textContent = data.apariencia_empaque ? `${data.apariencia_empaque}%` : '-';
+                        document.getElementById('view-resumen-hermeticidad').textContent = data.hermeticidad ? `${data.hermeticidad}%` : '-';
+
+                        // Sección Peso
+                        document.getElementById('view-gramaje-impreso').textContent = data.gramaje_impreso || '-';
+                        document.getElementById('view-peso-ishida').textContent = data.peso_ishida || '-';
+                        document.getElementById('view-peso-promedio').textContent = data.peso_promedio || '-';
+                        document.getElementById('view-dif-vs-gramaje').textContent = data.dif_vs_gramaje || '-';
+                        document.getElementById('view-dif-vs-ishida').textContent = data.dif_vs_ishida || '-';
+
+                        // Peso para pestaña Resumen
+                        document.getElementById('view-resumen-gramaje-impreso').textContent = data.gramaje_impreso || '-';
+                        document.getElementById('view-resumen-peso-ishida').textContent = data.peso_ishida || '-';
+                        document.getElementById('view-resumen-peso-promedio').textContent = data.peso_promedio || '-';
+                        document.getElementById('view-resumen-dif-vs-gramaje').textContent = data.dif_vs_gramaje || '-';
+                        document.getElementById('view-resumen-dif-vs-ishida').textContent = data.dif_vs_ishida || '-';
+
+                        // Muestras de peso
+                        document.getElementById('view-peso-muestra-1').textContent = data.peso_muestra_1 || '-';
+                        document.getElementById('view-peso-muestra-2').textContent = data.peso_muestra_2 || '-';
+                        document.getElementById('view-peso-muestra-3').textContent = data.peso_muestra_3 || '-';
+                        document.getElementById('view-peso-muestra-4').textContent = data.peso_muestra_4 || '-';
+                        document.getElementById('view-peso-muestra-5').textContent = data.peso_muestra_5 || '-';
+                        document.getElementById('view-peso-muestra-6').textContent = data.peso_muestra_6 || '-';
+                        document.getElementById('view-peso-muestra-7').textContent = data.peso_muestra_7 || '-';
+                        document.getElementById('view-peso-muestra-8').textContent = data.peso_muestra_8 || '-';
+                        document.getElementById('view-peso-muestra-9').textContent = data.peso_muestra_9 || '-';
+                        document.getElementById('view-peso-muestra-10').textContent = data.peso_muestra_10 || '-';
+
+                        // Muestras de peso para pestaña Resumen
+                        document.getElementById('view-resumen-peso-muestra-1').textContent = data.peso_muestra_1 || '-';
+                        document.getElementById('view-resumen-peso-muestra-2').textContent = data.peso_muestra_2 || '-';
+                        document.getElementById('view-resumen-peso-muestra-3').textContent = data.peso_muestra_3 || '-';
+                        document.getElementById('view-resumen-peso-muestra-4').textContent = data.peso_muestra_4 || '-';
+                        document.getElementById('view-resumen-peso-muestra-5').textContent = data.peso_muestra_5 || '-';
+                        document.getElementById('view-resumen-peso-muestra-6').textContent = data.peso_muestra_6 || '-';
+                        document.getElementById('view-resumen-peso-muestra-7').textContent = data.peso_muestra_7 || '-';
+                        document.getElementById('view-resumen-peso-muestra-8').textContent = data.peso_muestra_8 || '-';
+                        document.getElementById('view-resumen-peso-muestra-9').textContent = data.peso_muestra_9 || '-';
+                        document.getElementById('view-resumen-peso-muestra-10').textContent = data.peso_muestra_10 || '-';
+
+                        // Sección Cama de Aire
+                        document.getElementById('view-cama-aire-tipo').textContent = data.cama_aire_tipo || '-';
+                        document.getElementById('view-cama-aire-muestra-1').textContent = data.cama_aire_muestra_1 || '-';
+                        document.getElementById('view-cama-aire-muestra-2').textContent = data.cama_aire_muestra_2 || '-';
+                        document.getElementById('view-cama-aire-muestra-3').textContent = data.cama_aire_muestra_3 || '-';
+                        document.getElementById('view-cama-aire-promedio').textContent = data.cama_aire_promedio || '-';
+
+                        // Cama de Aire para pestaña Resumen
+                        document.getElementById('view-resumen-cama-aire-tipo').textContent = data.cama_aire_tipo || '-';
+                        document.getElementById('view-resumen-cama-aire-muestra-1').textContent = data.cama_aire_muestra_1 || '-';
+                        document.getElementById('view-resumen-cama-aire-muestra-2').textContent = data.cama_aire_muestra_2 || '-';
+                        document.getElementById('view-resumen-cama-aire-muestra-3').textContent = data.cama_aire_muestra_3 || '-';
+                        document.getElementById('view-resumen-cama-aire-promedio').textContent = data.cama_aire_promedio || '-';
+
+                        // Sección Oxígeno Residual
+                        document.getElementById('view-oxigeno-residual-muestra-1').textContent = data.oxigeno_residual_muestra_1 || '-';
+                        document.getElementById('view-oxigeno-residual-muestra-2').textContent = data.oxigeno_residual_muestra_2 || '-';
+                        document.getElementById('view-oxigeno-residual-promedio').textContent = data.oxigeno_residual_promedio || '-';
+
+                        // Oxígeno Residual para pestaña Resumen
+                        document.getElementById('view-resumen-oxigeno-residual-muestra-1').textContent = data.oxigeno_residual_muestra_1 || '-';
+                        document.getElementById('view-resumen-oxigeno-residual-muestra-2').textContent = data.oxigeno_residual_muestra_2 || '-';
+                        document.getElementById('view-resumen-oxigeno-residual-promedio').textContent = data.oxigeno_residual_promedio || '-';
+
+                        // Observaciones
+                        const observaciones = data.observaciones || '';
+                        document.getElementById('view-resumen-observaciones').textContent = observaciones || 'Sin observaciones';
+                    })
+                    .catch(error => {
+                        console.error('Error al obtener datos del registro:', error);
+                        // Si falla la petición AJAX, usar los datos disponibles en los atributos data-*
+                        document.getElementById('view-fecha').textContent = button.getAttribute('data-record-fecha');
+                        document.getElementById('view-hora').textContent = button.getAttribute('data-record-hora');
+                        document.getElementById('view-turno').textContent = button.getAttribute('data-record-turno');
+                        document.getElementById('view-operador').textContent = button.getAttribute('data-record-operador');
+                        document.getElementById('view-linea').textContent = button.getAttribute('data-record-linea');
+                        document.getElementById('view-orden').textContent = button.getAttribute('data-record-orden');
+                        document.getElementById('view-maquina').textContent = button.getAttribute('data-record-maquina');
+                        document.getElementById('view-producto').textContent = button.getAttribute('data-record-producto');
+                    });
+            });
+        }
+
+        // Configurar el modal de eliminación
+        const deleteModal = document.getElementById('deleteModal');
+        const deleteForm = document.getElementById('deleteForm');
+        let deleteRecordButton = null;
+
+        if (deleteModal && deleteForm) {
+            // Actualiza la acción del formulario y guarda el botón que abrió el modal
+            deleteModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const recordId = button.getAttribute('data-record-id');
+                deleteForm.action = `/weaklink/{{ category }}/delete/${recordId}`;
+                deleteRecordButton = button;
+            });
+
+            // Solo agrega el listener una vez
+            deleteForm.addEventListener('submit', function (e) {
+                e.preventDefault(); // Prevenir envío estándar
+
+                fetch(this.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(new FormData(this)).toString()
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            // Cerrar modal
+                            const bsModal = bootstrap.Modal.getInstance(deleteModal);
+                            bsModal.hide();
+
+                            // Eliminar la fila de la tabla (si existe)
+                            if (deleteRecordButton) {
+                                const row = deleteRecordButton.closest('tr');
+                                if (row) {
+                                    row.remove();
+                                }
+                            }
+
+                            // Mostrar mensaje de éxito
+                            showAlert('Registro eliminado correctamente', 'success');
+
+                            // Verificar si no hay más registros y mostrar mensaje
+                            const table = document.querySelector('.data-table tbody');
+                            if (table && table.children.length === 0) {
+                                const emptyState = `
+                            <div class="empty-state">
+                                <i class="fas fa-clipboard-list"></i>
+                                <h3>No hay registros disponibles</h3>
+                                <p>Aún no se han creado registros de WEAK LINK para {{ category }}.</p>
+                                <a href="{{ url_for('weaklink_create', category=category) }}" class="btn btn-warning">
+                                    <i class="fas fa-plus me-1"></i>Crear Primer Registro
+                                </a>
+                            </div>
+                            `;
+                                const cardBody = document.querySelector('.card-body');
+                                if (cardBody) {
+                                    const tableContainer = document.querySelector('.table-responsive');
+                                    if (tableContainer) {
+                                        tableContainer.remove();
+                                        cardBody.innerHTML = emptyState;
+                                    }
+                                }
+                            }
+                        } else {
+                            showAlert('Error al eliminar el registro', 'danger');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showAlert('Error al eliminar el registro', 'danger');
+                    });
+            });
+        }
+
+        // Modal de edición - Redirigir a página completa
+        document.querySelectorAll('.btn-edit-weaklink').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                const recordId = this.getAttribute('data-record-id');
+                // Redirigir directamente a la página de edición completa
+                window.location.href = `/weaklink/{{ category }}/edit/${recordId}`;
+            });
+        });
+
+
+
+        // Función para mostrar alertas
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+
+            // Insertar la alerta al inicio del contenedor principal
+            const container = document.querySelector('.container');
+            if (container) {
+                container.insertBefore(alertDiv, container.firstChild);
+
+                // Auto ocultar después de 5 segundos
+                setTimeout(() => {
+                    alertDiv.classList.remove('show');
+                    setTimeout(() => alertDiv.remove(), 150);
+                }, 5000);
+            }
+        }
+    });
+
+    // ===== RESUMEN DEL TURNO ACTUAL =====
+    document.addEventListener('DOMContentLoaded', function() {
+        let autoRefreshInterval;
+
+        function cargarResumenTurno() {
+            const category = '{{ category }}';
+            const btnRefrescar = document.getElementById('btn-refrescar-turno');
+            const icon = btnRefrescar?.querySelector('i');
+
+            // Animación de carga
+            if (icon) icon.classList.add('spinning');
+
+            fetch(`/api/weaklink/resumen-turno-actual?category=${category}`)
+                .then(res => res.json())
+                .then(data => {
+                    // Actualizar hora actual
+                    document.getElementById('hora-actual-display').textContent = data.hora_actual;
+
+                    // Actualizar estadísticas
+                    document.getElementById('total-registros-turno').textContent = data.total_registros;
+                    document.getElementById('equipos-completados').textContent =
+                        `${data.equipos_completados}/${data.total_equipos}`;
+                    document.getElementById('porcentaje-completado').textContent =
+                        `${data.porcentaje_completado}%`;
+
+                    // Renderizar tarjetas de equipos
+                    renderizarEquipos(data.resumen);
+
+                    // Quitar animación
+                    if (icon) {
+                        setTimeout(() => icon.classList.remove('spinning'), 500);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al cargar resumen del turno:', error);
+                    if (icon) icon.classList.remove('spinning');
+                });
+        }
+
+        function renderizarEquipos(equipos) {
+            const grid = document.getElementById('equipos-grid');
+            grid.innerHTML = '';
+
+            equipos.forEach((equipo, index) => {
+                // Crear tarjeta
+                const card = document.createElement('div');
+                card.className = `equipo-card status-${equipo.color}`;
+                card.style.animationDelay = `${index * 0.05}s`;
+
+                // Determinar icono según registros
+                let icon = 'fa-times-circle';
+                let badgeText = 'Pendiente';
+                let badgeClass = 'badge-danger';
+
+                if (equipo.registros === 0) {
+                    icon = 'fa-times-circle';
+                    badgeText = 'Pendiente';
+                    badgeClass = 'badge-danger';
+                } else if (equipo.registros === 1) {
+                    icon = 'fa-exclamation-circle';
+                    badgeText = 'En Progreso';
+                    badgeClass = 'badge-warning';
+                } else if (equipo.registros === 2) {
+                    icon = 'fa-check-circle';
+                    badgeText = 'En Progreso';
+                    badgeClass = 'badge-warning';
+                } else if (equipo.registros >= 3) {
+                    icon = 'fa-check-double';
+                    badgeText = 'Completo';
+                    badgeClass = 'badge-success';
+                }
+
+                card.innerHTML = `
+                    <div class="equipo-nombre">
+                        <div class="equipo-icon icon-${equipo.color}">
+                            <i class="fas ${icon}"></i>
+                        </div>
+                        <span>${equipo.equipo}</span>
+                    </div>
+                    <div class="equipo-progreso text-${equipo.color}">
+                        ${equipo.registros}/${equipo.objetivo}
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-${equipo.color}"
+                             role="progressbar"
+                             style="width: ${equipo.progreso}%"
+                             aria-valuenow="${equipo.progreso}"
+                             aria-valuemin="0"
+                             aria-valuemax="100">
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <small class="text-muted">${equipo.progreso}%</small>
+                    </div>
+                    <span class="equipo-badge ${badgeClass}">
+                        ${badgeText}
+                    </span>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // Botón refrescar
+        const btnRefrescar = document.getElementById('btn-refrescar-turno');
+        if (btnRefrescar) {
+            btnRefrescar.addEventListener('click', cargarResumenTurno);
+        }
+
+        // Cargar al abrir la pestaña "Resultados"
+        const resultadosTab = document.getElementById('resultados-tab');
+        if (resultadosTab) {
+            resultadosTab.addEventListener('shown.bs.tab', function() {
+                cargarResumenTurno();
+
+                // Auto-refresh cada 2 minutos
+                if (autoRefreshInterval) {
+                    clearInterval(autoRefreshInterval);
+                }
+                autoRefreshInterval = setInterval(cargarResumenTurno, 120000); // 2 minutos
+            });
+
+            // Detener auto-refresh al salir de la pestaña
+            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+                tab.addEventListener('shown.bs.tab', function(e) {
+                    if (e.target.id !== 'resultados-tab') {
+                        if (autoRefreshInterval) {
+                            clearInterval(autoRefreshInterval);
+                        }
+                    }
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

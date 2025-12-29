@@ -1,0 +1,21 @@
+/* 
+ * GUÍA RÁPIDA DE AJUSTE DE POSICIÓN DEL LOGIN
+ * ============================================
+ * 
+ * Si necesitas ajustar la posición vertical de la tarjeta de login,
+ * modifica estos valores:
+ * 
+ * 1. En .login-container:
+ *    - padding-bottom: 120px; (más alto = tarjeta más arriba)
+ * 
+ * 2. En .login-card:
+ *    - margin-top: -80px; (más negativo = tarjeta más arriba)
+ * 
+ * Valores recomendados según necesidad:
+ * - Muy arriba: padding-bottom: 200px; margin-top: -120px;
+ * - Arriba: padding-bottom: 120px; margin-top: -80px; (actual)
+ * - Centro: padding-bottom: 0px; margin-top: 0px;
+ * - Abajo: padding-bottom: 0px; margin-top: 50px;
+ * 
+ * NOTA: Ajusta también los valores móviles en @media (max-width: 480px)
+ */

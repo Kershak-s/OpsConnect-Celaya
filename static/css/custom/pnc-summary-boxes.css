@@ -1,0 +1,383 @@
+/* Estilos mejorados para las cajas de resumen de cantidades en PNC */
+
+/* Contenedor principal */
+.summary-container {
+    width: 100%;
+    padding: 20px 10px;
+    min-height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Wrapper para mostrar las cajas horizontalmente */
+.summary-boxes-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 20px;
+    justify-content: center;
+    align-items: stretch;
+    width: 100%;
+    overflow-x: auto;
+    padding: 10px 0;
+}
+
+/* Wrapper individual para cada caja */
+.summary-box-wrapper {
+    flex: 0 0 auto;
+    min-width: 180px;
+    max-width: 220px;
+}
+
+/* Estilo base para las cajas de resumen */
+.summary-box {
+    background: var(--box-bg-color, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 200px;
+    border: 3px solid var(--box-color);
+    position: relative;
+}
+
+/* Estilo especial para cajas con valor 0 */
+.summary-box-zero {
+    opacity: 0.85;
+}
+
+.summary-box-zero .summary-value {
+    color: #999999 !important;
+}
+
+.summary-box-zero .summary-icon {
+    background: #cccccc !important;
+}
+
+.summary-box-zero .summary-badge {
+    background: #999999 !important;
+}
+
+.summary-box-zero .summary-label {
+    color: #666666 !important;
+}
+
+.summary-box:hover {
+    transform: translateY(-5px) scale(1.03);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border-color: var(--box-hover-color);
+}
+
+.summary-box-zero:hover {
+    transform: translateY(-3px) scale(1.01);
+}
+
+/* Icono de las cajas */
+.summary-icon {
+    background: var(--box-color);
+    color: white;
+    padding: 20px;
+    text-align: center;
+    font-size: 2.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.summary-icon::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.15);
+    transform: rotate(45deg);
+    transition: all 0.3s ease;
+}
+
+.summary-box:hover .summary-icon::after {
+    right: -100%;
+}
+
+.summary-icon i {
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+}
+
+/* Contenido de las cajas */
+.summary-content {
+    padding: 20px 15px;
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: transparent;
+}
+
+.summary-value {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--box-color);
+    margin: 8px 0;
+    line-height: 1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.summary-label {
+    color: #333333;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.summary-badge {
+    display: inline-block;
+    background: var(--box-color);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 15px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    margin-top: 6px;
+    letter-spacing: 0.3px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Animaciones mejoradas */
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.summary-box-wrapper {
+    animation: slideInRight 0.5s ease-out forwards;
+}
+
+.summary-box-wrapper:nth-child(1) { animation-delay: 0.05s; }
+.summary-box-wrapper:nth-child(2) { animation-delay: 0.1s; }
+.summary-box-wrapper:nth-child(3) { animation-delay: 0.15s; }
+.summary-box-wrapper:nth-child(4) { animation-delay: 0.2s; }
+.summary-box-wrapper:nth-child(5) { animation-delay: 0.25s; }
+.summary-box-wrapper:nth-child(6) { animation-delay: 0.3s; }
+
+/* Mensaje cuando no hay datos */
+.alert-info {
+    background-color: #0066cc;
+    border: none;
+    color: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    width: 100%;
+    font-weight: 700;
+    box-shadow: 0 4px 12px rgba(0, 102, 204, 0.3);
+}
+
+/* Estilos para las secciones de resumen */
+.card.border-0.shadow-sm {
+    border-radius: 15px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid #e0e0e0;
+}
+
+.card-header.bg-primary {
+    background: #0066cc !important;
+    padding: 1.2rem;
+    border: none;
+}
+
+.card-header .card-title {
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.card-header .card-title i {
+    font-size: 1.4rem;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+.card-body {
+    padding: 1.5rem;
+    background-color: #f5f5f5;
+}
+
+/* Estilos para los gráficos */
+.card.h-100 {
+    height: 100% !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card.h-100:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Gradientes sólidos para los headers de los gráficos */
+.bg-gradient-primary {
+    background: #0066cc !important;
+}
+
+.bg-gradient-info {
+    background: #00a8cc !important;
+}
+
+.bg-gradient-success {
+    background: #00cc66 !important;
+}
+
+/* Canvas de gráficos */
+canvas {
+    max-height: 300px !important;
+    width: 100% !important;
+}
+
+/* Scrollbar personalizada para el contenedor horizontal */
+.summary-boxes-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+
+.summary-boxes-wrapper::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.summary-boxes-wrapper::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.summary-boxes-wrapper::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Media queries para responsividad */
+@media (max-width: 1400px) {
+    .summary-box-wrapper {
+        min-width: 160px;
+        max-width: 200px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .summary-boxes-wrapper {
+        gap: 15px;
+    }
+    
+    .summary-box-wrapper {
+        min-width: 150px;
+        max-width: 180px;
+    }
+    
+    .summary-value {
+        font-size: 2.2rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .summary-container {
+        padding: 15px 5px;
+    }
+    
+    .summary-boxes-wrapper {
+        gap: 12px;
+        justify-content: flex-start;
+    }
+    
+    .summary-box-wrapper {
+        min-width: 140px;
+        max-width: 160px;
+    }
+    
+    .summary-box {
+        min-height: 180px;
+    }
+    
+    .summary-icon {
+        padding: 15px !important;
+        font-size: 2rem !important;
+    }
+    
+    .summary-value {
+        font-size: 2rem;
+    }
+    
+    .summary-label {
+        font-size: 0.8rem;
+    }
+    
+    .summary-badge {
+        font-size: 0.65rem;
+        padding: 2px 8px;
+    }
+}
+
+@media (max-width: 576px) {
+    .summary-boxes-wrapper {
+        gap: 10px;
+    }
+    
+    .summary-box-wrapper {
+        min-width: 130px;
+        max-width: 150px;
+    }
+    
+    .summary-box {
+        border-radius: 10px;
+        min-height: 170px;
+    }
+    
+    .summary-content {
+        padding: 15px 10px;
+    }
+    
+    .summary-value {
+        font-size: 1.8rem;
+    }
+}
+
+/* Efectos hover adicionales */
+.summary-box:hover .summary-value {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+.summary-box:hover .summary-badge {
+    transform: scale(1.05);
+}
+
+/* Efecto especial para cajas con valor cero */
+@keyframes pulse-zero {
+    0% {
+        opacity: 0.85;
+    }
+    50% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 0.85;
+    }
+}
+
+.summary-box-zero {
+    animation: pulse-zero 3s infinite;
+}

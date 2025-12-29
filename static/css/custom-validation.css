@@ -1,0 +1,89 @@
+/**
+ * Custom form validation styling
+ */
+
+/* Custom styling for invalid inputs */
+.input-error {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.25rem rgba(220, 53, 69, 0.25) !important;
+    background-color: rgba(220, 53, 69, 0.05) !important;
+}
+
+/* Error message styling */
+.error-message {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+    font-weight: 500;
+}
+
+/* Styles to hide native browser validation messages */
+:invalid {
+    box-shadow: none !important;
+}
+
+/* Hide browser validation popup bubbles */
+input::-webkit-validation-bubble-message,
+input::-webkit-validation-bubble,
+input::-webkit-validation-bubble-arrow-clipper,
+input::-webkit-validation-bubble-arrow,
+input::-webkit-validation-bubble-icon {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
+/* Ensure date inputs look consistent across browsers */
+input[type="date"],
+input[type="time"] {
+    appearance: textfield;
+}
+
+/* Disable default validation styling for all elements */
+form {
+    /* This is important to override browser defaults */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Styling for time validation message box */
+.time-tooltip {
+    background-color: #212529;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    position: absolute;
+    bottom: 100%;
+    left: 0;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
+
+/* Arrow for tooltip */
+.time-tooltip:after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 15px;
+    border-width: 6px;
+    border-style: solid;
+    border-color: #212529 transparent transparent transparent;
+}
+
+/* Add valid styling for correct inputs */
+.input-valid {
+    border-color: #28a745 !important;
+    background-color: rgba(40, 167, 69, 0.05) !important;
+}
+
+/* Remove the default outline that appears in Chrome */
+input:focus:invalid {
+    outline: none !important;
+}

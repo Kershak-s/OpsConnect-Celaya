@@ -1,0 +1,77 @@
+/**
+ * Estilos para los selectores personalizados de hora
+ */
+
+/* Estilo para los contenedores de selectores */
+.pnc-hora-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+/* Estilo para las etiquetas */
+.pnc-hora-label {
+    font-weight: 600;
+    margin-right: 10px;
+    min-width: 50px;
+}
+
+/* Estilo para los selectores de hora */
+.pnc-hora-select {
+    flex: 1;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    padding: 8px 12px;
+    margin: 0 5px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%23212529' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 16px 12px;
+    background-color: #fff;
+}
+
+/* Estilo para separadores */
+.pnc-hora-separator {
+    font-weight: 600;
+    margin: 0 8px;
+}
+
+/* Estilo para los selectores cuando se enfocan */
+.pnc-hora-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    outline: none;
+}
+
+/* Personalización para campos de Turno A */
+.pnc-hora-turno-a .pnc-hora-select {
+    border-color: #0d6efd;
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Personalización para campos de Turno B */
+.pnc-hora-turno-b .pnc-hora-select {
+    border-color: #6f42c1;
+    background-color: rgba(111, 66, 193, 0.05);
+}
+
+/* Estilo para indicador de turno */
+.pnc-turno-indicator {
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 10px;
+}
+
+.pnc-turno-a {
+    background-color: #0d6efd;
+    color: white;
+}
+
+.pnc-turno-b {
+    background-color: #6f42c1;
+    color: white;
+}
+
