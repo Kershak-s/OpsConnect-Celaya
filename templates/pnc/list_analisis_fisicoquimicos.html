@@ -300,6 +300,97 @@
         font-size: 16px !important;
         height: 50px !important;
     }
+
+    /* Estilos para tarjetas de documentos */
+    .documento-card {
+        transition: all 0.3s ease;
+        border: 1px solid #e0e0e0;
+        cursor: pointer;
+        overflow: hidden;
+    }
+
+    .documento-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        border-color: #0d6efd;
+    }
+
+    .documento-thumbnail {
+        position: relative;
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 1px solid #e0e0e0;
+        overflow: hidden;
+        height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .documento-preview {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: top;
+        transition: transform 0.3s ease;
+    }
+
+    .documento-card:hover .documento-preview {
+        transform: scale(1.05);
+    }
+
+    .documento-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        color: white;
+    }
+
+    .documento-card:hover .documento-overlay {
+        opacity: 1;
+    }
+
+    .documento-icon-fallback {
+        padding: 40px;
+        background: linear-gradient(135deg, #fff5f5 0%, #ffe0e0 100%);
+        border-radius: 50%;
+    }
+
+    .documento-titulo {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #333;
+        line-height: 1.4;
+        min-height: 2.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .documento-card .card-footer {
+        padding: 0.75rem;
+    }
+
+    .documento-card .btn {
+        transition: all 0.2s ease;
+        font-size: 0.8rem;
+    }
+
+    .documento-card .btn:hover {
+        transform: scale(1.05);
+    }
+
+    .documento-card .card-body {
+        padding: 0.75rem;
+    }
 </style>
 {% endblock %}
 
@@ -365,6 +456,20 @@
             'aceite_pt_min': -1, 'aceite_pt_max': -1, 'aceite_pt_warning_low': -1, 'aceite_pt_warning_high': -1,
             'humedad_pt_min': 1.35, 'humedad_pt_max': 1.8, 'humedad_pt_warning_low': 1.20, 'humedad_pt_warning_high': 2,
             'sal_pt_min': 0.55, 'sal_pt_max': 0.85, 'sal_pt_warning_low': 0.45, 'sal_pt_warning_high': 0.95
+        },
+        'RUFFLES SAL': {
+            'humedad_base_min': 1.35, 'humedad_base_max': 1.65, 'humedad_base_warning_low': 1.20, 'humedad_base_warning_high': 1.80,
+            'aceite_base_min': 31, 'aceite_base_max': 35, 'aceite_base_warning_low': 30, 'aceite_base_warning_high': 36,
+            'aceite_pt_min': -1, 'aceite_pt_max': -1, 'aceite_pt_warning_low': -1, 'aceite_pt_warning_high': -1,
+            'humedad_pt_min': 1.35, 'humedad_pt_max': 1.8, 'humedad_pt_warning_low': 1.20, 'humedad_pt_warning_high': 2,
+            'sal_pt_min': 0.55, 'sal_pt_max': 0.85, 'sal_pt_warning_low': 0.45, 'sal_pt_warning_high': 0.95
+        },
+        'SABRITAS LIMON': {
+            'humedad_base_min': 1.35, 'humedad_base_max': 1.65, 'humedad_base_warning_low': 1.20, 'humedad_base_warning_high': 1.80,
+            'aceite_base_min': 31, 'aceite_base_max': 35, 'aceite_base_warning_low': 30, 'aceite_base_warning_high': 36,
+            'aceite_pt_min': -1, 'aceite_pt_max': -1, 'aceite_pt_warning_low': -1, 'aceite_pt_warning_high': -1,
+            'humedad_pt_min': -1, 'humedad_pt_max': -1, 'humedad_pt_warning_low': -1, 'humedad_pt_warning_high': -1,
+            'sal_pt_min': 1.23, 'sal_pt_max': 1.50, 'sal_pt_warning_low': 1.10, 'sal_pt_warning_high': 1.63
         },
         'SABRITAS XTRA FH': {
             'humedad_base_min': 1.20, 'humedad_base_max': 1.5, 'humedad_base_warning_low': 1.05, 'humedad_base_warning_high': 1.65,
@@ -651,6 +756,12 @@
                 <i class="fas fa-chart-bar me-1"></i> Resultados
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="documentos-tab" data-bs-toggle="tab" data-bs-target="#documentos" type="button"
+                role="tab" aria-controls="documentos" aria-selected="false">
+                <i class="fas fa-file-pdf me-1"></i> Documentos
+            </button>
+        </li>
     </ul>
 
     <!-- Contenido de las pestañas -->
@@ -669,11 +780,12 @@
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <label class="form-label mb-0">Mostrar:</label>
-                    <select class="form-select" id="recordsPerPage" style="width: auto;">
-                        <option value="20" selected>20</option>
-                        <option value="50">50</option>
-                        <option value="100">100</option>
-                        <option value="200">200</option>
+                    <select class="form-select" id="recordsPerPage" style="width: auto;"
+                        onchange="window.location.href='{{ url_for('list_analisis_fisicoquimicos', category=category) }}?per_page=' + this.value">
+                        <option value="20" {{ 'selected' if per_page == 20 }}>20</option>
+                        <option value="50" {{ 'selected' if per_page == 50 }}>50</option>
+                        <option value="100" {{ 'selected' if per_page == 100 }}>100</option>
+                        <option value="200" {{ 'selected' if per_page == 200 }}>200</option>
                     </select>
                     <span class="text-muted">registros</span>
                 </div>
@@ -834,20 +946,29 @@
                         </tbody>
                     </table>
                 </div>
-                <!-- Controles de Paginación -->
+                <!-- Controles de Paginación Server-Side -->
                 <div class="d-flex justify-content-between align-items-center mt-3">
-                    <div id="paginationInfo" class="text-muted">
-                        Mostrando <span id="showingFrom">1</span> a <span id="showingTo">20</span> de <span id="totalRecords">{{ analisis_records|length }}</span> registros
+                    <div class="text-muted">
+                        Mostrando {{ ((pagination.page - 1) * pagination.per_page) + 1 }} a {{ [pagination.page * pagination.per_page, pagination.total] | min }} de {{ pagination.total }} registros
                     </div>
                     <nav aria-label="Navegación de páginas">
-                        <ul class="pagination mb-0" id="paginationControls">
-                            <li class="page-item" id="prevPage">
-                                <a class="page-link" href="#" aria-label="Anterior">
+                        <ul class="pagination mb-0">
+                            <li class="page-item {{ 'disabled' if not pagination.has_prev }}">
+                                <a class="page-link" href="{{ url_for('list_analisis_fisicoquimicos', category=category, page=pagination.prev_num, per_page=per_page) }}" aria-label="Anterior">
                                     <i class="fas fa-chevron-left"></i>
                                 </a>
                             </li>
-                            <li class="page-item" id="nextPage">
-                                <a class="page-link" href="#" aria-label="Siguiente">
+                            {% for p in pagination.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+                                {% if p %}
+                                    <li class="page-item {{ 'active' if p == pagination.page }}">
+                                        <a class="page-link" href="{{ url_for('list_analisis_fisicoquimicos', category=category, page=p, per_page=per_page) }}">{{ p }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                                {% endif %}
+                            {% endfor %}
+                            <li class="page-item {{ 'disabled' if not pagination.has_next }}">
+                                <a class="page-link" href="{{ url_for('list_analisis_fisicoquimicos', category=category, page=pagination.next_num, per_page=per_page) }}" aria-label="Siguiente">
                                     <i class="fas fa-chevron-right"></i>
                                 </a>
                             </li>
@@ -906,6 +1027,8 @@
                                         {% elif category == 'PAPA' %}
                                         <option value="PAPA SAL">PAPA SAL</option>
                                         <option value="RUFFLES QUESO">RUFFLES QUESO</option>
+                                        <option value="RUFFLES SAL">RUFFLES SAL</option>
+                                        <option value="SABRITAS LIMON">SABRITAS LIMON</option>
                                         <option value="SABRITAS XTRA FH">SABRITAS XTRA FH</option>
                                         {% endif %}
                                     </select>
@@ -1062,6 +1185,67 @@
         </div>
     </div>
 </div>
+
+        <!-- Pestaña de Documentos -->
+        <div class="tab-pane fade" id="documentos" role="tabpanel" aria-labelledby="documentos-tab">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-folder-open me-2"></i> Documentos e Instructivos
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted mb-4">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Documentos técnicos y procedimientos del laboratorio fisicoquímico. Haz clic en cualquier documento para visualizarlo.
+                    </p>
+
+                    <div class="row" id="documentos-grid">
+                        {% for doc in documentos_lista %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100 documento-card" data-doc="{{ doc.filename }}">
+                                <div class="documento-thumbnail">
+                                    {% if doc.thumbnail %}
+                                    <img src="{{ url_for('static', filename='thumbnails/' + doc.thumbnail) }}"
+                                         alt="Vista previa de {{ doc.nombre }}"
+                                         class="img-fluid documento-preview">
+                                    <div class="documento-overlay">
+                                        <i class="fas fa-search-plus fa-2x"></i>
+                                    </div>
+                                    {% else %}
+                                    <div class="documento-icon-fallback">
+                                        <i class="fas fa-file-pdf fa-4x text-danger"></i>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="card-body text-center pt-2">
+                                    <h6 class="card-title documento-titulo">{{ doc.nombre }}</h6>
+                                    <p class="card-text small text-muted">{{ doc.codigo }}</p>
+                                </div>
+                                <div class="card-footer bg-transparent border-0 text-center">
+                                    <a href="{{ url_for('ver_documento_fisicoquimico', filename=doc.filename) }}"
+                                       target="_blank" class="btn btn-outline-primary btn-sm me-2">
+                                        <i class="fas fa-eye me-1"></i> Ver
+                                    </a>
+                                    <a href="{{ url_for('descargar_documento_fisicoquimico', filename=doc.filename) }}"
+                                       class="btn btn-outline-success btn-sm">
+                                        <i class="fas fa-download me-1"></i> Descargar
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                No hay documentos disponibles en este momento.
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
 </div>
 
 <!-- Modal para descarga Excel -->
@@ -1114,6 +1298,8 @@
                                 {% elif category == 'PAPA' %}
                                 <option value="PAPA SAL">PAPA SAL</option>
                                 <option value="RUFFLES QUESO">RUFFLES QUESO</option>
+                                <option value="RUFFLES SAL">RUFFLES SAL</option>
+                                <option value="SABRITAS LIMON">SABRITAS LIMON</option>
                                 <option value="SABRITAS XTRA FH">SABRITAS XTRA FH</option>
                                     {% endif %}
                             </select>
@@ -1222,6 +1408,8 @@
                                     {% elif category == 'PAPA' %}
                                     <option value="PAPA SAL">PAPA SAL</option>
                                     <option value="RUFFLES QUESO">RUFFLES QUESO</option>
+                                    <option value="RUFFLES SAL">RUFFLES SAL</option>
+                                    <option value="SABRITAS LIMON">SABRITAS LIMON</option>
                                     <option value="SABRITAS XTRA FH">SABRITAS XTRA FH</option>
                                     {% endif %}
                                 </select>
@@ -1479,6 +1667,8 @@
                                     {% elif category == 'PAPA' %}
                                     <option value="PAPA SAL">PAPA SAL</option>
                                     <option value="RUFFLES QUESO">RUFFLES QUESO</option>
+                                    <option value="RUFFLES SAL">RUFFLES SAL</option>
+                                    <option value="SABRITAS LIMON">SABRITAS LIMON</option>
                                     <option value="SABRITAS XTRA FH">SABRITAS XTRA FH</option>
                                     {% endif %}
                                 </select>
@@ -1887,81 +2077,12 @@
 <script>
 // Gestión del modal de descarga Excel
 document.addEventListener('DOMContentLoaded', function() {
-    // PAGINACIÓN DE TABLA
-    let currentPage = 1;
-    let recordsPerPage = 20;
-    let totalRecords = 0;
-    let allRows = [];
-    
-    function initPagination() {
-        const tbody = document.querySelector('.table tbody');
-        if (!tbody) return;
-        
-        allRows = Array.from(tbody.querySelectorAll('tr'));
-        totalRecords = allRows.length;
-        
-        document.getElementById('totalRecords').textContent = totalRecords;
-        
-        // Event listeners
-        document.getElementById('recordsPerPage').addEventListener('change', function() {
-            recordsPerPage = parseInt(this.value);
-            currentPage = 1;
-            showPage();
-        });
-        
-        document.getElementById('prevPage').addEventListener('click', function(e) {
-            e.preventDefault();
-            if (currentPage > 1) {
-                currentPage--;
-                showPage();
-            }
-        });
-        
-        document.getElementById('nextPage').addEventListener('click', function(e) {
-            e.preventDefault();
-            const totalPages = Math.ceil(totalRecords / recordsPerPage);
-            if (currentPage < totalPages) {
-                currentPage++;
-                showPage();
-            }
-        });
-        
-        showPage();
-    }
-    
-    function showPage() {
-        const startIndex = (currentPage - 1) * recordsPerPage;
-        const endIndex = startIndex + recordsPerPage;
-        
-        allRows.forEach((row, index) => {
-            row.style.display = (index >= startIndex && index < endIndex) ? '' : 'none';
-        });
-        
-        // Recolorear filas visibles
-        setTimeout(() => {
-            if (typeof aplicarColoresTabla !== 'undefined') {
-                aplicarColoresTabla();
-            }
-        }, 50);
-        
-        updatePaginationInfo();
-    }
-    
-    function updatePaginationInfo() {
-        const startIndex = (currentPage - 1) * recordsPerPage + 1;
-        const endIndex = Math.min(currentPage * recordsPerPage, totalRecords);
-        const totalPages = Math.ceil(totalRecords / recordsPerPage);
-        
-        document.getElementById('showingFrom').textContent = totalRecords === 0 ? 0 : startIndex;
-        document.getElementById('showingTo').textContent = endIndex;
-        
-        // Habilitar/deshabilitar botones
-        document.getElementById('prevPage').classList.toggle('disabled', currentPage === 1);
-        document.getElementById('nextPage').classList.toggle('disabled', currentPage === totalPages || totalRecords === 0);
-    }
-    
-    // Inicializar paginación
-    initPagination();
+    // Aplicar colores a la tabla al cargar (paginación server-side)
+    setTimeout(() => {
+        if (typeof aplicarColoresTabla !== 'undefined') {
+            aplicarColoresTabla();
+        }
+    }, 100);
     
     // MODAL DESCARGA EXCEL
     const btnDescargar = document.getElementById('btn-descargar-excel-fisico');
@@ -2171,6 +2292,12 @@ document.addEventListener('DOMContentLoaded', function() {
             sal_pt: '1.24 - 1.54'
         },
 
+        'SABRITAS LIMON': {
+            humedad_base: '1.35 - 1.65',
+            aceite_base: '31 - 35',
+            humedad_pt: 'N/A',
+            sal_pt: '1.23 - 1.50'
+        },
         'SABRITAS XTRA FH': {
             humedad_base: '1.35 - 1.65',
             aceite_base: '31 - 35',

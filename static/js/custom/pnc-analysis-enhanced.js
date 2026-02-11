@@ -23,7 +23,7 @@ const PNCAnalysis = {
                 origenes: ['COCIMIENTO', 'FREIDOR', 'LIMPIEZA DE MAIZ', 'MOLINO/LAMINADOR', 'SAZONADO', 'EMPAQUE GENERAL']
             },
             'PAPA': {
-                productos: ['PAPA SAL', 'OTROS'],
+                productos: ['PAPA SAL', 'RUFFLES QUESO', 'RUFFLES SAL', 'SABRITAS LIMON', 'SABRITAS XTRA FH', 'OTROS'],
                 origenes: ['PELADO', 'REBANADO', 'FREIDOR', 'SAZONADO', 'EMPAQUE']
             }
         },

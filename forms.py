@@ -405,6 +405,8 @@ class WeakLinkForm(FlaskForm):
         # Opciones para PAPA
         ('PAPA SAL', 'PAPA SAL'),
         ('RUFFLES QUESO', 'RUFFLES QUESO'),
+        ('RUFFLES SAL', 'RUFFLES SAL'),
+        ('SABRITAS LIMON', 'SABRITAS LIMON'),
         ('SABRITAS XTRA FH', 'SABRITAS XTRA FH'),
         # Opciones generales
         ('OTROS', 'OTROS')

@@ -1262,7 +1262,9 @@ def create_app(config_class=Config):
         elif category == 'PAPA':
             form.producto.choices = [
                 ('PAPA SAL', 'PAPA SAL'),
+                ('SABRITAS LIMON', 'SABRITAS LIMON'),
                 ('RUFFLES QUESO', 'RUFFLES QUESO'),
+                ('RUFFLES SAL', 'RUFFLES SAL'),
                 ('SABRITAS XTRA FH', 'SABRITAS XTRA FH')
             ]
         else:
@@ -1362,6 +1364,8 @@ def create_app(config_class=Config):
             elif category == 'PAPA':
                 form.producto.choices = [
                     ('PAPA SAL', 'PAPA SAL'),
+                    ('SABRITAS LIMON', 'SABRITAS LIMON'),
+                    ('RUFFLES SAL', 'RUFFLES SAL'),
                     ('RUFFLES QUESO', 'RUFFLES QUESO'),
                     ('SABRITAS XTRA FH', 'SABRITAS XTRA FH')
 
@@ -1823,14 +1827,118 @@ def create_app(config_class=Config):
                 flash(f'Error al actualizar el registro: {str(e)}', 'danger')
             return redirect(url_for('list_analisis_fisicoquimicos', category=category))
 
-        # Obtener todos los registros de análisis para esta categoría
-        analisis_records = AnalisisCalidad.query.filter_by(categoria=category).order_by(AnalisisCalidad.created_at.desc()).all()
-        
+        # Paginación server-side para evitar cargar todos los registros
+        page = request.args.get('page', 1, type=int)
+        per_page = request.args.get('per_page', 50, type=int)
+        # Limitar per_page a valores válidos
+        if per_page not in [20, 50, 100, 200]:
+            per_page = 50
+
+        pagination = AnalisisCalidad.query.filter_by(categoria=category)\
+            .order_by(AnalisisCalidad.created_at.desc())\
+            .paginate(page=page, per_page=per_page, error_out=False)
+
+        analisis_records = pagination.items
+
+        # Obtener lista de documentos de la carpeta Doc
+        documentos_lista = obtener_documentos_fisicoquimicos()
+
         return render_template('pnc/list_analisis_fisicoquimicos.html',
                                title=f'Análisis Fisicoquímicos - {category}',
                                category=category,
-                               analisis_records=analisis_records)
-    
+                               analisis_records=analisis_records,
+                               pagination=pagination,
+                               current_page=page,
+                               per_page=per_page,
+                               documentos_lista=documentos_lista)
+
+    # Función auxiliar para generar thumbnail de un PDF
+    def generar_thumbnail_pdf(pdf_path, thumbnail_path, width=300):
+        """Genera una imagen thumbnail de la primera página de un PDF"""
+        import os
+        try:
+            import fitz  # PyMuPDF
+            doc = fitz.open(pdf_path)
+            page = doc[0]  # Primera página
+
+            # Calcular el zoom para obtener el ancho deseado
+            zoom = width / page.rect.width
+            matrix = fitz.Matrix(zoom, zoom)
+
+            # Renderizar página como imagen
+            pix = page.get_pixmap(matrix=matrix)
+            pix.save(thumbnail_path)
+            doc.close()
+            return True
+        except Exception as e:
+            print(f"Error generando thumbnail: {e}")
+            return False
+
+    # Función auxiliar para obtener documentos de la carpeta Doc
+    def obtener_documentos_fisicoquimicos():
+        """Obtiene la lista de documentos PDF de la carpeta Doc con thumbnails"""
+        import os
+        documentos = []
+        doc_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Doc')
+        thumbnail_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static', 'thumbnails')
+
+        # Crear carpeta de thumbnails si no existe
+        if not os.path.exists(thumbnail_folder):
+            os.makedirs(thumbnail_folder)
+
+        if os.path.exists(doc_folder):
+            for filename in sorted(os.listdir(doc_folder)):
+                if filename.endswith('.pdf'):
+                    # Extraer código y nombre del documento
+                    # Formato: IT-CS-LFQ-XXX-NOMBRE.pdf
+                    parts = filename.replace('.pdf', '').split('-', 4)
+                    if len(parts) >= 5:
+                        codigo = '-'.join(parts[:4])  # IT-CS-LFQ-XXX
+                        nombre = parts[4].replace('_', ' ')  # Nombre del documento
+                    else:
+                        codigo = filename.replace('.pdf', '')
+                        nombre = filename.replace('.pdf', '')
+
+                    # Generar thumbnail si no existe
+                    thumbnail_name = filename.replace('.pdf', '.png')
+                    thumbnail_path = os.path.join(thumbnail_folder, thumbnail_name)
+                    pdf_path = os.path.join(doc_folder, filename)
+
+                    if not os.path.exists(thumbnail_path):
+                        generar_thumbnail_pdf(pdf_path, thumbnail_path)
+
+                    # Verificar si el thumbnail existe
+                    has_thumbnail = os.path.exists(thumbnail_path)
+
+                    documentos.append({
+                        'filename': filename,
+                        'codigo': codigo,
+                        'nombre': nombre,
+                        'thumbnail': thumbnail_name if has_thumbnail else None
+                    })
+
+        return documentos
+
+    # Ruta para ver documento PDF
+    @app.route('/documentos/fisicoquimicos/ver/<path:filename>')
+    @login_required
+    def ver_documento_fisicoquimico(filename):
+        """Sirve el documento PDF para visualización en el navegador"""
+        import os
+        from flask import send_from_directory
+        doc_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Doc')
+        return send_from_directory(doc_folder, filename, mimetype='application/pdf')
+
+    # Ruta para descargar documento PDF
+    @app.route('/documentos/fisicoquimicos/descargar/<path:filename>')
+    @login_required
+    def descargar_documento_fisicoquimico(filename):
+        """Sirve el documento PDF para descarga"""
+        import os
+        from flask import send_from_directory
+        doc_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Doc')
+        return send_from_directory(doc_folder, filename, as_attachment=True)
+
     # API para obtener los datos completos de un registro de análisis fisicoquímico
     @app.route('/api/analisis_fisicoquimicos/<int:registro_id>', methods=['GET'])
     @login_required
@@ -3132,6 +3240,8 @@ def create_app(config_class=Config):
         elif category == 'PAPA':
             form.producto.choices = [
                 ('PAPA SAL', 'PAPA SAL'),
+                ('SABRITAS LIMON', 'SABRITAS LIMON'),
+                ('RUFFLES SAL', 'RUFFLES SAL'),
                 ('RUFFLES QUESO', 'RUFFLES QUESO'),
                 ('SABRITAS XTRA FH', 'SABRITAS XTRA FH'),
                 ('OTROS', 'OTROS')
@@ -3289,29 +3399,69 @@ def create_app(config_class=Config):
     @app.route('/api/weaklink/resumen-turno-actual', methods=['GET'])
     @login_required
     def api_weaklink_resumen_turno_actual():
-        """API para obtener resumen del turno actual (6:30 AM - 6:30 AM)"""
+        """API para obtener resumen por turno A o B"""
         from models import WeakLink
         from datetime import datetime, date, time, timedelta
         from sqlalchemy import func, and_, or_
 
         categoria = request.args.get('category')
+        turno_solicitado = request.args.get('turno', None)  # 'A', 'B' o None para actual
 
         if not categoria or categoria not in ['EXTRUIDOS', 'TORTILLA', 'PAPA']:
             return jsonify({'error': 'Categoría no válida'}), 400
 
-        # Calcular el turno actual (6:30 AM - 6:30 AM del día siguiente)
         now = datetime.now()
         current_date = now.date()
         current_time = now.time()
-        turno_inicio_time = time(6, 30)
 
-        # Si son antes de las 6:30 AM, el turno comenzó ayer
-        if current_time < turno_inicio_time:
-            fecha_inicio_turno = current_date - timedelta(days=1)
-            fecha_fin_turno = current_date
+        # Horarios de turnos: A = 7:00-19:00, B = 19:00-7:00
+        turno_a_inicio = time(7, 0)
+        turno_a_fin = time(19, 0)
+
+        # Determinar turno actual si no se especifica
+        if turno_solicitado is None:
+            if turno_a_inicio <= current_time < turno_a_fin:
+                turno_solicitado = 'A'
+            else:
+                turno_solicitado = 'B'
+
+        # Calcular fechas y horas según el turno solicitado
+        if turno_solicitado == 'A':
+            # Turno A: 7:00 AM - 7:00 PM del mismo día
+            fecha_turno = current_date
+            hora_inicio = turno_a_inicio
+            hora_fin = turno_a_fin
+            turno_label = 'A (7:00 - 19:00)'
+
+            # Consultar registros del Turno A
+            registros = WeakLink.query.filter(
+                WeakLink.categoria == categoria,
+                WeakLink.fecha == fecha_turno,
+                WeakLink.turno == 'A'
+            ).all()
         else:
-            fecha_inicio_turno = current_date
-            fecha_fin_turno = current_date + timedelta(days=1)
+            # Turno B: 7:00 PM - 7:00 AM del día siguiente
+            # Si estamos antes de las 7 AM, el turno B empezó ayer
+            if current_time < turno_a_inicio:
+                fecha_inicio_b = current_date - timedelta(days=1)
+                fecha_fin_b = current_date
+            else:
+                fecha_inicio_b = current_date
+                fecha_fin_b = current_date + timedelta(days=1)
+
+            turno_label = 'B (19:00 - 7:00)'
+
+            # Consultar registros del Turno B
+            registros = WeakLink.query.filter(
+                WeakLink.categoria == categoria,
+                WeakLink.turno == 'B',
+                or_(
+                    WeakLink.fecha == fecha_inicio_b,
+                    WeakLink.fecha == fecha_fin_b
+                )
+            ).all()
+
+            fecha_turno = fecha_inicio_b
 
         # Definir equipos según categoría
         if categoria == 'TORTILLA':
@@ -3322,21 +3472,6 @@ def create_app(config_class=Config):
             equipos = [f'Tubo {i}' for i in range(33, 51)]  # Tubo 33-50 (18 equipos)
         else:
             equipos = []
-
-        # Consultar registros del turno actual
-        registros = WeakLink.query.filter(
-            WeakLink.categoria == categoria,
-            or_(
-                and_(
-                    WeakLink.fecha == fecha_inicio_turno,
-                    WeakLink.hora >= turno_inicio_time
-                ),
-                and_(
-                    WeakLink.fecha == fecha_fin_turno,
-                    WeakLink.hora < turno_inicio_time
-                )
-            )
-        ).all()
 
         # Contar registros por equipo
         conteo_por_equipo = {}
@@ -3385,8 +3520,9 @@ def create_app(config_class=Config):
 
         return jsonify({
             'categoria': categoria,
-            'fecha_inicio_turno': fecha_inicio_turno.strftime('%Y-%m-%d'),
-            'fecha_fin_turno': fecha_fin_turno.strftime('%Y-%m-%d'),
+            'turno': turno_solicitado,
+            'turno_label': turno_label,
+            'fecha_turno': fecha_turno.strftime('%Y-%m-%d'),
             'hora_actual': now.strftime('%H:%M'),
             'total_equipos': total_equipos,
             'equipos_completados': equipos_completados,
@@ -3574,6 +3710,8 @@ def create_app(config_class=Config):
         elif category == 'PAPA':
             form.producto.choices = [
                 ('PAPA SAL', 'PAPA SAL'),
+                ('SABRITAS LIMON', 'SABRITAS LIMON'),
+                ('RUFFLES SAL', 'RUFFLES SAL'),
                 ('RUFFLES QUESO', 'RUFFLES QUESO'),
                 ('SABRITAS XTRA FH', 'SABRITAS XTRA FH'),
                 ('OTROS', 'OTROS')
@@ -3673,18 +3811,18 @@ def create_app(config_class=Config):
     
     def procesar_datos_extruidos(registros, turno):
         """Procesa datos PAE específicos para EXTRUIDOS"""
-        
+
         # Definir atributos para EXTRUIDOS
         atributos_extruidos = {
             'A': 'Quemado (<0%)',
-            'B': 'Roto (<=3.8 cm) (<8%)', 
+            'B': 'Roto (<=3.8 cm) (<8%)',
             'C': 'Defectos Totales (<18%)',
             'D': 'Densidad (64-72 g/l)',
             'E': 'Densidad Base Frita (95-110 g/l)',
             'F': 'Diámetro 20 Collects (21-23 cm)',
             'G': 'Cobertura (90-100%)'
         }
-        
+
         # Determinar horas según turno
         if turno == 'A':
             horas = list(range(7, 19))
@@ -3692,54 +3830,69 @@ def create_app(config_class=Config):
             horas = list(range(19, 24)) + list(range(0, 7))
         else:
             horas = list(range(7, 19)) + list(range(19, 24)) + list(range(0, 7))
-        
+
         # Inicializar estructura de datos
         datos = {}
         for codigo in atributos_extruidos.keys():
             datos[codigo] = [0] * len(horas)
-        
+
+        # Contador de registros con valor por cada atributo (para calcular promedio correcto)
+        conteo_por_atributo = {}
+        for codigo in atributos_extruidos.keys():
+            conteo_por_atributo[codigo] = 0
+
         # Procesar cada registro
         for registro in registros:
             if registro.data:
                 try:
                     data_json = json.loads(registro.data)
                     hora_idx = None
-                    
+
                     # Encontrar índice de la hora
                     try:
                         hora_idx = horas.index(registro.hora_bloque)
                     except ValueError:
                         continue
-                    
+
                     # Extraer valores de atributos
                     for codigo in atributos_extruidos.keys():
-                        valor = data_json.get(codigo, 0)
-                        try:
-                            datos[codigo][hora_idx] += int(valor) if valor else 0
-                        except (ValueError, TypeError):
-                            pass
-                            
+                        valor_raw = data_json.get(codigo)
+                        # Solo contar si el campo tiene un valor real (no vacío, no None)
+                        if valor_raw is not None and valor_raw != '' and valor_raw != 0:
+                            try:
+                                valor_num = float(valor_raw)
+                                datos[codigo][hora_idx] += valor_num
+                                conteo_por_atributo[codigo] += 1
+                            except (ValueError, TypeError):
+                                pass
+                        elif valor_raw == 0 or valor_raw == '0':
+                            # El valor 0 es válido, debe contarse
+                            datos[codigo][hora_idx] += 0
+                            conteo_por_atributo[codigo] += 1
+
                 except json.JSONDecodeError:
                     continue
-        
-        # Calcular resumen - promedio basado en número de registros (formularios)
+
+        # Calcular resumen - promedio basado SOLO en formularios que tienen valor en ese campo
         num_registros = len(registros)
         resumen = []
         for codigo, nombre in atributos_extruidos.items():
             valores = datos[codigo]
             total = sum(valores)
-            # Promedio = total / número de formularios cargados
-            promedio = total / num_registros if num_registros > 0 else 0
+            # Promedio = total / número de formularios que tienen valor en este campo específico
+            conteo_campo = conteo_por_atributo[codigo]
+            promedio = total / conteo_campo if conteo_campo > 0 else 0
             maximo = max(valores) if valores else 0
             hora_max = horas[valores.index(maximo)] if maximo > 0 else None
 
             resumen.append({
                 'codigo': codigo,
                 'atributo': nombre,
-                'total': total,
+                'total': round(total, 2),
                 'promedio': round(promedio, 2),
-                'maximo': maximo,
-                'hora_max': hora_max
+                'maximo': round(maximo, 2),
+                'hora_max': hora_max,
+                'registros_con_valor': conteo_campo
             })
 
         # Ordenar por total descendente
@@ -3757,11 +3910,11 @@ def create_app(config_class=Config):
     
     def procesar_datos_tortilla(registros, turno):
         """Procesa datos PAE específicos para TORTILLA"""
-        
+
         # Definir atributos para TORTILLA
         atributos_tortilla = {
             'A': 'Puntos Negros',
-            'B': 'Quemado', 
+            'B': 'Quemado',
             'C': 'Manchas',
             'D': 'Doblados',
             'E': 'Pegados',
@@ -3777,7 +3930,7 @@ def create_app(config_class=Config):
             'O': 'Dobles (Laminado)',
             'P': 'Tamaño (Tamaño)'
         }
-        
+
         # Determinar horas según turno
         if turno == 'A':
             horas = list(range(7, 19))
@@ -3785,54 +3938,67 @@ def create_app(config_class=Config):
             horas = list(range(19, 24)) + list(range(0, 7))
         else:
             horas = list(range(7, 19)) + list(range(19, 24)) + list(range(0, 7))
-        
+
         # Inicializar estructura de datos
         datos = {}
         for codigo in atributos_tortilla.keys():
             datos[codigo] = [0] * len(horas)
-        
+
+        # Contador de registros con valor por cada atributo
+        conteo_por_atributo = {}
+        for codigo in atributos_tortilla.keys():
+            conteo_por_atributo[codigo] = 0
+
         # Procesar cada registro
         for registro in registros:
             if registro.data:
                 try:
                     data_json = json.loads(registro.data)
                     hora_idx = None
-                    
+
                     # Encontrar índice de la hora
                     try:
                         hora_idx = horas.index(registro.hora_bloque)
                     except ValueError:
                         continue
-                    
+
                     # Extraer valores de atributos
                     for codigo in atributos_tortilla.keys():
-                        valor = data_json.get(codigo, 0)
-                        try:
-                            datos[codigo][hora_idx] += int(valor) if valor else 0
-                        except (ValueError, TypeError):
-                            pass
-                            
+                        valor_raw = data_json.get(codigo)
+                        # Solo contar si el campo tiene un valor real
+                        if valor_raw is not None and valor_raw != '' and valor_raw != 0:
+                            try:
+                                valor_num = float(valor_raw)
+                                datos[codigo][hora_idx] += valor_num
+                                conteo_por_atributo[codigo] += 1
+                            except (ValueError, TypeError):
+                                pass
+                        elif valor_raw == 0 or valor_raw == '0':
+                            datos[codigo][hora_idx] += 0
+                            conteo_por_atributo[codigo] += 1
+
                 except json.JSONDecodeError:
                     continue
 
-        # Calcular resumen - promedio basado en número de registros (formularios)
+        # Calcular resumen - promedio basado SOLO en formularios con valor en ese campo
         num_registros = len(registros)
         resumen = []
         for codigo, nombre in atributos_tortilla.items():
             valores = datos[codigo]
             total = sum(valores)
-            # Promedio = total / número de formularios cargados
-            promedio = total / num_registros if num_registros > 0 else 0
+            conteo_campo = conteo_por_atributo[codigo]
+            promedio = total / conteo_campo if conteo_campo > 0 else 0
             maximo = max(valores) if valores else 0
             hora_max = horas[valores.index(maximo)] if maximo > 0 else None
 
             resumen.append({
                 'codigo': codigo,
                 'atributo': nombre,
-                'total': total,
+                'total': round(total, 2),
                 'promedio': round(promedio, 2),
-                'maximo': maximo,
-                'hora_max': hora_max
+                'maximo': round(maximo, 2),
+                'hora_max': hora_max,
+                'registros_con_valor': conteo_campo
             })
 
         # Ordenar por total descendente
@@ -3881,7 +4047,13 @@ def create_app(config_class=Config):
         for codigo in atributos_papa.keys():
             datos[codigo] = [0] * len(horas)
 
+        # Contador de registros con valor por cada atributo
+        conteo_por_atributo = {}
+        for codigo in atributos_papa.keys():
+            conteo_por_atributo[codigo] = 0
+
         # Procesar cada registro
+        num_registros = len(registros)
         for registro in registros:
             if registro.data:
                 try:
@@ -3896,24 +4068,31 @@ def create_app(config_class=Config):
 
                     # Extraer valores de atributos
                     for codigo in atributos_papa.keys():
-                        valor = data_json.get(codigo, 0)
-                        try:
-                            # Usar float para manejar decimales como "8.41", ".96", etc.
-                            datos[codigo][hora_idx] += float(valor) if valor else 0
-                        except (ValueError, TypeError):
-                            pass
+                        valor_raw = data_json.get(codigo)
+                        # Solo contar si el campo tiene un valor real (no vacío, no None)
+                        if valor_raw is not None and valor_raw != '' and valor_raw != 0:
+                            try:
+                                valor_num = float(valor_raw)
+                                datos[codigo][hora_idx] += valor_num
+                                conteo_por_atributo[codigo] += 1
+                            except (ValueError, TypeError):
+                                pass
+                        elif valor_raw == 0 or valor_raw == '0':
+                            # Si el valor es explícitamente 0, también cuenta como llenado
+                            datos[codigo][hora_idx] += 0
+                            conteo_por_atributo[codigo] += 1
 
                 except json.JSONDecodeError:
                     continue
 
-        # Calcular resumen - promedio basado en número de registros (formularios)
-        num_registros = len(registros)
+        # Calcular resumen - promedio basado solo en formularios con valor para cada atributo
         resumen = []
         for codigo, nombre in atributos_papa.items():
             valores = datos[codigo]
             total = sum(valores)
-            # Promedio = total / número de formularios cargados
-            promedio = total / num_registros if num_registros > 0 else 0
+            # Promedio = total / número de formularios que tienen valor en este campo específico
+            conteo_campo = conteo_por_atributo[codigo]
+            promedio = total / conteo_campo if conteo_campo > 0 else 0
             maximo = max(valores) if valores else 0
             hora_max = horas[valores.index(maximo)] if maximo > 0 else None
 
@@ -3923,7 +4102,8 @@ def create_app(config_class=Config):
                 'total': total,
                 'promedio': round(promedio, 2),
                 'maximo': maximo,
-                'hora_max': hora_max
+                'hora_max': hora_max,
+                'formularios_con_valor': conteo_campo
             })
 
         # Ordenar por total descendente
@@ -4500,6 +4680,22 @@ def create_app(config_class=Config):
                     'cloruros_base': {'verde': (0, 1), 'amarillo': []}
                 },
                 'PAPA SAL': {
+                    'humedad_base': {'verde': (1.35, 1.65), 'amarillo': [(1.20, 1.34), (1.66, 1.80)]},
+                    'aceite_base': {'verde': (31, 35), 'amarillo': [(30, 30.9), (35.1, 36)]},
+                    'humedad_pt': {'verde': (1.35, 1.8), 'amarillo': [(1.20, 2)]},
+                    'aceite_pt': {'verde': (0, 0), 'amarillo': []},
+                    'sal_pt': {'verde': (0.55, 0.85), 'amarillo': [(0.45, 0.54), (0.86, 0.95)]},
+                    'cloruros_base': {'verde': (0, 1), 'amarillo': []}
+                },
+                'SABRITAS LIMON': {
+                    'humedad_base': {'verde': (1.35, 1.65), 'amarillo': [(1.20, 1.34), (1.66, 1.80)]},
+                    'aceite_base': {'verde': (31, 35), 'amarillo': [(30, 30.9), (35.1, 36)]},
+                    'humedad_pt': {'verde': (0, 0), 'amarillo': []},
+                    'aceite_pt': {'verde': (0, 0), 'amarillo': []},
+                    'sal_pt': {'verde': (1.23, 1.50), 'amarillo': [(1.10, 1.22), (1.51, 1.63)]},
+                    'cloruros_base': {'verde': (0, 100), 'amarillo': []}
+                },
+                'RUFFLES SAL': {
                     'humedad_base': {'verde': (1.35, 1.65), 'amarillo': [(1.20, 1.34), (1.66, 1.80)]},
                     'aceite_base': {'verde': (31, 35), 'amarillo': [(30, 30.9), (35.1, 36)]},
                     'humedad_pt': {'verde': (1.35, 1.8), 'amarillo': [(1.20, 2)]},

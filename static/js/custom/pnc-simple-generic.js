@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
 let productosConfig = {
     'EXTRUIDOS': ['TORCIDOS', 'CHEETOS', 'OTROS'],
     'TORTILLA': ['DORITOS', 'TOSTITOS SALSA VERDE', 'TOSTITOS FH','DORITOS PIZZEROLA','DORITOS FH', 'RANCHERITOS','CHETOS'],
-    'PAPA': ['PAPA SAL', 'OTROS']
+    'PAPA': ['PAPA SAL', 'RUFFLES QUESO', 'RUFFLES SAL', 'SABRITAS LIMON', 'SABRITAS XTRA FH', 'OTROS']
 };
 
 // Variable global para almacenar la configuración de orígenes por categoría

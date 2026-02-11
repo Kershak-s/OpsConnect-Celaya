@@ -180,12 +180,27 @@ document.addEventListener('DOMContentLoaded', function() {
                 salPT: { min: 0.55, max: 0.85, warning_low: 0.45, warning_high: 0.95 }
             },
 
+            'RUFFLES SAL': {
+                humedadBase: { min: 1.35, max: 1.65, warning_low: 1.20, warning_high: 1.8 },
+                aceiteBase: { min: 31, max: 35, warning_low: 30, warning_high: 36 },
+                aceitePT: { min: 0, max: 0, warning_low: 0, warning_high: 0 },
+                humedadPT: { min: 1.35, max: 1.8, warning_low: 1.20, warning_high: 2 },
+                salPT: { min: 0.55, max: 0.85, warning_low: 0.45, warning_high: 0.95 }
+            },
+
             'RUFFLES QUESO': {
                 humedadBase: { min: 1.20, max: 1.5, warning_low: 1.05, warning_high: 1.65 },
                 aceiteBase: { min: 31, max: 35, warning_low: 30, warning_high: 36 },
                 aceitePT: { min: 0, max: 0, warning_low: 0, warning_high: 0 },
                 humedadPT: { min: 1.20, max: 1.5, warning_low: 1.05, warning_high: 1.65 },
                 salPT: { min: 1.24, max: 1.54, warning_low: 1.19, warning_high: 1.59 }
+            },
+            'SABRITAS LIMON': {
+                humedadBase: { min: 1.35, max: 1.65, warning_low: 1.20, warning_high: 1.80 },
+                aceiteBase: { min: 31, max: 35, warning_low: 30, warning_high: 36 },
+                aceitePT: { min: 0, max: 0, warning_low: 0, warning_high: 0 },
+                humedadPT: { min: 0, max: 0, warning_low: 0, warning_high: 0 },
+                salPT: { min: 1.23, max: 1.50, warning_low: 1.10, warning_high: 1.63 }
             },
             'SABRITAS XTRA FH': {
                 humedadBase: { min: 1.35, max: 1.65, warning_low: 1.20, warning_high: 1.80 },

@@ -449,6 +449,34 @@ const RANGOS_FISICOQUIMICOS_DEFINITIVOS = {
                 rojo: { menor_que: 0.45, mayor_que: 0.95 }
             }
         },
+
+        'RUFFLES SAL': {
+            humedad_base: { 
+                verde: { min: 1.35, max: 1.65 },
+                amarillo: [{ min: 1.20, max: 1.34 }, { min: 1.66, max: 1.8 }],
+                rojo: { menor_que: 1.20, mayor_que: 1.8 }
+            },
+            aceite_base: { 
+                verde: { min: 31, max: 35 },
+                amarillo: [{ min: 30, max: 30.9 }, { min: 35.1, max: 36 }],
+                rojo: { menor_que: 30, mayor_que: 36 }
+            },
+            aceite_pt: { 
+                verde: { min: 0, max: 0 },
+                amarillo: [{ min: 0, max: 0 }, { min: 0, max: 0 }],
+                rojo: { menor_que: 0, mayor_que: 0 }
+            },
+            humedad_pt: { 
+                verde: { min: 1.35, max: 1.8 },
+                amarillo: [{ min: 1.20, max: 2 }],
+                rojo: { menor_que: 0.45, mayor_que: 2 }
+            },
+            sal_pt: { 
+                verde: { min: 0.55, max: 0.85 },
+                amarillo: [{ min: 0.45, max: 0.54 }, { min: 0.86, max: 0.95 }],
+                rojo: { menor_que: 0.45, mayor_que: 0.95 }
+            }
+        },
         'SABRITAS XTRA FH': {
             humedad_base: { 
                 verde: { min: 1.35, max: 1.65 },

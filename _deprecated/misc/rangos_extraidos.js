@@ -144,6 +144,21 @@ const rangosPorProducto = {
         "warning_high": 36.0
       }
     },
+    "PAPA": {
+    "RUFFLES SAL": {
+      "humedad_base_frita": {
+        "min": 1.35,
+        "max": 1.65,
+        "warning_low": 1.2,
+        "warning_high": 1.8
+      },
+      "aceite_base_frita": {
+        "min": 31.0,
+        "max": 35.0,
+        "warning_low": 30.0,
+        "warning_high": 36.0
+      }
+    },
     "RUFFLES QUESO": {
       "humedad_base_frita": {
         "min": 1.2,

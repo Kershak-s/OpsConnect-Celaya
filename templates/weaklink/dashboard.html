@@ -49,6 +49,42 @@
         padding: 1rem 1.5rem;
     }
 
+    /* Estilos para pestañas de Turno A/B */
+    #turnoTabs {
+        border-bottom: none;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        padding: 4px;
+    }
+
+    #turnoTabs .nav-link {
+        border: none;
+        border-radius: 6px;
+        padding: 8px 20px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        background-color: transparent;
+    }
+
+    #turnoTabs .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+    }
+
+    #turnoTabs .nav-link.active {
+        background-color: #fff;
+        color: #212529 !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    #turnoTabs .nav-link i {
+        margin-right: 5px;
+    }
+
+    #fecha-turno-display {
+        font-size: 0.85rem;
+        padding: 4px 10px;
+    }
+
     .card-title {
         font-size: 1.25rem;
         margin-bottom: 0;
@@ -380,18 +416,36 @@
                     </div>
 <div class="tab-pane fade" id="resultados" role="tabpanel" aria-labelledby="resultados-tab" data-category="{{ category }}">
     <div class="p-4">
-        <!-- Resumen del Turno Actual -->
+        <!-- Resumen del Turno con Pestañas A/B -->
         <div class="card mb-4 shadow-sm" id="resumen-turno-card">
-            <div class="card-header bg-gradient text-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-chart-line me-2"></i>📊 Resumen del Turno Actual
-                </h5>
-                <div class="d-flex align-items-center gap-3">
-                    <small id="hora-actual-display">--:--</small>
-                    <button class="btn btn-sm btn-light" id="btn-refrescar-turno" title="Refrescar datos">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
+            <div class="card-header bg-gradient text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>📊 Estado por Equipo/Tubo
+                    </h5>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="badge bg-light text-dark" id="fecha-turno-display">--</span>
+                        <small id="hora-actual-display">--:--</small>
+                        <button class="btn btn-sm btn-light" id="btn-refrescar-turno" title="Refrescar datos">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
                 </div>
+                <!-- Pestañas de Turno A/B -->
+                <ul class="nav nav-tabs card-header-tabs mt-3" id="turnoTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active text-dark" id="turno-a-tab" data-bs-toggle="tab" data-turno="A"
+                                type="button" role="tab" aria-selected="true">
+                            <i class="fas fa-sun me-1"></i> Turno A <small class="text-muted">(7:00 - 19:00)</small>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link text-dark" id="turno-b-tab" data-bs-toggle="tab" data-turno="B"
+                                type="button" role="tab" aria-selected="false">
+                            <i class="fas fa-moon me-1"></i> Turno B <small class="text-muted">(19:00 - 7:00)</small>
+                        </button>
+                    </li>
+                </ul>
             </div>
             <div class="card-body">
                 <!-- Estadísticas Generales -->
@@ -420,7 +474,7 @@
                 </div>
 
                 <!-- Grid de Equipos -->
-                <h6 class="mb-3"><i class="fas fa-desktop me-2"></i>Estado por Equipo/Tubo</h6>
+                <h6 class="mb-3"><i class="fas fa-desktop me-2"></i>Estado por Equipo/Tubo - <span id="turno-actual-label">Turno A</span></h6>
                 <div id="equipos-grid" class="equipos-grid">
                     <!-- Las tarjetas de equipos se generarán dinámicamente aquí -->
                 </div>
@@ -1851,23 +1905,34 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ===== RESUMEN DEL TURNO ACTUAL =====
+    // ===== RESUMEN DEL TURNO POR PESTAÑAS A/B =====
     document.addEventListener('DOMContentLoaded', function() {
         let autoRefreshInterval;
+        let turnoActual = 'A'; // Turno seleccionado actualmente
 
-        function cargarResumenTurno() {
+        function cargarResumenTurno(turno = null) {
             const category = '{{ category }}';
             const btnRefrescar = document.getElementById('btn-refrescar-turno');
             const icon = btnRefrescar?.querySelector('i');
 
+            // Usar el turno especificado o el actual
+            const turnoCargar = turno || turnoActual;
+
             // Animación de carga
             if (icon) icon.classList.add('spinning');
 
-            fetch(`/api/weaklink/resumen-turno-actual?category=${category}`)
+            fetch(`/api/weaklink/resumen-turno-actual?category=${category}&turno=${turnoCargar}`)
                 .then(res => res.json())
                 .then(data => {
-                    // Actualizar hora actual
+                    // Actualizar hora actual y fecha
                     document.getElementById('hora-actual-display').textContent = data.hora_actual;
+                    document.getElementById('fecha-turno-display').textContent = data.fecha_turno;
+
+                    // Actualizar label del turno
+                    const turnoLabel = document.getElementById('turno-actual-label');
+                    if (turnoLabel) {
+                        turnoLabel.textContent = `Turno ${data.turno}`;
+                    }
 
                     // Actualizar estadísticas
                     document.getElementById('total-registros-turno').textContent = data.total_registros;
@@ -1889,6 +1954,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (icon) icon.classList.remove('spinning');
                 });
         }
+
+        // Manejar cambio de pestañas de turno
+        const turnoTabs = document.querySelectorAll('#turnoTabs button[data-turno]');
+        turnoTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                // Remover active de todas las pestañas
+                turnoTabs.forEach(t => t.classList.remove('active'));
+                // Agregar active a la pestaña clickeada
+                this.classList.add('active');
+
+                // Obtener el turno seleccionado
+                turnoActual = this.getAttribute('data-turno');
+
+                // Cargar datos del turno seleccionado
+                cargarResumenTurno(turnoActual);
+            });
+        });
 
         function renderizarEquipos(equipos) {
             const grid = document.getElementById('equipos-grid');
@@ -1954,23 +2036,50 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
+        // Función para determinar el turno actual según la hora
+        function determinarTurnoActual() {
+            const now = new Date();
+            const hora = now.getHours();
+            // Turno A: 7:00 - 19:00, Turno B: 19:00 - 7:00
+            return (hora >= 7 && hora < 19) ? 'A' : 'B';
+        }
+
+        // Función para activar la pestaña del turno correspondiente
+        function activarPestanaTurno(turno) {
+            turnoActual = turno;
+            turnoTabs.forEach(t => {
+                if (t.getAttribute('data-turno') === turno) {
+                    t.classList.add('active');
+                } else {
+                    t.classList.remove('active');
+                }
+            });
+        }
+
         // Botón refrescar
         const btnRefrescar = document.getElementById('btn-refrescar-turno');
         if (btnRefrescar) {
-            btnRefrescar.addEventListener('click', cargarResumenTurno);
+            btnRefrescar.addEventListener('click', function() {
+                cargarResumenTurno(turnoActual);
+            });
         }
 
         // Cargar al abrir la pestaña "Resultados"
         const resultadosTab = document.getElementById('resultados-tab');
         if (resultadosTab) {
             resultadosTab.addEventListener('shown.bs.tab', function() {
-                cargarResumenTurno();
+                // Determinar y activar el turno actual
+                const turnoInicial = determinarTurnoActual();
+                activarPestanaTurno(turnoInicial);
+                cargarResumenTurno(turnoInicial);
 
                 // Auto-refresh cada 2 minutos
                 if (autoRefreshInterval) {
                     clearInterval(autoRefreshInterval);
                 }
-                autoRefreshInterval = setInterval(cargarResumenTurno, 120000); // 2 minutos
+                autoRefreshInterval = setInterval(function() {
+                    cargarResumenTurno(turnoActual);
+                }, 120000); // 2 minutos
             });
 
             // Detener auto-refresh al salir de la pestaña

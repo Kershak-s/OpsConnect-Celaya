@@ -269,6 +269,16 @@ def crear_dataframe_rangos(categoria):
                 'cloruros_base': '0 - 1 (Verde)', 'humedad_pt': '1.35 - 1.8 (Verde)',
                 'aceite_pt': 'N/A', 'sal_pt': '0.55 - 0.85 (Verde)'
             },
+            'SABRITAS LIMON': {
+                'humedad_base': '1.35 - 1.65 (Verde)', 'aceite_base': '31 - 35 (Verde)',
+                'cloruros_base': 'N/A', 'humedad_pt': 'N/A',
+                'aceite_pt': 'N/A', 'sal_pt': '1.23 - 1.50 (Verde)'
+            },
+            'RUFFLES SAL': {
+                'humedad_base': '1.35 - 1.65 (Verde)', 'aceite_base': '31 - 35 (Verde)',
+                'cloruros_base': '0 - 1 (Verde)', 'humedad_pt': '1.35 - 1.8 (Verde)',
+                'aceite_pt': 'N/A', 'sal_pt': '0.55 - 0.85 (Verde)'
+            },
             'RUFFLES QUESO': {
                 'humedad_base': '1.20 - 1.5 (Verde)', 'aceite_base': '31 - 35 (Verde)',
                 'cloruros_base': '0 - 1 (Verde)', 'humedad_pt': '1.35 - 1.8 (Verde)',
@@ -449,6 +459,24 @@ def determinar_color_excel(valor, tipo_campo, categoria, producto):
                 'sal_pt': {'verde': (1.58, 1.88), 'amarillo': [(1.38, 1.57), (1.89, 2.08)]},
                 'cloruros_base': {'verde': (0, 1), 'amarillo': []},  # Solo verde o rojo
                 'aceite_pt': {'verde': (0, 0), 'amarillo': []}
+            }
+        elif producto == 'RUFFLES SAL':
+            rangos = {
+                'humedad_base': {'verde': (1.35, 1.65), 'amarillo': [(1.20, 1.34), (1.66, 1.80)]},
+                'aceite_base': {'verde': (31, 35), 'amarillo': [(30, 30.9), (35.1, 36)]},
+                'humedad_pt': {'verde': (1.35, 1.8), 'amarillo': [(1.20, 2)]},
+                'sal_pt': {'verde': (0.55, 0.85), 'amarillo': [(0.45, 0.54), (0.86, 0.95)]},
+                'cloruros_base': {'verde': (0, 1), 'amarillo': []},  # Solo verde o rojo
+                'aceite_pt': {'verde': (0, 0), 'amarillo': []}
+            }
+        elif producto == 'SABRITAS LIMON':
+            rangos = {
+                'humedad_base': {'verde': (1.35, 1.65), 'amarillo': [(1.20, 1.34), (1.66, 1.80)]},
+                'aceite_base': {'verde': (31, 35), 'amarillo': [(30, 30.9), (35.1, 36)]},
+                'humedad_pt': {'verde': (0, 0), 'amarillo': []},  # N/A
+                'sal_pt': {'verde': (1.23, 1.50), 'amarillo': [(1.10, 1.22), (1.51, 1.63)]},
+                'cloruros_base': {'verde': (0, 100), 'amarillo': []},  # N/A
+                'aceite_pt': {'verde': (0, 0), 'amarillo': []}  # N/A
             }
         else:  # PAPA SAL (default)
             rangos = {

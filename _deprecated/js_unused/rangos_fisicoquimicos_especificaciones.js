@@ -136,6 +136,14 @@ const RANGOS_FISICOQUIMICOS = {
             sal_pt: { min: 0.55, max: 0.85, warning_low: 0.45, warning_high: 0.95 },
             cloruros_base: { min: 0, max: 1, warning_low: null, warning_high: null } // Solo verde 0-1, rojo fuera
         },
+        'RUFFLES SAL': {
+            humedad_base: { min: 1.35, max: 1.65, warning_low: 1.20, warning_high: 1.80 },
+            aceite_base: { min: 31, max: 35, warning_low: 30, warning_high: 36 },
+            aceite_pt: { min: -1, max: -1, warning_low: -1, warning_high: -1 }, // Papa Sal sin Aceite PT
+            humedad_pt: { min: 1.35, max: 1.8, warning_low: 1.20, warning_high: 2.0 },
+            sal_pt: { min: 0.55, max: 0.85, warning_low: 0.45, warning_high: 0.95 },
+            cloruros_base: { min: 0, max: 1, warning_low: null, warning_high: null } // Solo verde 0-1, rojo fuera
+        },
         'RUFFLES QUESO': {
             humedad_base: { min: 1.35, max: 1.65, warning_low: 1.20, warning_high: 1.80 },
             aceite_base: { min: 31, max: 35, warning_low: 30, warning_high: 36 },

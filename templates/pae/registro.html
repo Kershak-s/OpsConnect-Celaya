@@ -438,6 +438,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             {% elif category == 'PAPA' %}
                             <option value="PAPA SAL" {% if form.producto.data=='PAPA SAL' %}selected{% endif %}>PAPA SAL</option>
                             <option value="RUFFLES QUESO" {% if form.producto.data=='RUFFLES QUESO' %}selected{% endif %}>RUFFLES QUESO</option>
+                            <option value="RUFFLES SAL" {% if form.producto.data=='RUFFLES SAL' %}selected{% endif %}>RUFFLES SAL</option>
+                            <option value="SABRITAS LIMON" {% if form.producto.data=='SABRITAS LIMON' %}selected{% endif %}>SABRITAS LIMON</option>
                             <option value="SABRITAS XTRA FH" {% if form.producto.data=='SABRITAS XTRA FH' %}selected{% endif %}>SABRITAS XTRA FH</option>
                             <option value="OTROS" {% if form.producto.data=='OTROS' %}selected{% endif %}>OTROS</option>
                             {% endif %}
@@ -1455,10 +1457,10 @@ let RANGOS = {};
 if (categoria === 'PAPA') {
     RANGOS = {...RANGOS_PAPA};  // Clonar rangos base de PAPA
 
-    // Si es Ruffles Queso, sobrescribir solo los campos específicos
-    if (productoSeleccionado === 'RUFFLES QUESO') {
+    // Si es Ruffles (Queso o Sal), sobrescribir solo los campos específicos
+    if (productoSeleccionado === 'RUFFLES QUESO' || productoSeleccionado === 'RUFFLES SAL') {
         Object.assign(RANGOS, RANGOS_RUFFLES_QUESO);
-        console.log('📦 Producto: RUFFLES QUESO - Aplicando rangos especiales');
+        console.log('📦 Producto:', productoSeleccionado, '- Aplicando rangos especiales de Ruffles');
     }
 } else if (categoria === 'EXTRUIDOS') {
     RANGOS = RANGOS_EXTRUIDOS;
@@ -1796,8 +1798,8 @@ function actualizarLabelsProducto(producto) {
     const hintTiempo = document.getElementById('hint-tiempo');
     const inputTiempo = document.getElementById('input-tiempo');
 
-    if (producto === 'RUFFLES QUESO') {
-        // Cambiar a Ruffles
+    if (producto === 'RUFFLES QUESO' || producto === 'RUFFLES SAL') {
+        // Cambiar a Ruffles (aplica para Queso y Sal)
         if (labelGrosor) labelGrosor.textContent = 'Grosor (Ruffles)';
         if (hintGrosor) hintGrosor.textContent = 'Objetivo: 2.78 mm | Verde: 2.73-2.83 mm';
         if (inputGrosor) inputGrosor.placeholder = 'Verde: 2.73-2.83 mm';
@@ -1841,10 +1843,10 @@ if (selectProducto && categoria === 'PAPA') {
         // Recargar rangos base
         RANGOS = {...RANGOS_PAPA};
 
-        // Aplicar rangos específicos si es Ruffles Queso
-        if (nuevoProducto === 'RUFFLES QUESO') {
+        // Aplicar rangos específicos si es Ruffles (Queso o Sal)
+        if (nuevoProducto === 'RUFFLES QUESO' || nuevoProducto === 'RUFFLES SAL') {
             Object.assign(RANGOS, RANGOS_RUFFLES_QUESO);
-            console.log('✅ Rangos de RUFFLES QUESO aplicados');
+            console.log('✅ Rangos de RUFFLES aplicados para:', nuevoProducto);
         } else {
             console.log('✅ Rangos estándar de PAPA aplicados');
         }
